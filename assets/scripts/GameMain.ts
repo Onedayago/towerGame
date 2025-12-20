@@ -1,6 +1,5 @@
 import { _decorator, Component, Graphics, Node, UITransform } from 'cc';
 const { ccclass, property } = _decorator;
-import { StartScreen } from './screens/StartScreen';
 import { UiConfig } from './config/Index';
 
 @ccclass('gameMain')

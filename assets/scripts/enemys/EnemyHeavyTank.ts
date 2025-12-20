@@ -4,12 +4,13 @@ import { EnemyType } from '../constants/Index';
 const { ccclass } = _decorator;
 
 /**
- * 普通坦克敌人
+ * 重型坦克敌人
  */
-@ccclass('EnemyTank')
-export class EnemyTank extends EnemyBase {
+@ccclass('EnemyHeavyTank')
+export class EnemyHeavyTank extends EnemyBase {
     
     start() {
-        this.init(EnemyType.TANK);
+        this.init(EnemyType.HEAVY_TANK);
     }
 }
+

@@ -31,7 +31,7 @@ export interface EnemyConfig {
 export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     [EnemyType.TANK]: {
         type: EnemyType.TANK,
-        moveSpeed: 100,      // 100像素/秒
+        moveSpeed: 50,      // 100像素/秒
         attackSpeed: 1.0,    // 每秒攻击1次
         health: 100,
         damage: 10,
@@ -39,7 +39,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     },
     [EnemyType.FAST_TANK]: {
         type: EnemyType.FAST_TANK,
-        moveSpeed: 150,      // 150像素/秒
+        moveSpeed: 75,      // 150像素/秒
         attackSpeed: 0.8,    // 每秒攻击1.25次
         health: 50,
         damage: 8,
@@ -47,7 +47,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     },
     [EnemyType.HEAVY_TANK]: {
         type: EnemyType.HEAVY_TANK,
-        moveSpeed: 60,       // 60像素/秒
+        moveSpeed: 30,       // 60像素/秒
         attackSpeed: 1.5,    // 每1.5秒攻击1次
         health: 200,
         damage: 20,
@@ -55,7 +55,7 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     },
     [EnemyType.BOSS]: {
         type: EnemyType.BOSS,
-        moveSpeed: 80,       // 80像素/秒
+        moveSpeed: 40,       // 80像素/秒
         attackSpeed: 0.5,    // 每秒攻击2次
         health: 500,
         damage: 30,

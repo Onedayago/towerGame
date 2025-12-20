@@ -3,6 +3,7 @@ import { UiConfig } from '../../config/Index';
 import { GridHelper } from '../../utils/Index';
 import { EnemyManager } from '../../managers/Index';
 import { MapDragHandler } from '../../business/Index';
+import { EnemyType } from '../../constants/Index';
 const { ccclass, property } = _decorator;
 
 @ccclass('WarView')
@@ -14,6 +15,15 @@ export class WarView extends Component {
 
     @property(Prefab)
     public enemyTankPrefab: Prefab = null;
+
+    @property(Prefab)
+    public enemyFastTankPrefab: Prefab = null;
+
+    @property(Prefab)
+    public enemyHeavyTankPrefab: Prefab = null;
+
+    @property(Prefab)
+    public enemyBossPrefab: Prefab = null;
 
     onLoad() {
         this.graphics = this.node.getComponent(Graphics);
@@ -29,8 +39,22 @@ export class WarView extends Component {
         const parent = this.node.parent;
         this.dragHandler = new MapDragHandler(this.node, parent);
 
-        // 初始化敌人管理器
-        this.enemyManager = new EnemyManager(this.node, this.enemyTankPrefab);
+        // 初始化敌人管理器，支持多种敌人类型
+        const enemyPrefabs = new Map<EnemyType, Prefab>();
+        if (this.enemyTankPrefab) {
+            enemyPrefabs.set(EnemyType.TANK, this.enemyTankPrefab);
+        }
+        if (this.enemyFastTankPrefab) {
+            enemyPrefabs.set(EnemyType.FAST_TANK, this.enemyFastTankPrefab);
+        }
+        if (this.enemyHeavyTankPrefab) {
+            enemyPrefabs.set(EnemyType.HEAVY_TANK, this.enemyHeavyTankPrefab);
+        }
+        if (this.enemyBossPrefab) {
+            enemyPrefabs.set(EnemyType.BOSS, this.enemyBossPrefab);
+        }
+        
+        this.enemyManager = new EnemyManager(this.node, enemyPrefabs);
 
         // 启用触摸事件
         this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this);
