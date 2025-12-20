@@ -10,9 +10,9 @@ export class WarScreen extends Component {
     onLoad() {
         this.graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
+        transform.setAnchorPoint(0, 0);
         transform.setContentSize(UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
-    
-        
+        this.node.setPosition(0, 0, 0);
         
     }
 
@@ -35,9 +35,9 @@ export class WarScreen extends Component {
         
         // 绘制竖线
         for (let j = 0; j <= cellCountX; j++) {
-            const x = -UiConfig.GAME_WIDTH / 2 + j * cellSize;
-            const topY = UiConfig.GAME_HEIGHT / 2;
-            const bottomY = -UiConfig.GAME_HEIGHT / 2;
+            const x = 0 + j * cellSize;
+            const topY = UiConfig.GAME_HEIGHT;
+            const bottomY = 0;
             this.graphics.moveTo(x, topY);
             this.graphics.lineTo(x, bottomY);
             this.graphics.stroke();
@@ -45,13 +45,14 @@ export class WarScreen extends Component {
         
         // 绘制横线
         for (let i = 0; i <= cellCountY; i++) {
-            const y = UiConfig.GAME_HEIGHT / 2 - i * cellSize;
-            const leftX = -UiConfig.GAME_WIDTH / 2;
-            const rightX = UiConfig.GAME_WIDTH / 2;
+            const y = UiConfig.GAME_HEIGHT - i * cellSize;
+            const leftX = 0;
+            const rightX = UiConfig.GAME_WIDTH;
             this.graphics.moveTo(leftX, y);
             this.graphics.lineTo(rightX, y);
             this.graphics.stroke();
         }
     }
+
 }
 

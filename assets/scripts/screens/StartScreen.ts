@@ -6,17 +6,20 @@ const { ccclass, property } = _decorator;
 export class StartScreen extends Component {
 
     private graphics: Graphics | null = null;
+
     onLoad() {
         this.graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
+        transform.setAnchorPoint(0, 0);
         transform.setContentSize(UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
+        this.node.setPosition(0, 0, 0);
         
     }
 
     start() {
         // this.hide();
         this.graphics.fillColor = Color.RED;
-        this.graphics.rect(-UiConfig.GAME_WIDTH/2, -UiConfig.GAME_HEIGHT/2, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
+        this.graphics.rect(0, 0, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
         this.graphics.fill();
         
     }
