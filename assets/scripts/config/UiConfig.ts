@@ -1,0 +1,17 @@
+
+
+
+const GAME_WIDTH = 1000;
+const GAME_HEIGHT = 480;
+
+const CELL_COUNT_Y = 6;
+
+const CELL_SIZE = Math.floor(GAME_HEIGHT / CELL_COUNT_Y);
+
+const CELL_COUNT_X = Math.floor(GAME_WIDTH / CELL_SIZE);
+
+
+
+
+export { CELL_SIZE, GAME_WIDTH, GAME_HEIGHT, CELL_COUNT_X, CELL_COUNT_Y };
+
