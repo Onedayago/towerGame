@@ -1,14 +1,10 @@
-import { _decorator, Component, Node } from 'cc';
-const { ccclass, property } = _decorator;
+/**
+ * 屏幕模块
+ * 导出所有屏幕相关类
+ */
 
-@ccclass('Index')
-export class Index extends Component {
-    start() {
+export { StartScreen } from './StartScreen';
+export { WarScreen } from './WarScreen';
 
-    }
-
-    update(deltaTime: number) {
-        
-    }
-}
-
+// 导出组件
+export * from './Components/Index';

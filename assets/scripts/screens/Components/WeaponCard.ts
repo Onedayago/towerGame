@@ -1,6 +1,7 @@
 import { _decorator, Color, Component, Graphics, Node, UITransform, EventTouch, Vec2, Vec3, instantiate } from 'cc';
 import { UiConfig } from '../../config/Index';
 import { WarView } from './WarView';
+import { GridHelper } from '../../utils/Index';
 const { ccclass, property } = _decorator;
 
 @ccclass('WeaponCard')
@@ -110,12 +111,10 @@ export class WeaponCard extends Component {
                 const localPos = new Vec3();
                 this.warViewNode.inverseTransformPoint(localPos, worldPos);
 
-                if (localPos.x >= 0 && localPos.x <= warViewTransform.width &&
-                    localPos.y >= 0 && localPos.y <= warViewTransform.height) {
-                    
-                    const cellSize = UiConfig.CELL_SIZE;
-                    const gridX = Math.floor(localPos.x / cellSize) * cellSize;
-                    const gridY = Math.floor(localPos.y / cellSize) * cellSize;
+                if (GridHelper.isInBounds(localPos.x, localPos.y, warViewTransform.width, warViewTransform.height)) {
+                    const snapped = GridHelper.snapToGrid(localPos.x, localPos.y);
+                    const gridX = snapped.x;
+                    const gridY = snapped.y;
 
                     const newCard = instantiate(this.node);
                     newCard.setParent(this.warViewNode);
