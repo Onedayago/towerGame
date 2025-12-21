@@ -1,6 +1,6 @@
 import { _decorator, Component, Graphics, UITransform, Node, Vec3, Prefab, instantiate } from 'cc';
 import { UiConfig } from '../config/Index';
-import { WeaponType, getWeaponConfig, WeaponConfig, getWeaponColor, WEAPON_COMMON_CONFIG } from '../constants/Index';
+import { WeaponType, getWeaponConfig, WeaponConfig, WEAPON_COMMON_CONFIG } from '../constants/Index';
 import { BulletManager } from '../managers/Index';
 import { BulletBase } from '../bullets/Index';
 import { TargetFinder, HealthBarHelper } from '../utils/Index';
@@ -51,13 +51,24 @@ export class WeaponBase extends Component {
         this.attackSpeed = this.config.attackSpeed;
         this.maxHealth = this.config.health; // 保存最大生命值
 
-        // 根据类型设置颜色（锚点在中心，所以从 -width/2, -height/2 开始绘制）
-        graphics.fillColor = getWeaponColor(type);
-        graphics.rect(-width / 2, -height / 2, width, height);
-        graphics.fill();
+        // 绘制武器外观（不使用背景色填充）
+        // 由子类实现具体的绘制逻辑
+        this.drawAppearance(graphics, width, height);
         
         // 创建血条
         this.updateHealthBar();
+    }
+    
+    /**
+     * 绘制武器外观
+     * 子类必须重写此方法实现自己的外观绘制
+     * @param graphics Graphics 组件
+     * @param width 宽度
+     * @param height 高度
+     */
+    protected drawAppearance(graphics: Graphics, width: number, height: number) {
+        // 基类不绘制任何内容，由子类实现
+        graphics.clear();
     }
     
     /**
