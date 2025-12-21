@@ -1,16 +1,14 @@
 import { Node, Graphics, UITransform, Color, Vec3 } from 'cc';
 import { UiConfig } from '../config/Index';
+import { HealthBarRenderer } from '../renderers/HealthBarRenderer';
 
 /**
  * 血条辅助类
  * 用于在节点顶部绘制血条
  */
 export class HealthBarHelper {
-    private static readonly HEALTH_BAR_HEIGHT = 4; // 血条高度
-    private static readonly HEALTH_BAR_MARGIN = 4; // 血条边距（距离格子边缘的距离）
-    private static readonly HEALTH_BAR_BG_COLOR = new Color(50, 50, 50, 255); // 血条背景颜色（深灰色）
-    private static readonly HEALTH_BAR_COLOR = new Color(0, 255, 0, 255); // 血条颜色（绿色）
-    private static readonly HEALTH_BAR_LOW_COLOR = new Color(255, 0, 0, 255); // 低血量颜色（红色）
+    private static readonly HEALTH_BAR_WIDTH_RATIO = 0.9; // 血条宽度比例（相对于格子大小，不超过格子）
+    private static readonly HEALTH_BAR_OFFSET_Y = 0.1; // 血条Y偏移比例（相对于格子大小，更靠近实体）
 
     /**
      * 创建或更新血条
@@ -69,48 +67,24 @@ export class HealthBarHelper {
         const parentTransform = healthBarNode.parent?.getComponent(UITransform);
         if (!parentTransform) return;
 
-        // 计算血条宽度（格子大小减去边距）
+        // 计算血条宽度（不超过格子大小）
         const cellSize = UiConfig.CELL_SIZE;
-        const healthBarWidth = cellSize - this.HEALTH_BAR_MARGIN * 2;
+        const healthBarWidth = cellSize * this.HEALTH_BAR_WIDTH_RATIO;
+        const healthBarHeight = HealthBarRenderer.getHeight();
         
         // 设置血条节点大小和位置
-        transform.setContentSize(healthBarWidth, this.HEALTH_BAR_HEIGHT);
+        transform.setContentSize(healthBarWidth, healthBarHeight);
         transform.setAnchorPoint(0.5, 0.5);
         
-        // 血条位置：节点顶部，但限制在格子内
-        // 计算血条应该位于格子顶部边缘内部
-        const offsetY = (parentTransform.height / 2) - (this.HEALTH_BAR_HEIGHT / 2) - this.HEALTH_BAR_MARGIN;
+        // 血条位置：节点顶部，更靠近实体
+        const offsetY = (parentTransform.height / 2) + (cellSize * this.HEALTH_BAR_OFFSET_Y);
         healthBarNode.setPosition(0, offsetY, 0);
 
         // 计算血量百分比
         const healthPercent = Math.max(0, Math.min(1, currentHealth / maxHealth));
         
-        // 绘制血条
-        graphics.clear();
-        
-        // 绘制背景（深灰色）
-        graphics.fillColor = this.HEALTH_BAR_BG_COLOR;
-        graphics.rect(
-            -healthBarWidth / 2,
-            -this.HEALTH_BAR_HEIGHT / 2,
-            healthBarWidth,
-            this.HEALTH_BAR_HEIGHT
-        );
-        graphics.fill();
-        
-        // 绘制血量条
-        const healthWidth = healthBarWidth * healthPercent;
-        if (healthWidth > 0) {
-            // 根据血量百分比选择颜色（低于30%显示红色）
-            graphics.fillColor = healthPercent <= 0.3 ? this.HEALTH_BAR_LOW_COLOR : this.HEALTH_BAR_COLOR;
-            graphics.rect(
-                -healthBarWidth / 2,
-                -this.HEALTH_BAR_HEIGHT / 2,
-                healthWidth,
-                this.HEALTH_BAR_HEIGHT
-            );
-            graphics.fill();
-        }
+        // 使用渲染器绘制美化的血条
+        HealthBarRenderer.render(graphics, healthBarWidth, healthBarHeight, healthPercent);
     }
 
     /**

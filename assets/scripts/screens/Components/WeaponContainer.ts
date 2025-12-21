@@ -1,7 +1,8 @@
-import { _decorator, Component, Node, Graphics, UITransform, Color, Prefab } from 'cc';
+import { _decorator, Component, Node, Graphics, UITransform, Prefab } from 'cc';
 import { UiConfig } from '../../config/Index';
 import { WeaponCard } from './WeaponCard';
 import { WeaponType } from '../../constants/Index';
+import { WeaponContainerRenderer } from '../../renderers/Index';
 const { ccclass, property } = _decorator;
 
 @ccclass('WeaponContainer')
@@ -16,8 +17,9 @@ export class WeaponContainer extends Component {
     @property({ type: Prefab, displayName: '火箭塔预制体' })
     public rocketWeaponPrefab: Prefab = null;
     
+    private graphics: Graphics | null = null;
+    
     onLoad() {
-        const graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
         
         // 设置大小为 3个格子宽 x 2个格子高（3种武器）
@@ -26,10 +28,14 @@ export class WeaponContainer extends Component {
         transform.setAnchorPoint(0, 0);
         transform.setContentSize(width, height);
         
-        // 绘制蓝色背景
-        graphics.fillColor = Color.BLUE;
-        graphics.rect(0, 0, width, height);
-        graphics.fill();
+        // 初始化 Graphics 组件
+        this.graphics = this.node.getComponent(Graphics);
+        if (!this.graphics) {
+            this.graphics = this.node.addComponent(Graphics);
+        }
+        
+        // 使用渲染器绘制美化背景
+        WeaponContainerRenderer.renderBackground(this.graphics, width, height);
     }
 
     start() {

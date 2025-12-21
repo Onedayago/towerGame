@@ -1,6 +1,7 @@
 import { _decorator, Graphics } from 'cc';
 import { WeaponBase } from './WeaponBase';
-import { WeaponType, getWeaponColor } from '../constants/Index';
+import { WeaponType } from '../constants/Index';
+import { WeaponRocketRenderer } from '../renderers/Index';
 const { ccclass } = _decorator;
 
 /**
@@ -24,38 +25,10 @@ export class WeaponRocket extends WeaponBase {
     
     /**
      * 绘制火箭塔外观
+     * 使用渲染器处理绘制逻辑
      */
     protected drawAppearance(graphics: Graphics, width: number, height: number) {
-        const color = getWeaponColor(WeaponType.ROCKET);
-        const halfWidth = width / 2;
-        const halfHeight = height / 2;
-        const radius = Math.min(width, height) * 0.35; // 底座半径
-        
-        graphics.clear();
-        
-        // 方形底座
-        graphics.strokeColor = color;
-        graphics.lineWidth = 2;
-        const baseSize = radius * 1.2;
-        graphics.rect(-baseSize / 2, -baseSize / 2, baseSize, baseSize);
-        graphics.stroke();
-        
-        // 火箭发射器（指向右侧）
-        graphics.moveTo(baseSize / 2, 0);
-        graphics.lineTo(halfWidth * 0.85, 0);
-        graphics.stroke();
-        
-        // 火箭发射器前端（三角形）
-        graphics.moveTo(halfWidth * 0.85, 0);
-        graphics.lineTo(halfWidth * 0.7, -halfHeight * 0.15);
-        graphics.lineTo(halfWidth * 0.7, halfHeight * 0.15);
-        graphics.close();
-        graphics.stroke();
-        
-        // 添加火箭细节
-        graphics.moveTo(halfWidth * 0.75, -halfHeight * 0.1);
-        graphics.lineTo(halfWidth * 0.75, halfHeight * 0.1);
-        graphics.stroke();
+        WeaponRocketRenderer.render(graphics, width, height);
     }
 }
 

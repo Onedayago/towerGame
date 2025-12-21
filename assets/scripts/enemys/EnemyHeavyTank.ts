@@ -1,6 +1,7 @@
 import { _decorator, Graphics } from 'cc';
 import { EnemyBase } from './EnemyBase';
-import { EnemyType, getEnemyColor } from '../constants/Index';
+import { EnemyType } from '../constants/Index';
+import { EnemyHeavyTankRenderer } from '../renderers/Index';
 const { ccclass } = _decorator;
 
 /**
@@ -15,35 +16,10 @@ export class EnemyHeavyTank extends EnemyBase {
     
     /**
      * 绘制重型坦克外观
+     * 使用渲染器处理绘制逻辑
      */
     protected drawAppearance(graphics: Graphics, width: number, height: number) {
-        const color = getEnemyColor(EnemyType.HEAVY_TANK);
-        const halfWidth = width / 2;
-        const halfHeight = height / 2;
-        
-        graphics.clear();
-        
-        // 绘制坦克主体（矩形，更厚的装甲）
-        graphics.strokeColor = color;
-        graphics.lineWidth = 3;
-        graphics.rect(-halfWidth * 0.8, -halfHeight * 0.6, width * 0.8, height * 0.6);
-        graphics.stroke();
-        
-        // 绘制炮管（指向右侧，更粗）
-        graphics.lineWidth = 3;
-        graphics.moveTo(halfWidth * 0.8, 0);
-        graphics.lineTo(halfWidth, 0);
-        graphics.stroke();
-        
-        // 绘制炮管前端（圆形）
-        graphics.fillColor = color;
-        graphics.circle(halfWidth, 0, 3);
-        graphics.fill();
-        
-        // 添加装甲板
-        graphics.lineWidth = 2;
-        graphics.rect(-halfWidth * 0.6, -halfHeight * 0.4, width * 0.4, height * 0.3);
-        graphics.stroke();
+        EnemyHeavyTankRenderer.render(graphics, width, height);
     }
 }
 

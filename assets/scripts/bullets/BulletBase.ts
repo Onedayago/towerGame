@@ -78,6 +78,7 @@ export class BulletBase extends Component {
         const size = UiConfig.CELL_SIZE * 0.3;
         transform.setContentSize(size, size);
         // 绘制子弹外观
+        // 由子类实现具体的绘制逻辑，调用对应的渲染器
         this.drawBullet(graphics, size);
     }
 

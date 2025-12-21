@@ -1,6 +1,7 @@
 import { _decorator, Color, Graphics } from 'cc';
 import { BulletBase } from '../BulletBase';
 import { BulletType } from '../../constants/Index';
+import { EnemyFastTankBulletRenderer } from '../../renderers/Index';
 const { ccclass } = _decorator;
 
 /**
@@ -36,22 +37,10 @@ export class EnemyFastTankBullet extends BulletBase {
     
     /**
      * 绘制快速坦克子弹外观：小圆形，带速度线条
+     * 使用渲染器处理绘制逻辑
      */
     protected drawBullet(graphics: Graphics, size: number) {
-        graphics.clear();
-        const radius = size / 2 * 0.8; // 稍小一些
-        
-        // 绘制外圈（浅红色）
-        graphics.fillColor = new Color(255, 100, 100, 255);
-        graphics.circle(0, 0, radius);
-        graphics.fill();
-        
-        // 绘制速度线条（尾部）
-        graphics.strokeColor = new Color(255, 150, 150, 255);
-        graphics.lineWidth = 1;
-        graphics.moveTo(-radius, 0);
-        graphics.lineTo(-radius * 1.5, 0);
-        graphics.stroke();
+        EnemyFastTankBulletRenderer.render(graphics, size);
     }
 }
 

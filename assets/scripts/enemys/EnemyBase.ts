@@ -45,9 +45,10 @@ export class EnemyBase extends Component {
         
         transform.setAnchorPoint(0.5, 0.5);
         
-        // 所有敌人大小相同
-        const width = UiConfig.CELL_SIZE;
-        const height = UiConfig.CELL_SIZE;
+        // 所有敌人大小相同（缩小到80%）
+        const sizeScale = 0.8;
+        const width = UiConfig.CELL_SIZE * sizeScale;
+        const height = UiConfig.CELL_SIZE * sizeScale;
         transform.setContentSize(width, height);
 
         // 加载敌人配置
@@ -57,7 +58,7 @@ export class EnemyBase extends Component {
         this.maxHealth = this.config.health; // 保存最大生命值
 
         // 绘制敌人外观（不使用背景色填充）
-        // 由子类实现具体的绘制逻辑
+        // 由子类实现具体的绘制逻辑，调用对应的渲染器
         this.drawAppearance(graphics, width, height);
         
         // 创建血条

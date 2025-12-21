@@ -1,6 +1,7 @@
 import { _decorator, Color, Graphics } from 'cc';
 import { BulletBase } from '../BulletBase';
 import { BulletType } from '../../constants/Index';
+import { WeaponRocketBulletRenderer } from '../../renderers/Index';
 const { ccclass } = _decorator;
 
 /**
@@ -36,40 +37,10 @@ export class WeaponRocketBullet extends BulletBase {
     
     /**
      * 绘制火箭子弹外观：火箭形状（带尾翼）
+     * 使用渲染器处理绘制逻辑
      */
     protected drawBullet(graphics: Graphics, size: number) {
-        graphics.clear();
-        const rocketLength = size * 1.2;
-        const rocketWidth = size * 0.6;
-        const halfLength = rocketLength / 2;
-        const halfWidth = rocketWidth / 2;
-        
-        // 绘制火箭主体（椭圆形）
-        graphics.fillColor = new Color(255, 165, 0, 255); // 橙色
-        graphics.ellipse(0, 0, halfLength, halfWidth);
-        graphics.fill();
-        
-        // 绘制火箭头部（三角形）
-        graphics.moveTo(halfLength, 0);
-        graphics.lineTo(halfLength * 0.7, -halfWidth * 0.5);
-        graphics.lineTo(halfLength * 0.7, halfWidth * 0.5);
-        graphics.close();
-        graphics.fill();
-        
-        // 绘制尾翼（左右各一个）
-        graphics.fillColor = new Color(200, 100, 0, 255); // 深橙色
-        // 左尾翼
-        graphics.moveTo(-halfLength * 0.8, -halfWidth * 0.3);
-        graphics.lineTo(-halfLength, -halfWidth);
-        graphics.lineTo(-halfLength * 0.6, -halfWidth * 0.3);
-        graphics.close();
-        graphics.fill();
-        // 右尾翼
-        graphics.moveTo(-halfLength * 0.8, halfWidth * 0.3);
-        graphics.lineTo(-halfLength, halfWidth);
-        graphics.lineTo(-halfLength * 0.6, halfWidth * 0.3);
-        graphics.close();
-        graphics.fill();
+        WeaponRocketBulletRenderer.render(graphics, size);
     }
 }
 

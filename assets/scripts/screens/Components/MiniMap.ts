@@ -1,9 +1,9 @@
-import { _decorator, Component, Node, Graphics, UITransform, Color, Vec3 } from 'cc';
+import { _decorator, Component, Node, Graphics, UITransform } from 'cc';
 import { UiConfig } from '../../config/Index';
 import { WarView } from './Index';
 import { WarContainer } from './Index';
 import { EnemyManager, WeaponManager } from '../../managers/Index';
-import { DrawHelper } from '../../utils/Index';
+import { MiniMapRenderer } from '../../renderers/Index';
 const { ccclass, property } = _decorator;
 
 /**
@@ -146,138 +146,26 @@ export class MiniMap extends Component {
         // 清空之前的绘制
         this.graphics.clear();
 
-        // 绘制背景
-        this.drawBackground(minimapWidth, minimapHeight);
+        // 使用渲染器绘制背景
+        MiniMapRenderer.renderBackground(this.graphics, minimapWidth, minimapHeight);
 
-        // 绘制敌人位置
-        this.drawEnemies(minimapWidth, minimapHeight);
-
-        // 绘制武器位置
-        this.drawWeapons(minimapWidth, minimapHeight);
-    }
-
-    /**
-     * 绘制背景
-     */
-    private drawBackground(width: number, height: number) {
-        if (!this.graphics) return;
-
-        DrawHelper.drawTransparentRect(
+        // 使用渲染器绘制敌人位置
+        MiniMapRenderer.renderEnemies(
             this.graphics,
-            0,
-            0,
-            width,
-            height,
-            new Color(0, 0, 0, 180),
-            Color.WHITE,
-            2
+            minimapWidth,
+            minimapHeight,
+            this.warViewNode,
+            this.enemyManager
         );
-    }
 
-
-    /**
-     * 绘制敌人位置
-     * 显示战场上所有的敌人
-     */
-    private drawEnemies(minimapWidth: number, minimapHeight: number) {
-        if (!this.graphics || !this.warViewNode || !this.enemyManager) return;
-
-        const enemies = this.enemyManager.getAllEnemies();
-        if (enemies.length === 0) return;
-
-        const warViewTransform = this.warViewNode.getComponent(UITransform);
-        if (!warViewTransform) return;
-
-        // 计算缩放比例（基于整个 WarView）
-        const scale = this.calculateScale(minimapWidth, minimapHeight, warViewTransform);
-        const offset = this.calculateOffset(minimapWidth, minimapHeight, warViewTransform, scale);
-
-        // 绘制敌人位置（红色点）
-        for (const enemy of enemies) {
-            if (!enemy || !enemy.isValid) continue;
-
-            const enemyPos = enemy.position;
-            const minimapX = offset.x + enemyPos.x * scale;
-            const minimapY = offset.y + enemyPos.y * scale;
-
-            // 绘制小圆点
-            DrawHelper.drawDot(this.graphics, minimapX, minimapY, 2, Color.RED);
-        }
-    }
-
-    /**
-     * 绘制武器位置
-     * 显示战场上所有的武器
-     */
-    private drawWeapons(minimapWidth: number, minimapHeight: number) {
-        if (!this.graphics || !this.warViewNode || !this.weaponManager) return;
-
-        const weapons = this.weaponManager.getAllWeapons();
-        if (weapons.length === 0) return;
-
-        const warViewTransform = this.warViewNode.getComponent(UITransform);
-        if (!warViewTransform) return;
-
-        // 计算缩放比例（基于整个 WarView）
-        const scale = this.calculateScale(minimapWidth, minimapHeight, warViewTransform);
-        const offset = this.calculateOffset(minimapWidth, minimapHeight, warViewTransform, scale);
-        
-        // 绘制武器位置（蓝色点）
-        for (const weapon of weapons) {
-            if (!weapon || !weapon.isValid) continue;
-
-            const weaponPos = weapon.position;
-            const minimapX = offset.x + weaponPos.x * scale;
-            const minimapY = offset.y + weaponPos.y * scale;
-
-            // 绘制小方块
-            DrawHelper.drawSquare(this.graphics, minimapX, minimapY, 3, Color.BLUE);
-        }
-    }
-
-
-    /**
-     * 计算缩放比例
-     * 根据小地图的宽度和高度适配 WarView
-     */
-    private calculateScale(minimapWidth: number, minimapHeight: number, warViewTransform: UITransform): number {
-        const warViewWidth = warViewTransform.width;
-        const warViewHeight = warViewTransform.height;
-
-        // 计算宽高比
-        const minimapAspect = minimapWidth / minimapHeight;
-        const warViewAspect = warViewWidth / warViewHeight;
-
-        // 根据宽高比选择合适的缩放方式
-        let scale: number;
-        if (minimapAspect > warViewAspect) {
-            // 小地图更宽，以高度为准
-            scale = minimapHeight / warViewHeight;
-        } else {
-            // 小地图更高，以宽度为准
-            scale = minimapWidth / warViewWidth;
-        }
-
-        // 不使用边距，完全填充
-        return scale;
-    }
-
-    /**
-     * 计算偏移量
-     * 将 WarView 居中显示在小地图中
-     */
-    private calculateOffset(minimapWidth: number, minimapHeight: number, warViewTransform: UITransform, scale: number): Vec3 {
-        const warViewWidth = warViewTransform.width;
-        const warViewHeight = warViewTransform.height;
-
-        const scaledWidth = warViewWidth * scale;
-        const scaledHeight = warViewHeight * scale;
-        
-        // 居中显示
-        const offsetX = (minimapWidth - scaledWidth) / 2;
-        const offsetY = (minimapHeight - scaledHeight) / 2;
-
-        return new Vec3(offsetX, offsetY, 0);
+        // 使用渲染器绘制武器位置
+        MiniMapRenderer.renderWeapons(
+            this.graphics,
+            minimapWidth,
+            minimapHeight,
+            this.warViewNode,
+            this.weaponManager
+        );
     }
 
     /**
