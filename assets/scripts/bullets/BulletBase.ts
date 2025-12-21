@@ -83,12 +83,15 @@ export class BulletBase extends Component {
 
     /**
      * 绘制子弹
-     * 子类可以重写此方法自定义外观
+     * 子类必须重写此方法实现自己的外观绘制
+     * @param graphics Graphics 组件
+     * @param size 子弹大小
      */
     protected drawBullet(graphics: Graphics, size: number) {
+        // 基类默认绘制：简单圆形
         graphics.clear();
         graphics.fillColor = this.getBulletColor();
-        graphics.rect(-size / 2, -size / 2, size, size);
+        graphics.circle(0, 0, size / 2);
         graphics.fill();
     }
 

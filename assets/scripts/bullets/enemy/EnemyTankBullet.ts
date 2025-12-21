@@ -1,4 +1,4 @@
-import { _decorator, Color } from 'cc';
+import { _decorator, Color, Graphics } from 'cc';
 import { BulletBase } from '../BulletBase';
 import { BulletType } from '../../constants/Index';
 const { ccclass } = _decorator;
@@ -32,6 +32,24 @@ export class EnemyTankBullet extends BulletBase {
      */
     protected getBulletColor(): Color {
         return Color.RED;
+    }
+    
+    /**
+     * 绘制坦克子弹外观：实心圆形
+     */
+    protected drawBullet(graphics: Graphics, size: number) {
+        graphics.clear();
+        const radius = size / 2;
+        
+        // 绘制外圈（红色）
+        graphics.fillColor = Color.RED;
+        graphics.circle(0, 0, radius);
+        graphics.fill();
+        
+        // 绘制内圈（更亮的红色）
+        graphics.fillColor = new Color(255, 150, 150, 255);
+        graphics.circle(0, 0, radius * 0.6);
+        graphics.fill();
     }
 }
 
