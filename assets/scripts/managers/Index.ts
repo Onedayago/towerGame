@@ -6,4 +6,5 @@
 export { EnemyManager } from './EnemyManager';
 export { GameManager } from './GameManager';
 export { WeaponManager } from './WeaponManager';
+export { BulletManager } from './BulletManager';
 

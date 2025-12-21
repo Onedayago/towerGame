@@ -48,13 +48,23 @@ export class GridHelper {
      * @param x X坐标
      * @param y Y坐标
      * @param cellSize 格子大小
+     * @param centerAnchor 是否对齐到网格中心（默认 false，对齐到左下角）
      * @returns 对齐后的坐标
      */
-    static snapToGrid(x: number, y: number, cellSize: number = UiConfig.CELL_SIZE): { x: number; y: number } {
-        return {
-            x: Math.floor(x / cellSize) * cellSize,
-            y: Math.floor(y / cellSize) * cellSize
-        };
+    static snapToGrid(x: number, y: number, cellSize: number = UiConfig.CELL_SIZE, centerAnchor: boolean = false): { x: number; y: number } {
+        if (centerAnchor) {
+            // 对齐到网格中心
+            return {
+                x: Math.floor(x / cellSize) * cellSize + cellSize / 2,
+                y: Math.floor(y / cellSize) * cellSize + cellSize / 2
+            };
+        } else {
+            // 对齐到网格左下角
+            return {
+                x: Math.floor(x / cellSize) * cellSize,
+                y: Math.floor(y / cellSize) * cellSize
+            };
+        }
     }
 
     /**

@@ -5,4 +5,5 @@
 
 export * from './EnemyConstants';
 export * from './WeaponConstants';
+export * from './BulletConstants';
 

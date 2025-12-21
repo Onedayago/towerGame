@@ -32,8 +32,7 @@ export class WeaponCard extends Component {
         const height = UiConfig.CELL_SIZE;
         transform.setContentSize(width, height);
 
-        // 绘制背景（浅灰色边框）
-        // this.drawCardBackground(graphics, width, height);
+        // 背景绘制已禁用，由武器预制体显示
         
         // 如果提供了武器预制体，则实例化武器
         if (this.weaponPrefab) {
@@ -69,9 +68,9 @@ export class WeaponCard extends Component {
 
     /**
      * 创建武器节点
+     * 实例化武器预制体并添加到卡片中
      */
     private createWeapon() {
-        
         if (!this.weaponPrefab) return;
 
         // 如果已存在武器节点，先销毁
@@ -84,10 +83,13 @@ export class WeaponCard extends Component {
         this.weaponNode = instantiate(this.weaponPrefab);
         this.weaponNode.setParent(this.node);
         
-        // 设置武器节点位置（居中）
-        const transform = this.node.getComponent(UITransform);
-        if (transform) {
-        
+        // 设置武器节点位置（卡片锚点在左下角，武器锚点在中心，所以需要偏移到卡片中心）
+        const cardTransform = this.node.getComponent(UITransform);
+        if (cardTransform) {
+            const centerX = cardTransform.width / 2;
+            const centerY = cardTransform.height / 2;
+            this.weaponNode.setPosition(centerX, centerY, 0);
+        } else {
             this.weaponNode.setPosition(0, 0, 0);
         }
     }
@@ -103,14 +105,23 @@ export class WeaponCard extends Component {
         }
     }
 
+    /**
+     * 触摸开始事件处理
+     */
     onTouchStart(event: EventTouch) {
         this.dragHandler?.onTouchStart(event);
     }
 
+    /**
+     * 触摸移动事件处理
+     */
     onTouchMove(event: EventTouch) {
         this.dragHandler?.onTouchMove(event);
     }
 
+    /**
+     * 触摸结束事件处理
+     */
     onTouchEnd(event: EventTouch) {
         this.dragHandler?.onTouchEnd(event);
     }

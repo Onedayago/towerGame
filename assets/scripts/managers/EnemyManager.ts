@@ -2,6 +2,8 @@ import { Node, Prefab, UITransform } from 'cc';
 import { EnemyType } from '../constants/Index';
 import { EnemySpawnHandler } from '../business/EnemySpawnHandler';
 import { EnemyUpdateHandler } from '../business/EnemyUpdateHandler';
+import { BulletManager } from './BulletManager';
+import { WeaponManager } from './WeaponManager';
 
 /**
  * 敌人管理器
@@ -89,6 +91,23 @@ export class EnemyManager {
      */
     getEnabledTypes(): EnemyType[] {
         return this.spawnHandler.getEnabledTypes();
+    }
+
+    /**
+     * 获取所有敌人节点
+     * @returns 所有有效的敌人节点数组
+     */
+    getAllEnemies(): Node[] {
+        return this.updateHandler.getAllEnemies();
+    }
+    
+    /**
+     * 设置子弹管理器和武器管理器
+     * @param bulletManager 子弹管理器
+     * @param weaponManager 武器管理器
+     */
+    setManagers(bulletManager: BulletManager, weaponManager: WeaponManager) {
+        this.updateHandler.setManagers(bulletManager, weaponManager);
     }
 }
 

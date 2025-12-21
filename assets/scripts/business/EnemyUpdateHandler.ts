@@ -1,5 +1,7 @@
 import { Node, UITransform } from 'cc';
 import { UiConfig } from '../config/Index';
+import { BulletManager } from '../managers/BulletManager';
+import { WeaponManager } from '../managers/WeaponManager';
 
 /**
  * 敌人更新处理器
@@ -8,9 +10,21 @@ import { UiConfig } from '../config/Index';
 export class EnemyUpdateHandler {
     private enemies: Node[] = [];
     private containerWidth: number = 0;
+    private bulletManager: BulletManager | null = null;
+    private weaponManager: WeaponManager | null = null;
 
     constructor(containerWidth: number) {
         this.containerWidth = containerWidth;
+    }
+    
+    /**
+     * 设置子弹管理器和武器管理器
+     * @param bulletManager 子弹管理器
+     * @param weaponManager 武器管理器
+     */
+    setManagers(bulletManager: BulletManager, weaponManager: WeaponManager) {
+        this.bulletManager = bulletManager;
+        this.weaponManager = weaponManager;
     }
 
     /**
@@ -55,6 +69,13 @@ export class EnemyUpdateHandler {
                                enemy.getComponent('EnemyBoss');
         
         if (enemyComponent) {
+            // 设置管理器的引用（如果还没有设置）
+            if (this.bulletManager && this.weaponManager) {
+                if (typeof (enemyComponent as any).setManagers === 'function') {
+                    (enemyComponent as any).setManagers(this.bulletManager, this.weaponManager);
+                }
+            }
+            
             if (typeof (enemyComponent as any).updatePosition === 'function') {
                 (enemyComponent as any).updatePosition(deltaTime, this.containerWidth);
             }
@@ -70,9 +91,14 @@ export class EnemyUpdateHandler {
      */
     private isOutOfBounds(enemy: Node): boolean {
         const currentPos = enemy.position;
-        // 敌人锚点在左下角(0,0)，所以 position.x 是左边缘位置
+        const enemyTransform = enemy.getComponent(UITransform);
+        if (!enemyTransform) return false;
+        
+        // 敌人锚点在中心(0.5, 0.5)，所以需要计算左边缘位置
+        // 左边缘 = position.x - width/2
+        const leftEdge = currentPos.x - enemyTransform.width / 2;
         // 当左边缘超过容器宽度时，敌人已经完全移出右边界
-        return currentPos.x >= this.containerWidth;
+        return leftEdge >= this.containerWidth;
     }
 
     /**
@@ -109,6 +135,15 @@ export class EnemyUpdateHandler {
      */
     getEnemyCount(): number {
         return this.enemies.length;
+    }
+
+    /**
+     * 获取所有敌人节点
+     * @returns 所有有效的敌人节点数组
+     */
+    getAllEnemies(): Node[] {
+        // 过滤掉无效的敌人节点
+        return this.enemies.filter(enemy => enemy && enemy.isValid);
     }
 }
 

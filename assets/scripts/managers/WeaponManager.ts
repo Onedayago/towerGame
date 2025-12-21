@@ -1,5 +1,7 @@
 import { Node, UITransform } from 'cc';
 import { WeaponBase } from '../weapons/Index';
+import { BulletManager } from './BulletManager';
+import { EnemyManager } from './EnemyManager';
 
 /**
  * 武器管理器
@@ -8,9 +10,27 @@ import { WeaponBase } from '../weapons/Index';
 export class WeaponManager {
     private containerNode: Node;
     private weapons: Node[] = [];
+    private bulletManager: BulletManager | null = null;
+    private enemyManager: EnemyManager | null = null;
 
     constructor(containerNode: Node) {
         this.containerNode = containerNode;
+    }
+    
+    /**
+     * 设置子弹管理器
+     * @param bulletManager 子弹管理器
+     */
+    setBulletManager(bulletManager: BulletManager) {
+        this.bulletManager = bulletManager;
+    }
+    
+    /**
+     * 设置敌人管理器
+     * @param enemyManager 敌人管理器
+     */
+    setEnemyManager(enemyManager: EnemyManager) {
+        this.enemyManager = enemyManager;
     }
 
     /**
@@ -23,7 +43,6 @@ export class WeaponManager {
         // 确保武器节点是容器的子节点
         if (weaponNode.parent !== this.containerNode) {
             weaponNode.setParent(this.containerNode);
-        
         }
     
         this.weapons.push(weaponNode);
@@ -45,6 +64,9 @@ export class WeaponManager {
      * @param deltaTime 帧时间
      */
     update(deltaTime: number) {
+        // 获取所有敌人
+        const enemies = this.enemyManager ? this.enemyManager.getAllEnemies() : [];
+        
         for (let i = this.weapons.length - 1; i >= 0; i--) {
             const weapon = this.weapons[i];
             
@@ -57,7 +79,7 @@ export class WeaponManager {
             // 更新武器的攻击逻辑
             const weaponComponent = weapon.getComponent(WeaponBase);
             if (weaponComponent) {
-                weaponComponent.updateAttack(deltaTime);
+                weaponComponent.updateAttack(deltaTime, enemies, this.bulletManager);
             }
         }
     }
@@ -90,29 +112,21 @@ export class WeaponManager {
 
     /**
      * 根据位置获取武器
-     * @param x X坐标
-     * @param y Y坐标
+     * @param x X坐标（网格对齐后的位置）
+     * @param y Y坐标（网格对齐后的位置）
      * @returns 武器节点，如果没有则返回 null
      */
     getWeaponAtPosition(x: number, y: number): Node | null {
+        // 由于武器是对齐到网格的，直接比较位置是否相同（允许小的误差）
+        const epsilon = 0.1; // 允许的误差范围
+        
         for (const weapon of this.weapons) {
             if (!weapon || !weapon.isValid) continue;
             
-            const transform = weapon.getComponent(UITransform);
-            if (!transform) continue;
-            
             const weaponPos = weapon.position;
-            const weaponWidth = transform.width;
-            const weaponHeight = transform.height;
             
-            // 检查位置是否在武器范围内（考虑锚点）
-            const anchorPoint = transform.anchorPoint;
-            const left = weaponPos.x - anchorPoint.x * weaponWidth;
-            const right = weaponPos.x + (1 - anchorPoint.x) * weaponWidth;
-            const bottom = weaponPos.y - anchorPoint.y * weaponHeight;
-            const top = weaponPos.y + (1 - anchorPoint.y) * weaponHeight;
-            
-            if (x >= left && x <= right && y >= bottom && y <= top) {
+            // 检查位置是否相同（考虑浮点数误差）
+            if (Math.abs(weaponPos.x - x) < epsilon && Math.abs(weaponPos.y - y) < epsilon) {
                 return weapon;
             }
         }

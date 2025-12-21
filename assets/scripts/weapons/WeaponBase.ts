@@ -1,7 +1,10 @@
-import { _decorator, Color, Component, Graphics, UITransform } from 'cc';
+import { _decorator, Component, Graphics, UITransform, Node, Vec3, Prefab, instantiate } from 'cc';
 import { UiConfig } from '../config/Index';
-import { WeaponType, getWeaponConfig, WeaponConfig } from '../constants/Index';
-const { ccclass } = _decorator;
+import { WeaponType, getWeaponConfig, WeaponConfig, getWeaponColor, WEAPON_COMMON_CONFIG } from '../constants/Index';
+import { BulletManager } from '../managers/Index';
+import { BulletBase } from '../bullets/Index';
+import { TargetFinder, HealthBarHelper } from '../utils/Index';
+const { ccclass, property } = _decorator;
 
 /**
  * 武器基类
@@ -15,6 +18,13 @@ export class WeaponBase extends Component {
     protected attackTimer: number = 0;
     protected config: WeaponConfig | null = null;
     protected weaponType: WeaponType;
+    protected maxHealth: number = 0; // 最大生命值（用于血条显示）
+    
+    @property(Prefab)
+    protected bulletPrefab: Prefab = null; // 子弹预制体
+    
+    protected bulletManager: BulletManager | null = null; // 子弹管理器
+    protected enemies: Node[] = []; // 敌人列表（由 WeaponManager 设置）
 
     /**
      * 初始化武器
@@ -28,7 +38,7 @@ export class WeaponBase extends Component {
         
         if (!graphics || !transform) return;
         
-        transform.setAnchorPoint(0, 0);
+        transform.setAnchorPoint(0.5, 0.5);
         
         // 所有武器大小相同
         const width = UiConfig.CELL_SIZE;
@@ -39,53 +49,133 @@ export class WeaponBase extends Component {
         // 加载武器配置
         this.config = getWeaponConfig(type);
         this.attackSpeed = this.config.attackSpeed;
+        this.maxHealth = this.config.health; // 保存最大生命值
 
-        // 根据类型设置颜色
-        graphics.fillColor = this.getColorByType(type);
-        graphics.rect(0, 0, width, height);
+        // 根据类型设置颜色（锚点在中心，所以从 -width/2, -height/2 开始绘制）
+        graphics.fillColor = getWeaponColor(type);
+        graphics.rect(-width / 2, -height / 2, width, height);
         graphics.fill();
+        
+        // 创建血条
+        this.updateHealthBar();
     }
-
+    
     /**
-     * 根据武器类型获取颜色
-     * 子类可以重写此方法自定义颜色
+     * 更新血条显示
      */
-    protected getColorByType(type: WeaponType): Color {
-        switch (type) {
-            case WeaponType.BASIC:
-                return Color.RED;  // 洋红色
-            case WeaponType.RAPID:
-                return Color.CYAN;     // 青色
-            case WeaponType.HEAVY:
-                return new Color(255, 165, 0, 255);   // 橙色 (RGB: 255, 165, 0)
-            case WeaponType.SNIPER:
-                return new Color(128, 0, 128, 255);   // 紫色 (RGB: 128, 0, 128)
-            default:
-                return Color.MAGENTA;
-        }
+    protected updateHealthBar() {
+        if (!this.config) return;
+        HealthBarHelper.createOrUpdateHealthBar(
+            this.node,
+            this.config.health,
+            this.maxHealth
+        );
     }
 
     /**
      * 更新攻击逻辑
      * @param deltaTime 帧时间
+     * @param enemies 敌人列表
+     * @param bulletManager 子弹管理器
      */
-    updateAttack(deltaTime: number) {
+    updateAttack(deltaTime: number, enemies: Node[] = [], bulletManager: BulletManager | null = null) {
         if (!this.config) return;
+        
+        // 保存敌人列表和子弹管理器
+        this.enemies = enemies;
+        this.bulletManager = bulletManager;
         
         this.attackTimer += deltaTime;
         if (this.attackTimer >= this.attackSpeed) {
             this.attackTimer = 0;
-            this.performAttack();
+            
+            // 检测附近是否有敌人
+            const targetEnemy = this.findNearestEnemyInRange();
+            if (targetEnemy) {
+                this.performAttack(targetEnemy);
+            }
         }
     }
 
     /**
      * 执行攻击
      * 子类可以重写此方法实现不同的攻击逻辑
+     * @param targetEnemy 目标敌人
      */
-    protected performAttack() {
-        // 默认攻击逻辑
-        console.log(`Weapon ${this.weaponType} attacks with damage ${this.config?.damage}, range ${this.config?.range}`);
+    protected performAttack(targetEnemy: Node | null = null) {
+        if (!targetEnemy || !this.bulletManager || !this.bulletPrefab) {
+            return;
+        }
+        
+        // 发射子弹
+        this.fireBullet(targetEnemy);
+    }
+    
+    /**
+     * 发射子弹
+     * @param targetEnemy 目标敌人
+     */
+    protected fireBullet(targetEnemy: Node) {
+        if (!this.bulletPrefab || !this.bulletManager || !this.config) {
+            return;
+        }
+        
+        // 创建子弹实例
+        const bulletNode = instantiate(this.bulletPrefab);
+        if (!bulletNode) return;
+        
+        // 获取武器中心位置（武器锚点为中心）
+        const weaponPos = this.node.position;
+        const weaponCenterX = weaponPos.x;
+        const weaponCenterY = weaponPos.y;
+        
+        // 获取敌人中心位置（敌人锚点为中心）
+        const enemyPos = targetEnemy.position;
+        const enemyCenterX = enemyPos.x;
+        const enemyCenterY = enemyPos.y;
+        
+        // 计算方向向量
+        const direction = new Vec3(
+            enemyCenterX - weaponCenterX,
+            enemyCenterY - weaponCenterY,
+            0
+        );
+        
+        // 设置子弹初始位置（武器中心）
+        bulletNode.setPosition(weaponCenterX, weaponCenterY, 0);
+        
+        // 初始化子弹（使用 BulletBase，支持所有子弹类型）
+        const bulletComponent = bulletNode.getComponent(BulletBase);
+        if (bulletComponent) {
+            // 最大飞行距离为攻击范围的倍数（从常量配置中获取）
+            const maxDistance = this.config.range * WEAPON_COMMON_CONFIG.BULLET_MAX_DISTANCE_MULTIPLIER;
+            // 子弹速度由子弹类自己管理，这里只需要传入伤害和方向
+            bulletComponent.init(this.config.damage, direction, maxDistance);
+        }
+        
+        // 添加到子弹管理器
+        this.bulletManager.addBullet(bulletNode);
+    }
+    
+    /**
+     * 查找攻击范围内的最近敌人
+     * @returns 最近的敌人节点，如果没有则返回 null
+     */
+    protected findNearestEnemyInRange(): Node | null {
+        if (!this.config || this.enemies.length === 0) {
+            return null;
+        }
+        
+        // 武器位置
+        const weaponPos = this.node.position;
+        const range = this.config.range;
+        
+        // 使用 TargetFinder 查找目标（武器可以攻击任何方向的敌人）
+        return TargetFinder.findNearestInRange(
+            weaponPos,
+            this.enemies,
+            range
+        );
     }
 
     /**
@@ -121,6 +211,33 @@ export class WeaponBase extends Component {
      */
     getDamage(): number {
         return this.config?.damage || 0;
+    }
+    
+    /**
+     * 受到伤害
+     * @param damage 伤害值
+     */
+    takeDamage(damage: number) {
+        if (!this.config) return;
+        
+        this.config.health -= damage;
+        
+        // 更新血条
+        this.updateHealthBar();
+        
+        if (this.config.health <= 0) {
+            this.onDeath();
+        }
+    }
+    
+    /**
+     * 死亡处理
+     * 子类可以重写此方法实现不同的死亡效果
+     */
+    protected onDeath() {
+        // 移除血条
+        HealthBarHelper.removeHealthBar(this.node);
+        this.node.destroy();
     }
 }
 

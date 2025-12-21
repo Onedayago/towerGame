@@ -4,4 +4,6 @@
  */
 
 export { GridHelper } from './GridHelper';
+export { TargetFinder } from './TargetFinder';
+export { HealthBarHelper } from './HealthBarHelper';
 

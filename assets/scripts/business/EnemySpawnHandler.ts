@@ -64,9 +64,9 @@ export class EnemySpawnHandler {
         // 随机选择一行
         const randomRow = Math.floor(Math.random() * cellCountY);
 
-        // 计算最左边格子的位置
-        const startX = 0;
-        const startY = randomRow * cellSize;
+        // 计算最左边格子的中心位置（敌人锚点在中心）
+        const startX = cellSize / 2; // 第一个格子的中心X
+        const startY = randomRow * cellSize + cellSize / 2; // 随机行的中心Y
 
         // 创建敌人
         const enemy = instantiate(prefab);

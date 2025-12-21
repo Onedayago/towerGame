@@ -5,7 +5,6 @@
 
 export { WeaponBase } from './WeaponBase';
 export { WeaponBasic } from './WeaponBasic';
-export { WeaponRapid } from './WeaponRapid';
-export { WeaponHeavy } from './WeaponHeavy';
-export { WeaponSniper } from './WeaponSniper';
+export { WeaponLaser } from './WeaponLaser';
+export { WeaponRocket } from './WeaponRocket';
 
