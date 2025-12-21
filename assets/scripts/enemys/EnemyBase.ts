@@ -68,15 +68,15 @@ export class EnemyBase extends Component {
     /**
      * 更新敌人位置（由 EnemyManager 调用）
      * @param deltaTime 帧时间
-     * @param boundaryWidth 右边界宽度
+     * @param boundaryWidth 右边界宽度（容器宽度）
      */
     updatePosition(deltaTime: number, boundaryWidth: number) {
         const currentPos = this.node.position;
         const newX = currentPos.x + this.moveSpeed * deltaTime;
         
-        if (newX <= boundaryWidth) {
-            this.node.setPosition(newX, currentPos.y, 0);
-        }
+        // 允许移动到边界位置，超出边界的敌人由 EnemyUpdateHandler 移除
+        // 敌人会一直移动，直到左边缘达到或超过容器宽度
+        this.node.setPosition(newX, currentPos.y, 0);
     }
 
     /**

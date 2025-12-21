@@ -2,12 +2,12 @@
   "ver": "1.1.50",
   "importer": "prefab",
   "imported": true,
-  "uuid": "1ce1ec4f-5a1f-4118-9877-4646dbd65a6c",
+  "uuid": "a30c8180-17ae-47b4-8bf8-eac4377de3d1",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "WeaponCard"
+    "syncNodeName": "WeaponHeavy"
   }
 }

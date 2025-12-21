@@ -1,4 +1,5 @@
-import { Node } from 'cc';
+import { Node, UITransform } from 'cc';
+import { UiConfig } from '../config/Index';
 
 /**
  * 敌人更新处理器
@@ -65,10 +66,13 @@ export class EnemyUpdateHandler {
 
     /**
      * 检查敌人是否超出边界
+     * 当敌人的左边缘超过容器右边界时，认为已移出
      */
     private isOutOfBounds(enemy: Node): boolean {
         const currentPos = enemy.position;
-        return currentPos.x > this.containerWidth;
+        // 敌人锚点在左下角(0,0)，所以 position.x 是左边缘位置
+        // 当左边缘超过容器宽度时，敌人已经完全移出右边界
+        return currentPos.x >= this.containerWidth;
     }
 
     /**

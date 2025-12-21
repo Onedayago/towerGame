@@ -1,7 +1,7 @@
 import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab } from 'cc';
 import { UiConfig } from '../../config/Index';
 import { GridHelper } from '../../utils/Index';
-import { EnemyManager } from '../../managers/Index';
+import { EnemyManager, GameManager, WeaponManager } from '../../managers/Index';
 import { MapDragHandler } from '../../business/Index';
 import { EnemyType } from '../../constants/Index';
 const { ccclass, property } = _decorator;
@@ -11,7 +11,9 @@ export class WarView extends Component {
 
     private graphics: Graphics | null = null;
     private enemyManager: EnemyManager | null = null;
+    private weaponManager: WeaponManager | null = null;
     private dragHandler: MapDragHandler | null = null;
+    private gameManager: GameManager;
 
     @property(Prefab)
     public enemyTankPrefab: Prefab = null;
@@ -35,6 +37,8 @@ export class WarView extends Component {
         transform.setAnchorPoint(0, 0);
         this.node.setPosition(0, 0, 0);
         
+        this.gameManager = GameManager.getInstance();
+        
         // 初始化拖拽处理器
         const parent = this.node.parent;
         this.dragHandler = new MapDragHandler(this.node, parent);
@@ -55,6 +59,9 @@ export class WarView extends Component {
         }
         
         this.enemyManager = new EnemyManager(this.node, enemyPrefabs);
+        
+        // 初始化武器管理器
+        this.weaponManager = new WeaponManager(this.node);
 
         // 启用触摸事件
         this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this);
@@ -91,6 +98,10 @@ export class WarView extends Component {
         if (this.enemyManager) {
             this.enemyManager.clearAll();
         }
+        
+        if (this.weaponManager) {
+            this.weaponManager.clearAll();
+        }
     }
 
     start() {
@@ -98,9 +109,22 @@ export class WarView extends Component {
     }
 
     update(deltaTime: number) {
-        if (this.enemyManager) {
-            this.enemyManager.update(deltaTime);
+        // 只有游戏开始后才更新敌人管理器和武器管理器
+        if (this.gameManager.canUpdate()) {
+            if (this.enemyManager) {
+                this.enemyManager.update(deltaTime);
+            }
+            if (this.weaponManager) {
+                this.weaponManager.update(deltaTime);
+            }
         }
+    }
+    
+    /**
+     * 获取武器管理器
+     */
+    getWeaponManager(): WeaponManager | null {
+        return this.weaponManager;
     }
 
     drawGrid() {

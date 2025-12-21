@@ -6,4 +6,5 @@
 export { MapDragHandler } from './MapDragHandler';
 export { EnemySpawnHandler } from './EnemySpawnHandler';
 export { EnemyUpdateHandler } from './EnemyUpdateHandler';
+export { WeaponCardDragHandler } from './WeaponCardDragHandler';
 

@@ -1,18 +1,29 @@
-import { _decorator, Color, Component, Graphics, Node, UITransform, EventTouch, Vec2, Vec3, instantiate } from 'cc';
+import { _decorator, Color, Component, Graphics, Node, UITransform, EventTouch, Prefab, instantiate } from 'cc';
 import { UiConfig } from '../../config/Index';
-import { WarView } from './WarView';
-import { GridHelper } from '../../utils/Index';
+import { WeaponCardDragHandler } from '../../business/Index';
+import { WeaponType } from '../../constants/Index';
 const { ccclass, property } = _decorator;
 
 @ccclass('WeaponCard')
 export class WeaponCard extends Component {
 
-    private isDragging: boolean = false;
-    private lastTouchPos: Vec2 = new Vec2();
-    private dragNode: Node | null = null;
-    private warViewNode: Node | null = null;
+    private dragHandler: WeaponCardDragHandler | null = null;
+    private weaponNode: Node | null = null;
+    
+    @property({ type: String, displayName: '武器类型' })
+    public weaponType: WeaponType = WeaponType.BASIC;
+
+    @property({ type: Prefab, displayName: '武器预制体' })
+    public weaponPrefab: Prefab = null;
 
     start() {
+        this.initCard();
+    }
+
+    /**
+     * 初始化卡片
+     */
+    private initCard() {
         const graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
         transform.setAnchorPoint(0, 0);
@@ -21,13 +32,16 @@ export class WeaponCard extends Component {
         const height = UiConfig.CELL_SIZE;
         transform.setContentSize(width, height);
 
-        // 绘制红色背景
-        graphics.fillColor = Color.RED;
-        graphics.rect(0, 0, width, height);
-        graphics.fill();
+        // 绘制背景（浅灰色边框）
+        // this.drawCardBackground(graphics, width, height);
+        
+        // 如果提供了武器预制体，则实例化武器
+        if (this.weaponPrefab) {
+            this.createWeapon();
+        }
 
-        // 查找 WarView 节点
-        this.findWarViewNode();
+        // 初始化拖拽处理器
+        this.dragHandler = new WeaponCardDragHandler(this.node);
 
         // 启用触摸事件
         this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this);
@@ -36,101 +50,69 @@ export class WeaponCard extends Component {
         this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
     }
 
-    findWarViewNode() {
-        // 从场景中查找 WarView 节点（通过组件类型查找）
-        const scene = this.node.scene;
-        if (scene) {
-            // 递归查找所有节点
-            const findNodeWithComponent = (node: Node, componentType: typeof Component): Node | null => {
-                if (node.getComponent(componentType)) {
-                    return node;
-                }
-                for (let child of node.children) {
-                    const result = findNodeWithComponent(child, componentType);
-                    if (result) {
-                        return result;
-                    }
-                }
-                return null;
-            };
-            
-            this.warViewNode = findNodeWithComponent(scene, WarView);
+    /**
+     * 绘制卡片背景
+     */
+    private drawCardBackground(graphics: Graphics, width: number, height: number) {
+        graphics.clear();
+        // 绘制浅灰色背景
+        graphics.fillColor = new Color(200, 200, 200, 255);
+        graphics.rect(0, 0, width, height);
+        graphics.fill();
+        
+        // 绘制边框
+        graphics.strokeColor = Color.BLACK;
+        graphics.lineWidth = 2;
+        graphics.rect(0, 0, width, height);
+        graphics.stroke();
+    }
+
+    /**
+     * 创建武器节点
+     */
+    private createWeapon() {
+        
+        if (!this.weaponPrefab) return;
+
+        // 如果已存在武器节点，先销毁
+        if (this.weaponNode) {
+            this.weaponNode.destroy();
+            this.weaponNode = null;
+        }
+
+        // 实例化武器预制体
+        this.weaponNode = instantiate(this.weaponPrefab);
+        this.weaponNode.setParent(this.node);
+        
+        // 设置武器节点位置（居中）
+        const transform = this.node.getComponent(UITransform);
+        if (transform) {
+        
+            this.weaponNode.setPosition(0, 0, 0);
+        }
+    }
+
+    /**
+     * 设置武器类型和预制体
+     */
+    public setWeaponType(type: WeaponType, prefab: Prefab | null = null) {
+        this.weaponType = type;
+        if (prefab) {
+            this.weaponPrefab = prefab;
+            this.createWeapon();
         }
     }
 
     onTouchStart(event: EventTouch) {
-        this.isDragging = true;
-        const touchLocation = event.getUILocation();
-        this.lastTouchPos = new Vec2(touchLocation.x, touchLocation.y);
-        
-        // 创建拖拽副本节点
-        const dragNode = instantiate(this.node);
-        dragNode.setParent(this.node.parent);
-        dragNode.setPosition(this.node.position);
-        
-        // 设置透明度，表示正在拖拽
-        const graphics = dragNode.getComponent(Graphics);
-        if (graphics) {
-            graphics.fillColor = new Color(255, 0, 0, 128);
-        }
-        
-        this.dragNode = dragNode;
-        
-        // 提升拖拽节点层级，确保在最上层
-        const parent = dragNode.parent;
-        if (parent) {
-            dragNode.setSiblingIndex(parent.children.length - 1);
-        }
+        this.dragHandler?.onTouchStart(event);
     }
 
     onTouchMove(event: EventTouch) {
-        if (!this.isDragging || !this.dragNode) return;
-
-        const touchLocation = event.getUILocation();
-        const deltaX = touchLocation.x - this.lastTouchPos.x;
-        const deltaY = touchLocation.y - this.lastTouchPos.y;
-
-        const currentPos = this.dragNode.position;
-        const newX = currentPos.x + deltaX;
-        const newY = currentPos.y + deltaY;
-
-        // 更新拖拽节点的位置，跟随手指移动
-        this.dragNode.setPosition(newX, newY, 0);
-        this.lastTouchPos = new Vec2(touchLocation.x, touchLocation.y);
+        this.dragHandler?.onTouchMove(event);
     }
 
     onTouchEnd(event: EventTouch) {
-        if (!this.isDragging || !this.dragNode) return;
-        this.isDragging = false;
-
-        // 检查是否在 WarView 范围内，如果是则对齐到格子并创建新节点
-        if (this.warViewNode) {
-            const warViewTransform = this.warViewNode.getComponent(UITransform);
-            if (warViewTransform) {
-                const worldPos = this.dragNode.worldPosition;
-                const localPos = new Vec3();
-                this.warViewNode.inverseTransformPoint(localPos, worldPos);
-
-                if (GridHelper.isInBounds(localPos.x, localPos.y, warViewTransform.width, warViewTransform.height)) {
-                    const snapped = GridHelper.snapToGrid(localPos.x, localPos.y);
-                    const gridX = snapped.x;
-                    const gridY = snapped.y;
-
-                    const newCard = instantiate(this.node);
-                    newCard.setParent(this.warViewNode);
-                    newCard.setPosition(gridX, gridY, 0);
-                    
-                    const newGraphics = newCard.getComponent(Graphics);
-                    if (newGraphics) {
-                        newGraphics.fillColor = Color.RED;
-                    }
-                }
-            }
-        }
-
-        // 销毁拖拽节点
-        this.dragNode.destroy();
-        this.dragNode = null;
+        this.dragHandler?.onTouchEnd(event);
     }
 
     onDestroy() {
@@ -138,6 +120,18 @@ export class WeaponCard extends Component {
         this.node.off(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
         this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this);
         this.node.off(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
+        
+        // 安全销毁武器节点，避免重复销毁
+        if (this.weaponNode && this.weaponNode.isValid) {
+            this.weaponNode.destroy();
+            this.weaponNode = null;
+        }
+        
+        // 清理拖拽处理器（会安全销毁拖拽节点）
+        if (this.dragHandler) {
+            this.dragHandler.destroy();
+            this.dragHandler = null;
+        }
     }
 }
 
