@@ -188,6 +188,14 @@ export class WarView extends Component {
     }
 
     /**
+     * 获取敌人管理器
+     * @returns 敌人管理器实例，如果未初始化则返回 null
+     */
+    getEnemyManager(): EnemyManager | null {
+        return this.enemyManager;
+    }
+
+    /**
      * 绘制网格
      */
     private drawGrid() {

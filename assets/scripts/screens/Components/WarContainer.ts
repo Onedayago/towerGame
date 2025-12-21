@@ -1,5 +1,6 @@
 import { _decorator, Component, Graphics, UITransform, Color } from 'cc';
 import { UiConfig } from '../../config/Index';
+import { DrawHelper } from '../../utils/Index';
 const { ccclass } = _decorator;
 
 /**
@@ -39,9 +40,14 @@ export class WarContainer extends Component {
         
         if (!graphics || !transform) return;
         
-        graphics.fillColor = Color.RED;
-        graphics.rect(0, 0, transform.width, transform.height);
-        graphics.fill();
+        DrawHelper.drawSolidBackground(
+            graphics,
+            0,
+            0,
+            transform.width,
+            transform.height,
+            Color.RED
+        );
     }
 
     start() {

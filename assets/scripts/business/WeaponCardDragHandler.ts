@@ -102,6 +102,12 @@ export class WeaponCardDragHandler {
             (weaponCardComponent as Component).enabled = false;
         }
         
+        // 隐藏金币显示节点（如果存在）
+        const costDisplayNode = dragNode.getChildByName('CostDisplay');
+        if (costDisplayNode) {
+            costDisplayNode.active = false;
+        }
+        
         // 设置半透明红色，表示正在拖拽
         const graphics = dragNode.getComponent(Graphics);
         if (graphics) {

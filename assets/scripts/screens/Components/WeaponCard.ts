@@ -1,7 +1,8 @@
-import { _decorator, Color, Component, Graphics, Node, UITransform, EventTouch, Prefab, instantiate } from 'cc';
+import { _decorator, Color, Component, Graphics, Node, UITransform, EventTouch, Prefab, instantiate, Label } from 'cc';
 import { UiConfig } from '../../config/Index';
 import { WeaponCardDragHandler } from '../../business/Index';
-import { WeaponType } from '../../constants/Index';
+import { WeaponType, getWeaponConfig } from '../../constants/Index';
+import { DrawHelper } from '../../utils/Index';
 const { ccclass, property } = _decorator;
 
 @ccclass('WeaponCard')
@@ -53,17 +54,16 @@ export class WeaponCard extends Component {
      * 绘制卡片背景
      */
     private drawCardBackground(graphics: Graphics, width: number, height: number) {
-        graphics.clear();
-        // 绘制浅灰色背景
-        graphics.fillColor = new Color(200, 200, 200, 255);
-        graphics.rect(0, 0, width, height);
-        graphics.fill();
-        
-        // 绘制边框
-        graphics.strokeColor = Color.BLACK;
-        graphics.lineWidth = 2;
-        graphics.rect(0, 0, width, height);
-        graphics.stroke();
+        DrawHelper.drawRect(
+            graphics,
+            0,
+            0,
+            width,
+            height,
+            new Color(200, 200, 200, 255),
+            Color.BLACK,
+            2
+        );
     }
 
     /**
@@ -83,14 +83,62 @@ export class WeaponCard extends Component {
         this.weaponNode = instantiate(this.weaponPrefab);
         this.weaponNode.setParent(this.node);
         
-        // 设置武器节点位置（卡片锚点在左下角，武器锚点在中心，所以需要偏移到卡片中心）
+        // 设置武器节点位置（卡片锚点在左下角，武器锚点在中心，所以需要偏移到卡片中心偏上）
         const cardTransform = this.node.getComponent(UITransform);
         if (cardTransform) {
             const centerX = cardTransform.width / 2;
-            const centerY = cardTransform.height / 2;
+            // 武器位置稍微上移，为金币文本留出空间
+            const centerY = cardTransform.height / 2 + cardTransform.height * 0.15;
             this.weaponNode.setPosition(centerX, centerY, 0);
         } else {
             this.weaponNode.setPosition(0, 0, 0);
+        }
+        
+        // 创建金币显示
+        this.createCostLabel();
+    }
+    
+    /**
+     * 创建金币显示
+     * 使用 Label 组件显示金币数量
+     */
+    private createCostLabel() {
+        // 获取武器配置
+        const config = getWeaponConfig(this.weaponType);
+        const cost = config.cost || 0;
+        
+        // 查找或创建金币显示节点
+        let costNode = this.node.getChildByName('CostDisplay');
+        
+        if (!costNode) {
+            costNode = new Node('CostDisplay');
+            costNode.setParent(this.node);
+            
+            // 添加 UITransform 组件
+            const transform = costNode.addComponent(UITransform);
+            transform.setAnchorPoint(0.5, 0.5);
+            
+            // 设置位置（卡片底部）
+            const cardTransform = this.node.getComponent(UITransform);
+            if (cardTransform) {
+                const offsetY = 10; // 距离底部的偏移
+                costNode.setPosition(cardTransform.width / 2, offsetY, 0);
+            }
+            
+            // 添加 Label 组件
+            const label = costNode.addComponent(Label);
+            label.string = `${cost}`;
+            label.fontSize = 18;
+            label.color = Color.YELLOW;
+            
+            // 设置标签大小
+            transform.setContentSize(30, 20);
+        } else {
+            // 更新标签文本
+            const label = costNode.getComponent(Label);
+            if (label) {
+                label.string = `${cost}`;
+            }
         }
     }
 

@@ -55,8 +55,26 @@ export class WeaponBase extends Component {
         // 由子类实现具体的绘制逻辑
         this.drawAppearance(graphics, width, height);
         
-        // 创建血条
-        this.updateHealthBar();
+        // 创建血条（如果不在武器容器中）
+        // 通过检查父节点名称来判断是否在武器容器中
+        if (!this.isInWeaponContainer()) {
+            this.updateHealthBar();
+        }
+    }
+    
+    /**
+     * 判断是否在武器容器中
+     * @returns 是否在武器容器中
+     */
+    protected isInWeaponContainer(): boolean {
+        let parent = this.node.parent;
+        while (parent) {
+            if (parent.name === 'WeaponContainer' || parent.name.startsWith('WeaponCard_')) {
+                return true;
+            }
+            parent = parent.parent;
+        }
+        return false;
     }
     
     /**

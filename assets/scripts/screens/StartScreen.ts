@@ -1,4 +1,4 @@
-import { _decorator, Component, Graphics, UITransform } from 'cc';
+import { _decorator, Component, UITransform } from 'cc';
 import { UiConfig } from '../config/Index';
 import { GameManager } from '../managers/Index';
 const { ccclass } = _decorator;
@@ -10,7 +10,6 @@ const { ccclass } = _decorator;
 @ccclass('StartScreen')
 export class StartScreen extends Component {
 
-    private graphics: Graphics | null = null;
     private gameManager: GameManager;
 
     onLoad() {
@@ -22,7 +21,6 @@ export class StartScreen extends Component {
      * 初始化节点变换属性
      */
     private initTransform() {
-        this.graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
         transform.setAnchorPoint(0, 0);
         transform.setContentSize(UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
@@ -36,10 +34,6 @@ export class StartScreen extends Component {
         this.gameManager = GameManager.getInstance();
         // 确保游戏未开始
         this.gameManager.stopGame();
-    }
-
-    start() {
-        // 初始化完成后的逻辑可以在这里添加
     }
 
     update(deltaTime: number) {
