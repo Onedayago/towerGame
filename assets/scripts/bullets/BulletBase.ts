@@ -61,6 +61,26 @@ export class BulletBase extends Component {
 
         // 初始化节点大小和外观
         this.initNode();
+        
+        // 根据方向旋转节点（使子弹朝向目标方向）
+        this.updateRotation();
+    }
+    
+    /**
+     * 根据方向向量更新节点旋转
+     */
+    protected updateRotation() {
+        if (!this.direction) return;
+        
+        // 计算角度（弧度转角度）
+        // atan2 返回 -π 到 π 的角度，需要转换为 0 到 360 度
+        // atan2(y, x) 计算从 x 轴正方向到向量 (x, y) 的角度
+        const angleRad = Math.atan2(this.direction.y, this.direction.x);
+        const angleDeg = angleRad * (180 / Math.PI);
+        
+        // 设置节点旋转（Cocos Creator 使用 Z 轴旋转，角度为正时逆时针）
+        // 注意：Cocos Creator 的 Z 轴旋转，0度指向右（X轴正方向），90度指向上（Y轴正方向）
+        this.node.setRotationFromEuler(0, 0, angleDeg);
     }
 
     /**
@@ -75,7 +95,7 @@ export class BulletBase extends Component {
         transform.setAnchorPoint(0.5, 0.5); // 中心锚点
         
         // 设置子弹大小（小方块）
-        const size = UiConfig.CELL_SIZE * 0.3;
+        const size = UiConfig.CELL_SIZE * 0.2;
         transform.setContentSize(size, size);
         // 绘制子弹外观
         // 由子类实现具体的绘制逻辑，调用对应的渲染器
@@ -160,6 +180,9 @@ export class BulletBase extends Component {
         const normalized = new Vec3();
         Vec3.normalize(normalized, direction);
         this.direction = normalized;
+        
+        // 更新旋转
+        this.updateRotation();
     }
 }
 

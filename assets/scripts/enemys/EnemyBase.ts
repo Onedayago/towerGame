@@ -30,6 +30,38 @@ export class EnemyBase extends Component {
     protected bulletManager: BulletManager | null = null; // 子弹管理器
     protected weaponManager: WeaponManager | null = null; // 武器管理器
     protected maxHealth: number = 0; // 最大生命值（用于血条显示）
+    private baseHealth: number = 0; // 基础生命值（未加成前的血量）
+    
+    // 子节点引用（从预制体中获取）
+    protected healthBarNode: Node | null = null; // 血条节点
+    protected appearanceNode: Node | null = null; // 外观展示节点
+    
+    /**
+     * 设置血量加成（根据波次）
+     * @param hpBonus 血量加成倍数（例如：1.5 表示增加 1.5 倍，即最终为 2.5 倍）
+     */
+    setHpBonus(hpBonus: number) {
+        if (!this.config || hpBonus <= 0) return;
+        
+        // 如果还没有保存基础血量，则保存当前血量作为基础值（安全措施）
+        if (this.baseHealth === 0) {
+            this.baseHealth = this.config.health;
+        }
+        
+        // 应用血量加成：基础血量 * (1 + 加成倍数)
+        const bonusMultiplier = 1 + hpBonus;
+        const newMaxHealth = this.baseHealth * bonusMultiplier;
+        
+        // 计算当前血量比例（通常在生成时是满血，即 1.0）
+        const healthRatio = this.maxHealth > 0 ? (this.config.health / this.maxHealth) : 1.0;
+        
+        // 更新最大血量和当前血量（保持比例）
+        this.maxHealth = newMaxHealth;
+        this.config.health = newMaxHealth * healthRatio;
+        
+        // 更新血条
+        this.updateHealthBar();
+    }
 
     /**
      * 初始化敌人
@@ -38,10 +70,8 @@ export class EnemyBase extends Component {
     protected init(type: EnemyType) {
         this.enemyType = type;
         
-        const graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
-        
-        if (!graphics || !transform) return;
+        if (!transform) return;
         
         transform.setAnchorPoint(0.5, 0.5);
         
@@ -50,29 +80,47 @@ export class EnemyBase extends Component {
         const width = UiConfig.CELL_SIZE * sizeScale;
         const height = UiConfig.CELL_SIZE * sizeScale;
         transform.setContentSize(width, height);
+        
+        // 初始化子节点引用
+        this.initChildNodes();
 
         // 加载敌人配置
         this.config = getEnemyConfig(type);
         this.moveSpeed = this.config.moveSpeed;
         this.attackSpeed = this.config.attackSpeed;
+        this.baseHealth = this.config.health; // 保存基础生命值（未加成前）
         this.maxHealth = this.config.health; // 保存最大生命值
 
-        // 绘制敌人外观（不使用背景色填充）
-        // 由子类实现具体的绘制逻辑，调用对应的渲染器
-        this.drawAppearance(graphics, width, height);
+        // 绘制敌人外观（在外观节点上绘制）
+        this.drawAppearance(width, height);
         
-        // 创建血条
+        // 初始化血条
         this.updateHealthBar();
+    }
+    
+    /**
+     * 初始化子节点引用
+     */
+    protected initChildNodes() {
+        // 查找血条节点
+        this.healthBarNode = this.node.getChildByName('HealthBar');
+        
+        // 查找外观展示节点
+        this.appearanceNode = this.node.getChildByName('AppearanceNode');
     }
     
     /**
      * 绘制敌人外观
      * 子类必须重写此方法实现自己的外观绘制
-     * @param graphics Graphics 组件
      * @param width 宽度
      * @param height 高度
      */
-    protected drawAppearance(graphics: Graphics, width: number, height: number) {
+    protected drawAppearance(width: number, height: number) {
+        if (!this.appearanceNode) return;
+        
+        const graphics = this.appearanceNode.getComponent(Graphics);
+        if (!graphics) return;
+        
         // 基类不绘制任何内容，由子类实现
         graphics.clear();
     }
@@ -82,11 +130,19 @@ export class EnemyBase extends Component {
      */
     protected updateHealthBar() {
         if (!this.config) return;
+        
+        // 使用预制体中已有的血条节点
         HealthBarHelper.createOrUpdateHealthBar(
             this.node,
             this.config.health,
             this.maxHealth
         );
+        
+        // 确保血条节点不随父节点旋转
+        if (this.healthBarNode) {
+            const parentRotation = this.node.eulerAngles.z;
+            this.healthBarNode.setRotationFromEuler(0, 0, -parentRotation);
+        }
     }
 
     /**
@@ -118,9 +174,11 @@ export class EnemyBase extends Component {
         // 检查是否有目标在攻击范围内
         const targetWeapon = this.findNearestWeaponInRange();
         
-        // 如果找到了目标，锁定目标（停止移动）
+        // 如果找到了目标，锁定目标（停止移动）并旋转面向目标
         if (targetWeapon) {
             this.lockedTarget = targetWeapon;
+            // 旋转敌人面向目标武器
+            this.rotateTowardsTarget(targetWeapon);
         } else {
             // 如果目标不在范围内，解除锁定
             this.lockedTarget = null;
@@ -133,6 +191,11 @@ export class EnemyBase extends Component {
                 // 攻击完成，恢复移动（如果目标还在范围内，会继续锁定）
                 this.isAttacking = false;
                 this.attackDurationTimer = 0;
+                
+                // 如果目标不在范围内，恢复方向向右
+                if (!this.lockedTarget) {
+                    this.resetRotation();
+                }
             }
             return;
         }
@@ -146,8 +209,9 @@ export class EnemyBase extends Component {
                 this.startAttack();
             }
         } else {
-            // 如果没有锁定目标，重置攻击计时器
+            // 如果没有锁定目标，重置攻击计时器，并恢复方向向右
             this.attackTimer = 0;
+            this.resetRotation();
         }
     }
     
@@ -222,6 +286,58 @@ export class EnemyBase extends Component {
             attackRange,
             rightFilter
         );
+    }
+    
+    /**
+     * 旋转敌人面向目标武器
+     * @param targetWeapon 目标武器节点
+     */
+    protected rotateTowardsTarget(targetWeapon: Node) {
+        if (!targetWeapon || !targetWeapon.isValid) return;
+        
+        // 获取敌人位置和目标位置
+        const enemyPos = this.node.position;
+        const targetPos = targetWeapon.position;
+        
+        // 计算方向向量（从敌人指向武器）
+        const direction = new Vec3(
+            targetPos.x - enemyPos.x,
+            targetPos.y - enemyPos.y,
+            0
+        );
+        
+        // 计算角度（弧度转角度）
+        const angleRad = Math.atan2(direction.y, direction.x);
+        const angleDeg = angleRad * (180 / Math.PI);
+        
+        // 只旋转外观节点，不旋转根节点
+        if (this.appearanceNode) {
+            this.appearanceNode.setRotationFromEuler(0, 0, angleDeg);
+        }
+        
+        // 更新血条旋转，保持水平
+        this.updateHealthBarRotation();
+    }
+    
+    /**
+     * 更新血条旋转，保持水平
+     */
+    protected updateHealthBarRotation() {
+        if (!this.healthBarNode) return;
+        
+        // 血条节点不旋转，保持水平
+        this.healthBarNode.setRotationFromEuler(0, 0, 0);
+    }
+    
+    /**
+     * 恢复方向向右（0度）
+     */
+    protected resetRotation() {
+        if (this.appearanceNode) {
+            this.appearanceNode.setRotationFromEuler(0, 0, 0);
+        }
+        // 更新血条旋转，保持水平
+        this.updateHealthBarRotation();
     }
     
     /**

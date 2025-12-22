@@ -12,6 +12,7 @@ export class WeaponManager {
     private weapons: Node[] = [];
     private bulletManager: BulletManager | null = null;
     private enemyManager: EnemyManager | null = null;
+    private selectedWeapon: Node | null = null; // 当前选中的武器
 
     constructor(containerNode: Node) {
         this.containerNode = containerNode;
@@ -43,6 +44,12 @@ export class WeaponManager {
         // 确保武器节点是容器的子节点
         if (weaponNode.parent !== this.containerNode) {
             weaponNode.setParent(this.containerNode);
+        }
+    
+        // 设置武器的武器管理器引用
+        const weaponComponent = weaponNode.getComponent(WeaponBase);
+        if (weaponComponent) {
+            weaponComponent.setWeaponManager(this);
         }
     
         this.weapons.push(weaponNode);
@@ -131,6 +138,70 @@ export class WeaponManager {
             }
         }
         return null;
+    }
+    
+    /**
+     * 根据屏幕坐标获取武器（用于点击检测）
+     * @param localPos 本地坐标（相对于容器节点）
+     * @returns 武器节点，如果没有则返回 null
+     */
+    getWeaponAtLocalPosition(localPos: { x: number; y: number }): Node | null {
+        for (const weapon of this.weapons) {
+            if (!weapon || !weapon.isValid) continue;
+            
+            const weaponPos = weapon.position;
+            
+            // 计算距离
+            const dx = localPos.x - weaponPos.x;
+            const dy = localPos.y - weaponPos.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // 如果点击位置在武器范围内（使用武器大小作为点击范围）
+            const clickRange = 50; // 点击范围（像素）
+            if (distance <= clickRange) {
+                return weapon;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 选中武器
+     * @param weaponNode 武器节点
+     */
+    selectWeapon(weaponNode: Node | null) {
+        // 取消之前选中武器的按钮显示
+        if (this.selectedWeapon && this.selectedWeapon.isValid) {
+            const prevWeaponComponent = this.selectedWeapon.getComponent(WeaponBase);
+            if (prevWeaponComponent) {
+                prevWeaponComponent.setSelected(false);
+            }
+        }
+        
+        // 设置新的选中武器
+        this.selectedWeapon = weaponNode;
+        
+        // 显示新选中武器的按钮
+        if (this.selectedWeapon && this.selectedWeapon.isValid) {
+            const weaponComponent = this.selectedWeapon.getComponent(WeaponBase);
+            if (weaponComponent) {
+                weaponComponent.setSelected(true);
+            }
+        }
+    }
+    
+    /**
+     * 取消选中武器
+     */
+    deselectWeapon() {
+        this.selectWeapon(null);
+    }
+    
+    /**
+     * 获取当前选中的武器
+     */
+    getSelectedWeapon(): Node | null {
+        return this.selectedWeapon;
     }
 }
 

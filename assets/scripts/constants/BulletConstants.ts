@@ -31,24 +31,25 @@ export interface BulletConfig {
 
 /**
  * 子弹配置表
+ * 参考微信小游戏的配置：基础速度200像素/秒，不同子弹类型使用不同的速度倍数
  */
 export const BULLET_CONFIGS: Record<BulletType, BulletConfig> = {
     // 武器子弹配置
     [BulletType.WEAPON_BASIC]: {
         type: BulletType.WEAPON_BASIC,
-        speed: 150,          // 基础武器子弹速度：150像素/秒（原速度的30%）
+        speed: 200,          // 基础武器子弹速度：200像素/秒（基础速度，参考加农炮）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 2000    // 最大飞行距离：2000像素
     },
     [BulletType.WEAPON_LASER]: {
         type: BulletType.WEAPON_LASER,
-        speed: 240,          // 激光武器子弹速度：240像素/秒（原速度的30%）
+        speed: 180,          // 激光武器子弹速度：180像素/秒（减小速度）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 2500    // 最大飞行距离：2500像素
     },
     [BulletType.WEAPON_ROCKET]: {
         type: BulletType.WEAPON_ROCKET,
-        speed: 90,           // 火箭塔子弹速度：90像素/秒（原速度的30%）
+        speed: 300,          // 火箭塔子弹速度：300像素/秒（基础速度 * 1.5，参考追踪火箭）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 3000    // 最大飞行距离：3000像素
     },

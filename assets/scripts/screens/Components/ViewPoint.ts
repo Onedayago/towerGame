@@ -148,6 +148,7 @@ export class ViewPoint extends Component {
 
     /**
      * 计算视野范围在小地图中的位置和尺寸
+     * 使用独立的 scaleX 和 scaleY，让内容充满整个小地图
      */
     private calculateViewportInMiniMap(
         warViewTransform: UITransform,
@@ -161,16 +162,9 @@ export class ViewPoint extends Component {
         const miniMapWidth = miniMapTransform.width;
         const miniMapHeight = miniMapTransform.height;
 
-        // 计算缩放比例
+        // 计算缩放比例（充满整个小地图，使用独立的 scaleX 和 scaleY）
         const scaleX = miniMapWidth / warViewWidth;
         const scaleY = miniMapHeight / warViewHeight;
-        const scale = Math.min(scaleX, scaleY) * 0.9; // 留出一些边距
-
-        // 计算偏移量（居中显示）
-        const scaledWarViewWidth = warViewWidth * scale;
-        const scaledWarViewHeight = warViewHeight * scale;
-        const offsetX = (miniMapWidth - scaledWarViewWidth) / 2;
-        const offsetY = (miniMapHeight - scaledWarViewHeight) / 2;
 
         // 获取 WarView 的位置（相对于 WarContainer）
         // WarView 向左移动（X 减小）→ 视窗看到右边的内容 → ViewPoint 在小地图上向右移动（X 增加）
@@ -178,11 +172,14 @@ export class ViewPoint extends Component {
         // 所以 ViewPoint 的位置应该是 WarView 位置的相反方向
         const warViewPos = this.warViewNode.position;
 
-        // 计算视野范围在小地图中的位置（取反，因为视窗移动方向与 WarView 移动方向相反）
-        const viewportX = offsetX - warViewPos.x * scale;
-        const viewportY = offsetY - warViewPos.y * scale;
-        const viewportScaledWidth = viewportWidth * scale;
-        const viewportScaledHeight = viewportHeight * scale;
+        // 计算视野范围在小地图中的位置（充满整个小地图，不需要偏移）
+        // WarView 的位置是相对于 WarContainer 的，需要转换为小地图坐标
+        // WarView 在 WarContainer 中的位置 (warViewPos.x, warViewPos.y) 对应小地图中的位置
+        // 由于 WarView 向左移动时，视窗看到右边内容，所以需要取反
+        const viewportX = -warViewPos.x * scaleX;
+        const viewportY = -warViewPos.y * scaleY;
+        const viewportScaledWidth = viewportWidth * scaleX;
+        const viewportScaledHeight = viewportHeight * scaleY;
 
         return {
             x: viewportX,
@@ -254,8 +251,8 @@ export class ViewPoint extends Component {
         // 在小地图上向右拖拽 ViewPoint → WarView 向左移动（X 减小）→ 视窗看到右边的内容
         // 在小地图上向上拖拽 ViewPoint → WarView 向下移动（Y 减小）→ 视窗看到上面的内容
         // 所以拖拽方向应该相反：向右拖拽 ViewPoint → WarView 向左移动（X 减小）
-        const warViewDeltaX = -deltaX / scale;
-        const warViewDeltaY = -deltaY / scale;
+        const warViewDeltaX = -deltaX / scale.scaleX;
+        const warViewDeltaY = -deltaY / scale.scaleY;
 
         // 更新 WarView 位置
         const currentPos = this.warViewNode.position;
@@ -280,21 +277,23 @@ export class ViewPoint extends Component {
     }
 
     /**
-     * 计算缩放比例
+     * 计算缩放比例（充满整个小地图，使用独立的 scaleX 和 scaleY）
      */
     private calculateScale(
         warViewTransform: UITransform,
         warContainerTransform: UITransform,
         miniMapTransform: UITransform
-    ): number {
+    ): { scaleX: number; scaleY: number } {
         const warViewWidth = warViewTransform.width;
         const warViewHeight = warViewTransform.height;
         const miniMapWidth = miniMapTransform.width;
         const miniMapHeight = miniMapTransform.height;
 
+        // 分别计算X和Y的缩放比例，让内容充满整个小地图
         const scaleX = miniMapWidth / warViewWidth;
         const scaleY = miniMapHeight / warViewHeight;
-        return Math.min(scaleX, scaleY) * 0.9;
+        
+        return { scaleX, scaleY };
     }
 
     /**

@@ -1,8 +1,8 @@
 import { _decorator, Color, Component, Graphics, Node, UITransform, EventTouch, Prefab, instantiate, Label } from 'cc';
-import { UiConfig } from '../../config/Index';
 import { WeaponCardDragHandler } from '../../business/Index';
-import { WeaponType, getWeaponConfig } from '../../constants/Index';
-import { DrawHelper } from '../../utils/Index';
+import { WeaponType } from '../../constants/Index';
+import { getWeaponBuildCost } from '../../config/Index';
+import { UiConfig } from '../../config/Index';
 const { ccclass, property } = _decorator;
 
 @ccclass('WeaponCard')
@@ -25,7 +25,6 @@ export class WeaponCard extends Component {
      * 初始化卡片
      */
     private initCard() {
-        const graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
         transform.setAnchorPoint(0, 0);
         // 设置大小为 1个格子
@@ -33,8 +32,6 @@ export class WeaponCard extends Component {
         const height = UiConfig.CELL_SIZE;
         transform.setContentSize(width, height);
 
-        // 背景绘制已禁用，由武器预制体显示
-        
         // 如果提供了武器预制体，则实例化武器
         if (this.weaponPrefab) {
             this.createWeapon();
@@ -48,22 +45,6 @@ export class WeaponCard extends Component {
         this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
         this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
         this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
-    }
-
-    /**
-     * 绘制卡片背景
-     */
-    private drawCardBackground(graphics: Graphics, width: number, height: number) {
-        DrawHelper.drawRect(
-            graphics,
-            0,
-            0,
-            width,
-            height,
-            new Color(200, 200, 200, 255),
-            Color.BLACK,
-            2
-        );
     }
 
     /**
@@ -103,9 +84,8 @@ export class WeaponCard extends Component {
      * 使用 Label 组件显示金币数量
      */
     private createCostLabel() {
-        // 获取武器配置
-        const config = getWeaponConfig(this.weaponType);
-        const cost = config.cost || 0;
+        // 获取武器建造成本
+        const cost = getWeaponBuildCost(this.weaponType);
         
         // 查找或创建金币显示节点
         let costNode = this.node.getChildByName('CostDisplay');

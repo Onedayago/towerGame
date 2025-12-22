@@ -9,4 +9,6 @@ export { WeaponCard } from './WeaponCard';
 export { WeaponContainer } from './WeaponContainer';
 export { MiniMap } from './MiniMap';
 export { ViewPoint } from './ViewPoint';
+export { GoldView } from './GoldView';
+export { WaveView } from './WaveView';
 

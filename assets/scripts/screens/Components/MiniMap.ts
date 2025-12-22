@@ -1,7 +1,6 @@
 import { _decorator, Component, Node, Graphics, UITransform } from 'cc';
 import { UiConfig } from '../../config/Index';
 import { WarView } from './Index';
-import { WarContainer } from './Index';
 import { EnemyManager, WeaponManager } from '../../managers/Index';
 import { MiniMapRenderer } from '../../renderers/Index';
 const { ccclass, property } = _decorator;
@@ -14,7 +13,6 @@ const { ccclass, property } = _decorator;
 export class MiniMap extends Component {
     private graphics: Graphics | null = null;
     private warViewNode: Node | null = null;
-    private warContainerNode: Node | null = null;
     private warViewComponent: WarView | null = null;
     private enemyManager: EnemyManager | null = null;
     private weaponManager: WeaponManager | null = null;
@@ -27,22 +25,12 @@ export class MiniMap extends Component {
         this.initTransform();
         this.initGraphics();
         this.findWarView();
-        this.findWarContainer();
-    }
-
-    /**
-     * 查找 WarContainer 节点
-     */
-    private findWarContainer() {
-        const scene = this.node.scene;
-        if (!scene) return;
-
-        this.warContainerNode = this.findNodeWithComponent(scene, WarContainer);
     }
 
     /**
      * 初始化节点变换属性
      * 将 MiniMap 定位到左下角，设置尺寸为 4 个格子宽 x 2 个格子高
+     * 距离左边40边距，距离底部20边距，距离顶部20边距，缩小尺寸以适配
      */
     private initTransform() {
         const transform = this.node.getComponent(UITransform);
@@ -56,13 +44,19 @@ export class MiniMap extends Component {
             // 设置锚点为左下角 (0, 0)
             finalTransform.setAnchorPoint(0, 0);
             
-            // 设置尺寸：宽度 4 个格子，高度 2 个格子
-            const width = UiConfig.CELL_SIZE * 4;
-            const height = UiConfig.CELL_SIZE * 2;
+            // 左边距40，底部边距20，顶部边距20，缩小尺寸以适配
+            const leftMargin = 40;
+            const bottomMargin = 20;
+            const topMargin = 20;
+            
+            // 缩小宽度和高度来适配边距
+            const width = UiConfig.CELL_SIZE * 4 - leftMargin;
+            const height = UiConfig.CELL_SIZE * 2 - bottomMargin - topMargin;
             finalTransform.setContentSize(width, height);
             
-            // 设置位置为左下角 (0, 0)
-            this.node.setPosition(0, 0, 0);
+            // 设置位置：左边距40，底部边距20
+            // 由于锚点是左下角，y 位置就是底部边距
+            this.node.setPosition(leftMargin, bottomMargin, 0);
         }
     }
 
@@ -146,8 +140,11 @@ export class MiniMap extends Component {
         // 清空之前的绘制
         this.graphics.clear();
 
-        // 使用渲染器绘制背景
-        MiniMapRenderer.renderBackground(this.graphics, minimapWidth, minimapHeight);
+        // 获取 WarView 的 UITransform（用于绘制网格）
+        const warViewTransform = this.warViewNode.getComponent(UITransform);
+
+        // 使用渲染器绘制背景（包含网格）
+        MiniMapRenderer.renderBackground(this.graphics, minimapWidth, minimapHeight, warViewTransform || undefined);
 
         // 使用渲染器绘制敌人位置
         MiniMapRenderer.renderEnemies(
@@ -168,70 +165,5 @@ export class MiniMap extends Component {
         );
     }
 
-    /**
-     * 获取视野范围边界
-     * @returns 视野范围在 WarView 中的位置和尺寸
-     */
-    private getViewportBounds(warViewTransform: UITransform, warContainerTransform: UITransform): { x: number; y: number; width: number; height: number } {
-        // WarView 的位置就是视野范围左下角在 WarView 中的位置
-        const warViewPos = this.warViewNode!.position;
-        const viewportWidth = warContainerTransform.width;
-        const viewportHeight = warContainerTransform.height;
-
-        return {
-            x: warViewPos.x,
-            y: warViewPos.y,
-            width: viewportWidth,
-            height: viewportHeight
-        };
-    }
-
-    /**
-     * 检查位置是否在视野范围内
-     */
-    private isInViewport(pos: Vec3, viewport: { x: number; y: number; width: number; height: number }): boolean {
-        return pos.x >= viewport.x &&
-               pos.x <= viewport.x + viewport.width &&
-               pos.y >= viewport.y &&
-               pos.y <= viewport.y + viewport.height;
-    }
-
-    /**
-     * 计算视野范围的缩放比例
-     * 根据小地图的宽度和高度适配视野范围
-     */
-    private calculateViewportScale(minimapWidth: number, minimapHeight: number, viewport: { x: number; y: number; width: number; height: number }): number {
-        // 计算宽高比
-        const minimapAspect = minimapWidth / minimapHeight;
-        const viewportAspect = viewport.width / viewport.height;
-
-        // 根据宽高比选择合适的缩放方式
-        let scale: number;
-        if (minimapAspect > viewportAspect) {
-            // 小地图更宽，以高度为准
-            scale = minimapHeight / viewport.height;
-        } else {
-            // 小地图更高，以宽度为准
-            scale = minimapWidth / viewport.width;
-        }
-
-        // 留出一些边距
-        return scale * 0.95;
-    }
-
-    /**
-     * 计算视野范围的偏移量
-     * 将视野范围居中显示在小地图中
-     */
-    private calculateViewportOffset(minimapWidth: number, minimapHeight: number, viewport: { x: number; y: number; width: number; height: number }, scale: number): Vec3 {
-        const scaledWidth = viewport.width * scale;
-        const scaledHeight = viewport.height * scale;
-        
-        // 居中显示
-        const offsetX = (minimapWidth - scaledWidth) / 2;
-        const offsetY = (minimapHeight - scaledHeight) / 2;
-
-        return new Vec3(offsetX, offsetY, 0);
-    }
 }
 

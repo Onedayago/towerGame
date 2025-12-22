@@ -18,7 +18,12 @@ export class EnemyFastTank extends EnemyBase {
      * 绘制快速坦克外观
      * 使用渲染器处理绘制逻辑
      */
-    protected drawAppearance(graphics: Graphics, width: number, height: number) {
+    protected drawAppearance(width: number, height: number) {
+        if (!this.appearanceNode) return;
+        
+        const graphics = this.appearanceNode.getComponent(Graphics);
+        if (!graphics) return;
+        
         EnemyFastTankRenderer.render(graphics, width, height);
     }
 }

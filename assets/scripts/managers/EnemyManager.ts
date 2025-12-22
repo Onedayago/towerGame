@@ -4,6 +4,7 @@ import { EnemySpawnHandler } from '../business/EnemySpawnHandler';
 import { EnemyUpdateHandler } from '../business/EnemyUpdateHandler';
 import { BulletManager } from './BulletManager';
 import { WeaponManager } from './WeaponManager';
+import { WaveManager } from './WaveManager';
 
 /**
  * 敌人管理器
@@ -16,9 +17,11 @@ export class EnemyManager {
     
     private spawnHandler: EnemySpawnHandler;
     private updateHandler: EnemyUpdateHandler;
+    private waveManager: WaveManager;
 
     constructor(containerNode: Node, enemyPrefabs: Map<EnemyType, Prefab> | null = null) {
         this.containerNode = containerNode;
+        this.waveManager = WaveManager.getInstance();
         
         if (enemyPrefabs) {
             this.enemyPrefabs = enemyPrefabs;
@@ -32,6 +35,10 @@ export class EnemyManager {
         // 初始化生成和更新处理器
         this.spawnHandler = new EnemySpawnHandler(containerNode, enemyPrefabs);
         this.updateHandler = new EnemyUpdateHandler(this.containerWidth);
+        
+        // 初始化波次管理器并开始第一波
+        this.waveManager.init();
+        this.waveManager.startNewWave();
     }
 
     /**
@@ -39,7 +46,14 @@ export class EnemyManager {
      * @param deltaTime 帧时间
      */
     update(deltaTime: number) {
-        // 更新生成逻辑
+        // 检查波次是否完成，如果完成则开始下一波
+        const currentEnemyCount = this.updateHandler.getEnemyCount();
+        if (this.waveManager.checkWaveComplete(currentEnemyCount)) {
+            // 波次完成，开始下一波
+            this.waveManager.startNewWave();
+        }
+        
+        // 更新生成逻辑（只有在波次未完成时才会生成）
         const newEnemy = this.spawnHandler.update(deltaTime);
         if (newEnemy) {
             this.updateHandler.addEnemy(newEnemy);

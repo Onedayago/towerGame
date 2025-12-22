@@ -1,4 +1,4 @@
-import { _decorator, Component, UITransform, Graphics } from 'cc';
+import { _decorator, Component, UITransform, Graphics, Node, Button, EventTouch, Label } from 'cc';
 import { UiConfig } from '../config/Index';
 import { GameManager } from '../managers/Index';
 import { StartScreenRenderer } from '../renderers/Index';
@@ -7,18 +7,96 @@ const { ccclass } = _decorator;
 /**
  * 开始界面
  * 显示游戏开始界面，处理开始按钮点击
- * 参考微信小游戏的背景设计
+ * 参考原游戏实现
  */
 @ccclass('StartScreen')
 export class StartScreen extends Component {
 
     private gameManager: GameManager;
     private graphics: Graphics | null = null;
+    
+    // 组件引用（从编辑器创建）
+    private titleLabel: Label | null = null;
+    private subtitleLabel: Label | null = null;
+    private startButton: Button | null = null;
+    private helpButton: Button | null = null;
 
     onLoad() {
         this.initTransform();
         this.initGameManager();
+        this.initComponents();
         this.renderBackground();
+        this.styleUIElements();
+        this.initButtonEvents();
+    }
+    
+    /**
+     * 初始化组件引用
+     * titleLabelNode 和 subtitleLabelNode 是 Label 类型
+     * startButtonNode 和 helpButtonNode 是 Button 类型
+     */
+    private initComponents() {
+        // 查找 Label 组件（通过子节点名称）
+        const titleLabelNode = this.node.getChildByName('TitleLabel');
+        if (titleLabelNode) {
+            this.titleLabel = titleLabelNode.getComponent(Label);
+        }
+        
+        const subtitleLabelNode = this.node.getChildByName('SubtitleLabel');
+        if (subtitleLabelNode) {
+            this.subtitleLabel = subtitleLabelNode.getComponent(Label);
+        }
+        
+        // 查找 Button 组件（通过子节点名称）
+        const startButtonNode = this.node.getChildByName('StartButton');
+        if (startButtonNode) {
+            this.startButton = startButtonNode.getComponent(Button);
+        }
+        
+        const helpButtonNode = this.node.getChildByName('HelpButton');
+        if (helpButtonNode) {
+            this.helpButton = helpButtonNode.getComponent(Button);
+        }
+    }
+    
+    /**
+     * 美化UI元素
+     */
+    private styleUIElements() {
+        // 美化标题
+        if (this.titleLabel) {
+            StartScreenRenderer.styleTitleLabel(this.titleLabel);
+        }
+        
+        // 美化副标题
+        if (this.subtitleLabel) {
+            StartScreenRenderer.styleSubtitleLabel(this.subtitleLabel);
+        }
+        
+        // 美化开始按钮
+        if (this.startButton) {
+            StartScreenRenderer.styleStartButton(this.startButton);
+        }
+        
+        // 美化帮助按钮（如果存在）
+        if (this.helpButton) {
+            StartScreenRenderer.styleHelpButton(this.helpButton);
+        }
+    }
+    
+    /**
+     * 初始化按钮事件
+     */
+    private initButtonEvents() {
+        // 开始按钮事件
+        if (this.startButton) {
+            this.startButton.node.on(Button.EventType.CLICK, this.onStartButtonClick, this);
+        }
+        
+        // 帮助按钮事件（如果存在）
+        if (this.helpButton) {
+            this.helpButton.node.on(Button.EventType.CLICK, this.onHelpButtonClick, this);
+        }
     }
 
     /**
@@ -66,11 +144,44 @@ export class StartScreen extends Component {
     /**
      * 开始按钮点击事件处理
      */
-    onStartButtonClick() {
+    onStartButtonClick(event?: EventTouch) {
+        // 阻止事件冒泡
+        if (event) {
+            event.propagationStopped = true;
+        }
+        
         // 开始游戏
         this.gameManager.startGame();
         // 隐藏开始界面
         this.hide();
+    }
+    
+    /**
+     * 帮助按钮点击事件处理（可选）
+     */
+    onHelpButtonClick(event?: EventTouch) {
+        // 阻止事件冒泡
+        if (event) {
+            event.propagationStopped = true;
+        }
+        
+        // TODO: 实现帮助界面显示逻辑
+        console.log('Help button clicked');
+    }
+    
+    /**
+     * 组件销毁时清理事件监听
+     */
+    onDestroy() {
+        // 清理开始按钮事件
+        if (this.startButton && this.startButton.node && this.startButton.node.isValid) {
+            this.startButton.node.off(Button.EventType.CLICK, this.onStartButtonClick, this);
+        }
+        
+        // 清理帮助按钮事件
+        if (this.helpButton && this.helpButton.node && this.helpButton.node.isValid) {
+            this.helpButton.node.off(Button.EventType.CLICK, this.onHelpButtonClick, this);
+        }
     }
 
     /**

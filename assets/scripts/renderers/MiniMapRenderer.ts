@@ -1,23 +1,28 @@
 import { Graphics, Color, Node, Vec3, UITransform } from 'cc';
 import { UiColors } from '../constants/Index';
 import { EnemyManager, WeaponManager } from '../managers/Index';
-import { DrawHelper } from '../utils/Index';
+import { WeaponBase } from '../weapons/Index';
+import { getWeaponColor } from '../constants/Index';
 
 /**
  * 小地图渲染器
  * 负责小地图的绘制逻辑
+ * 参考原游戏实现
  */
 export class MiniMapRenderer {
+    // 小地图标记尺寸
+    private static readonly ENEMY_SIZE = 2; // 敌人圆点半径
+    private static readonly WEAPON_SIZE = 3; // 武器方块边长的一半
+
     /**
      * 绘制小地图背景
      * @param graphics Graphics 组件
      * @param width 宽度
      * @param height 高度
+     * @param warViewTransform WarView 的 UITransform（用于绘制网格）
      */
-    static renderBackground(graphics: Graphics, width: number, height: number): void {
+    static renderBackground(graphics: Graphics, width: number, height: number, warViewTransform?: UITransform): void {
         if (!graphics) return;
-
-        graphics.clear();
 
         // 绘制渐变背景（从深蓝紫色到更深的蓝紫色）
         const gradientSteps = UiColors.MINIMAP_GRADIENT_STEPS;
@@ -39,6 +44,8 @@ export class MiniMapRenderer {
             graphics.rect(0, y, width, stepHeight + 1);
             graphics.fill();
         }
+
+        // 网格绘制已移除
 
         // 绘制外边框（发光效果，青色）
         graphics.strokeColor = UiColors.MINIMAP_BORDER_COLOR;
@@ -80,16 +87,18 @@ export class MiniMapRenderer {
         const scale = this.calculateScale(minimapWidth, minimapHeight, warViewTransform);
         const offset = this.calculateOffset(minimapWidth, minimapHeight, warViewTransform, scale);
 
-        // 绘制敌人位置（红色点）
+        // 绘制敌人位置（红色圆点，参考原游戏）
+        graphics.fillColor = new Color(255, 0, 0, 230); // 红色，90%透明度
         for (const enemy of enemies) {
             if (!enemy || !enemy.isValid) continue;
 
             const enemyPos = enemy.position;
-            const minimapX = offset.x + enemyPos.x * scale;
-            const minimapY = offset.y + enemyPos.y * scale;
+            const minimapX = offset.x + enemyPos.x * scale.scaleX;
+            const minimapY = offset.y + enemyPos.y * scale.scaleY;
 
             // 绘制小圆点
-            DrawHelper.drawDot(graphics, minimapX, minimapY, 2, Color.RED);
+            graphics.circle(minimapX, minimapY, this.ENEMY_SIZE);
+            graphics.fill();
         }
     }
 
@@ -120,67 +129,65 @@ export class MiniMapRenderer {
         const scale = this.calculateScale(minimapWidth, minimapHeight, warViewTransform);
         const offset = this.calculateOffset(minimapWidth, minimapHeight, warViewTransform, scale);
         
-        // 绘制武器位置（蓝色点）
+        // 绘制武器位置（根据武器类型显示不同颜色，参考原游戏）
         for (const weapon of weapons) {
             if (!weapon || !weapon.isValid) continue;
 
+            const weaponComponent = weapon.getComponent(WeaponBase);
+            if (!weaponComponent) continue;
+
+            // 根据武器类型获取颜色
+            const weaponType = weaponComponent.getWeaponType();
+            const weaponColor = getWeaponColor(weaponType);
+            
+            // 创建半透明颜色（90%透明度）
+            const color = new Color(weaponColor.r, weaponColor.g, weaponColor.b, 230);
+
             const weaponPos = weapon.position;
-            const minimapX = offset.x + weaponPos.x * scale;
-            const minimapY = offset.y + weaponPos.y * scale;
+            const minimapX = offset.x + weaponPos.x * scale.scaleX;
+            const minimapY = offset.y + weaponPos.y * scale.scaleY;
 
-            // 绘制小方块
-            DrawHelper.drawSquare(graphics, minimapX, minimapY, 3, Color.BLUE);
+            // 绘制小方块（参考原游戏）
+            graphics.fillColor = color;
+            graphics.rect(
+                minimapX - this.WEAPON_SIZE,
+                minimapY - this.WEAPON_SIZE,
+                this.WEAPON_SIZE * 2,
+                this.WEAPON_SIZE * 2
+            );
+            graphics.fill();
         }
     }
 
     /**
-     * 计算缩放比例
+     * 计算缩放比例（X和Y分别计算，充满整个小地图）
      * @param minimapWidth 小地图宽度
      * @param minimapHeight 小地图高度
      * @param warViewTransform WarView 的 UITransform
-     * @returns 缩放比例
+     * @returns 缩放比例对象 {scaleX, scaleY}
      */
-    private static calculateScale(minimapWidth: number, minimapHeight: number, warViewTransform: UITransform): number {
+    private static calculateScale(minimapWidth: number, minimapHeight: number, warViewTransform: UITransform): { scaleX: number; scaleY: number } {
         const warViewWidth = warViewTransform.width;
         const warViewHeight = warViewTransform.height;
 
-        // 计算宽高比
-        const minimapAspect = minimapWidth / minimapHeight;
-        const warViewAspect = warViewWidth / warViewHeight;
+        // 分别计算X和Y的缩放比例，让内容充满整个小地图
+        const scaleX = minimapWidth / warViewWidth;
+        const scaleY = minimapHeight / warViewHeight;
 
-        // 根据宽高比选择合适的缩放方式
-        let scale: number;
-        if (minimapAspect > warViewAspect) {
-            // 小地图更宽，以高度为准
-            scale = minimapHeight / warViewHeight;
-        } else {
-            // 小地图更高，以宽度为准
-            scale = minimapWidth / warViewWidth;
-        }
-
-        return scale;
+        return { scaleX, scaleY };
     }
 
     /**
-     * 计算偏移量
+     * 计算偏移量（充满整个小地图，不需要偏移）
      * @param minimapWidth 小地图宽度
      * @param minimapHeight 小地图高度
      * @param warViewTransform WarView 的 UITransform
-     * @param scale 缩放比例
-     * @returns 偏移量
+     * @param scale 缩放比例对象
+     * @returns 偏移量（充满时偏移为0）
      */
-    private static calculateOffset(minimapWidth: number, minimapHeight: number, warViewTransform: UITransform, scale: number): Vec3 {
-        const warViewWidth = warViewTransform.width;
-        const warViewHeight = warViewTransform.height;
-
-        const scaledWidth = warViewWidth * scale;
-        const scaledHeight = warViewHeight * scale;
-        
-        // 居中显示
-        const offsetX = (minimapWidth - scaledWidth) / 2;
-        const offsetY = (minimapHeight - scaledHeight) / 2;
-
-        return new Vec3(offsetX, offsetY, 0);
+    private static calculateOffset(minimapWidth: number, minimapHeight: number, warViewTransform: UITransform, scale: { scaleX: number; scaleY: number }): Vec3 {
+        // 充满整个小地图，不需要偏移
+        return new Vec3(0, 0, 0);
     }
 }
 

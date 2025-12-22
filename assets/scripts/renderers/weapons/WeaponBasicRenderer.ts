@@ -168,18 +168,20 @@ export class WeaponBasicRenderer {
     }
     
     /**
-     * 绘制炮管系统
+     * 绘制炮管系统（炮管默认向左）
      */
     private static drawBarrelSystem(graphics: Graphics, barrelLength: number, barrelWidth: number, baseY: number): void {
-        const barrelStartX = 0;
+        // 炮管从中心向左绘制
+        const barrelStartX = 0; // 中心点
+        const barrelEndX = -barrelLength; // 向左延伸
         const barrelY = baseY;
         
         // 炮管主体（圆角矩形模拟）
         graphics.strokeColor = new Color(100, 116, 139, 255); // #64748b
         graphics.lineWidth = barrelWidth;
         graphics.moveTo(barrelStartX, barrelY - barrelWidth / 2);
-        graphics.lineTo(barrelStartX + barrelLength, barrelY - barrelWidth / 2);
-        graphics.lineTo(barrelStartX + barrelLength, barrelY + barrelWidth / 2);
+        graphics.lineTo(barrelEndX, barrelY - barrelWidth / 2);
+        graphics.lineTo(barrelEndX, barrelY + barrelWidth / 2);
         graphics.lineTo(barrelStartX, barrelY + barrelWidth / 2);
         graphics.close();
         graphics.stroke();
@@ -188,24 +190,24 @@ export class WeaponBasicRenderer {
         graphics.strokeColor = new Color(51, 65, 85, 230); // rgba(51, 65, 85, 0.9)
         graphics.lineWidth = 2.5;
         for (let i = 0; i < 4; i++) {
-            const ringX = barrelStartX + barrelLength * (0.2 + i * 0.2);
+            const ringX = barrelStartX - barrelLength * (0.2 + i * 0.2); // 向左计算位置
             graphics.moveTo(ringX, barrelY - barrelWidth / 2);
             graphics.lineTo(ringX, barrelY + barrelWidth / 2);
             graphics.stroke();
         }
         
-        // 炮口制退器
-        const muzzleX = barrelStartX + barrelLength;
+        // 炮口制退器（在炮管左端）
+        const muzzleX = barrelEndX;
         const muzzleWidth = barrelWidth * 1.3;
         const muzzleLength = barrelWidth * 0.6;
         
         graphics.fillColor = new Color(71, 85, 105, 242); // rgba(71, 85, 105, 0.95)
-        graphics.rect(muzzleX - muzzleLength, barrelY - muzzleWidth / 2, muzzleLength, muzzleWidth);
+        graphics.rect(muzzleX, barrelY - muzzleWidth / 2, muzzleLength, muzzleWidth);
         graphics.fill();
         
         graphics.strokeColor = new Color(30, 41, 59, 204); // rgba(30, 41, 59, 0.8)
         graphics.lineWidth = 2;
-        graphics.rect(muzzleX - muzzleLength, barrelY - muzzleWidth / 2, muzzleLength, muzzleWidth);
+        graphics.rect(muzzleX, barrelY - muzzleWidth / 2, muzzleLength, muzzleWidth);
         graphics.stroke();
         
         // 炮口光环（3层）

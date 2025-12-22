@@ -1,6 +1,8 @@
 import { Node, Prefab, instantiate, UITransform } from 'cc';
 import { UiConfig } from '../config/Index';
 import { EnemyType, getEnemyConfig, ENEMY_CONFIGS } from '../constants/Index';
+import { WaveManager } from '../managers/WaveManager';
+import { EnemyBase } from '../enemys/Index';
 
 /**
  * 敌人生成处理器
@@ -12,9 +14,11 @@ export class EnemySpawnHandler {
     private spawnInterval: number = 2; // 生成间隔（秒）
     private spawnTimer: number = 0;
     private enabledTypes: EnemyType[] = []; // 启用的敌人类型列表
+    private waveManager: WaveManager;
 
     constructor(containerNode: Node, enemyPrefabs: Map<EnemyType, Prefab> | null = null) {
         this.containerNode = containerNode;
+        this.waveManager = WaveManager.getInstance();
         
         if (enemyPrefabs) {
             this.enemyPrefabs = enemyPrefabs;
@@ -22,11 +26,14 @@ export class EnemySpawnHandler {
             
         } else {
             // 默认启用所有类型
-            this.enabledTypes = Object.values(EnemyType);
+            this.enabledTypes = Object.keys(ENEMY_CONFIGS) as EnemyType[];
         }
         
         // 使用最短的生成间隔作为默认间隔
         this.updateSpawnInterval();
+        
+        // 设置基础生成间隔
+        this.waveManager.setBaseSpawnInterval(this.spawnInterval);
     }
 
     /**
@@ -35,8 +42,16 @@ export class EnemySpawnHandler {
      * @returns 新生成的敌人节点，如果没有生成则返回 null
      */
     update(deltaTime: number): Node | null {
+        // 检查是否可以生成敌人（波次限制）
+        if (!this.waveManager.canSpawnEnemy()) {
+            return null;
+        }
+        
+        // 根据波次更新生成间隔
+        const currentSpawnInterval = this.waveManager.getSpawnInterval(this.spawnInterval);
+        
         this.spawnTimer += deltaTime;
-        if (this.spawnTimer >= this.spawnInterval) {
+        if (this.spawnTimer >= currentSpawnInterval) {
             this.spawnTimer = 0;
             return this.spawn();
         }
@@ -49,12 +64,22 @@ export class EnemySpawnHandler {
      */
     spawn(): Node | null {
         if (this.enabledTypes.length === 0) return null;
-
-        // 随机选择敌人类型
-        const randomIndex = Math.floor(Math.random() * this.enabledTypes.length);
-        const selectedType = this.enabledTypes[randomIndex];
-        const prefab = this.enemyPrefabs.get(selectedType);
         
+        // 检查是否可以生成（波次限制）
+        if (!this.waveManager.canSpawnEnemy()) {
+            return null;
+        }
+
+        // 优先从波次类型池中选择，如果池为空则随机选择
+        let selectedType: EnemyType | null = this.waveManager.getNextEnemyType();
+        
+        // 如果类型池返回的类型不在可用类型中，或者池为空，则随机选择
+        if (!selectedType || this.enabledTypes.indexOf(selectedType) === -1 || !this.enemyPrefabs.has(selectedType)) {
+            const randomIndex = Math.floor(Math.random() * this.enabledTypes.length);
+            selectedType = this.enabledTypes[randomIndex];
+        }
+        
+        const prefab = this.enemyPrefabs.get(selectedType);
         if (!prefab) return null;
 
         const cellSize = UiConfig.CELL_SIZE;
@@ -72,6 +97,16 @@ export class EnemySpawnHandler {
         const enemy = instantiate(prefab);
         enemy.setParent(this.containerNode);
         enemy.setPosition(startX, startY, 0);
+        
+        // 应用波次血量加成
+        const enemyComponent = enemy.getComponent(EnemyBase);
+        if (enemyComponent) {
+            const hpBonus = this.waveManager.getHpBonus();
+            enemyComponent.setHpBonus(hpBonus);
+        }
+        
+        // 更新波次管理器
+        this.waveManager.addEnemy();
 
         return enemy;
     }
@@ -107,7 +142,7 @@ export class EnemySpawnHandler {
      */
     addEnemyPrefab(type: EnemyType, prefab: Prefab) {
         this.enemyPrefabs.set(type, prefab);
-        if (!this.enabledTypes.includes(type)) {
+        if (this.enabledTypes.indexOf(type) === -1) {
             this.enabledTypes.push(type);
         }
         this.updateSpawnInterval();

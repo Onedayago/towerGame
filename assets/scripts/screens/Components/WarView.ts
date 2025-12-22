@@ -1,7 +1,6 @@
-import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab } from 'cc';
-import { UiConfig } from '../../config/Index';
-import { GridHelper } from '../../utils/Index';
-import { EnemyManager, GameManager, WeaponManager, BulletManager } from '../../managers/Index';
+import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab, Vec3 } from 'cc';
+import { UiConfig, GOLD_CONFIG } from '../../config/Index';
+import { EnemyManager, GameManager, WeaponManager, BulletManager, GoldManager } from '../../managers/Index';
 import { MapDragHandler } from '../../business/Index';
 import { EnemyType } from '../../constants/Index';
 const { ccclass, property } = _decorator;
@@ -32,7 +31,7 @@ export class WarView extends Component {
         this.initTransform();
         this.initManagers();
         this.initEventListeners();
-        this.drawGrid();
+        // 网格绘制已移除
     }
 
     /**
@@ -54,6 +53,10 @@ export class WarView extends Component {
      */
     private initManagers() {
         this.gameManager = GameManager.getInstance();
+        
+        // 初始化金币管理器
+        const goldManager = GoldManager.getInstance();
+        goldManager.init(GOLD_CONFIG.INITIAL_GOLD);
         
         // 初始化地图拖拽处理器
         const parent = this.node.parent;
@@ -125,10 +128,33 @@ export class WarView extends Component {
     }
 
     /**
-     * 触摸结束事件处理（地图拖拽）
+     * 触摸结束事件处理（地图拖拽和武器选中）
      */
     onTouchEnd(event: EventTouch) {
+        // 先处理地图拖拽
         this.dragHandler?.onTouchEnd(event);
+        
+        // 如果拖拽处理器没有消耗事件，检查是否点击了武器
+        if (!event.propagationStopped && this.weaponManager) {
+            // 获取触摸位置（转换为本地坐标）
+            const touchLocation = event.getUILocation();
+            const localPos = new Vec3();
+            const transform = this.node.getComponent(UITransform);
+            if (transform) {
+                transform.convertToNodeSpaceAR(new Vec3(touchLocation.x, touchLocation.y, 0), localPos);
+                
+                // 尝试获取点击位置的武器
+                const weapon = this.weaponManager.getWeaponAtLocalPosition({ x: localPos.x, y: localPos.y });
+                if (weapon) {
+                    // 选中武器
+                    this.weaponManager.selectWeapon(weapon);
+                    event.propagationStopped = true;
+                } else {
+                    // 点击空白处，取消选中
+                    this.weaponManager.deselectWeapon();
+                }
+            }
+        }
     }
 
     onDestroy() {
@@ -195,20 +221,5 @@ export class WarView extends Component {
         return this.enemyManager;
     }
 
-    /**
-     * 绘制网格
-     */
-    private drawGrid() {
-        if (!this.graphics) return;
-        
-        const transform = this.node.getComponent(UITransform);
-        if (!transform) return;
-
-        GridHelper.drawGrid(
-            this.graphics,
-            transform.width,
-            transform.height
-        );
-    }
 }
 

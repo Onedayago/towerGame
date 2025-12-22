@@ -4,6 +4,9 @@ import { UiConfig } from '../config/Index';
 import { WarView } from '../screens/Components/Index';
 import { WarScreen } from '../screens/Index';
 import { WeaponCard } from '../screens/Components/Index';
+import { GoldManager } from '../managers/Index';
+import { WeaponType } from '../constants/Index';
+import { getWeaponBuildCost } from '../config/Index';
 
 /**
  * 武器卡片拖拽处理器
@@ -185,16 +188,13 @@ export class WeaponCardDragHandler {
         const touchLocalPos = this.getTouchLocalPosition(event);
         if (!touchLocalPos) return;
 
-        // 计算中心点位置（用于判断是否在范围内）
-        const centerLocalPos = this.calculateCenterPosition(touchLocalPos, dragNodeTransform);
-        
-        // 检查是否在 WarView 范围内
-        if (!GridHelper.isInBounds(centerLocalPos.x, centerLocalPos.y, warViewTransform.width, warViewTransform.height)) {
-            return; // 不在范围内，不放置
-        }
-
         // 对齐到网格中心（武器锚点在中心）
         const snapped = GridHelper.snapToGrid(touchLocalPos.x, touchLocalPos.y, UiConfig.CELL_SIZE, true);
+        
+        // 检查对齐后的位置是否在 WarView 范围内（武器只能放在 WarView 范围内）
+        if (!GridHelper.isInBounds(snapped.x, snapped.y, warViewTransform.width, warViewTransform.height)) {
+            return; // 不在 WarView 范围内，不放置
+        }
         
         // 检查位置是否已被占用
         if (this.isPositionOccupied(snapped.x, snapped.y)) {
@@ -264,6 +264,25 @@ export class WeaponCardDragHandler {
     private placeWeapon(x: number, y: number) {
         const weaponCardComponent = this.cardNode.getComponent(WeaponCard);
         if (!weaponCardComponent || !weaponCardComponent.weaponPrefab) return;
+
+        // 获取武器类型和建造成本
+        const weaponType = weaponCardComponent.weaponType;
+        const cost = getWeaponBuildCost(weaponType);
+        
+        // 检查是否有足够的金币
+        const goldManager = GoldManager.getInstance();
+        if (!goldManager.canAfford(cost)) {
+            console.log(`Not enough gold to purchase weapon. Need: ${cost}, Have: ${goldManager.getGold()}`);
+            return; // 金币不足，不放置武器
+        }
+        
+        // 扣除金币
+        if (!goldManager.spend(cost)) {
+            console.log(`Failed to spend gold for weapon purchase`);
+            return;
+        }
+        
+        console.log(`Purchased weapon ${weaponType} for ${cost} gold. Remaining: ${goldManager.getGold()}`);
 
         // 实例化武器预制体
         const weaponNode = instantiate(weaponCardComponent.weaponPrefab);

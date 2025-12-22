@@ -1,6 +1,6 @@
-import { _decorator, Component, Graphics, UITransform } from 'cc';
+import { _decorator, Component, UITransform } from 'cc';
 import { UiConfig } from './config/Index';
-const { ccclass, property } = _decorator;
+const { ccclass } = _decorator;
 
 /**
  * 游戏主组件
@@ -8,9 +8,12 @@ const { ccclass, property } = _decorator;
  */
 @ccclass('gameMain')
 export class gameMain extends Component {
-
-    @property(Node)
-    childNode: Node | null = null; // 在编辑器中拖拽子节点到这里
+    // 帧率统计
+    private frameCount: number = 0;
+    private frameTime: number = 0;
+    private readonly FPS_UPDATE_INTERVAL: number = 1.0; // 每秒更新一次帧率显示
+    private fpsUpdateTimer: number = 0;
+    private currentFPS: number = 0;
 
     start() {
         this.initTransform();
@@ -20,7 +23,6 @@ export class gameMain extends Component {
      * 初始化节点变换属性
      */
     private initTransform() {
-        const graphics = this.node.getComponent(Graphics);
         const transform = this.node.getComponent(UITransform);
         transform.setContentSize(UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
         transform.setAnchorPoint(0, 0);
@@ -29,7 +31,20 @@ export class gameMain extends Component {
     }
 
     update(deltaTime: number) {
-        // 更新逻辑可以在这里添加
+        // 帧率统计
+        this.frameCount++;
+        this.frameTime += deltaTime;
+        this.fpsUpdateTimer += deltaTime;
+
+        // 每秒更新一次帧率显示
+        if (this.fpsUpdateTimer >= this.FPS_UPDATE_INTERVAL) {
+            this.currentFPS = Math.round(this.frameCount / this.fpsUpdateTimer);
+            console.log(`FPS: ${this.currentFPS}`);
+            
+            // 重置计数器
+            this.frameCount = 0;
+            this.fpsUpdateTimer = 0;
+        }
     }
 }
 

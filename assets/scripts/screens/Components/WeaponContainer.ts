@@ -22,11 +22,16 @@ export class WeaponContainer extends Component {
     onLoad() {
         const transform = this.node.getComponent(UITransform);
         
-        // 设置大小为 3个格子宽 x 2个格子高（3种武器）
-        const width = UiConfig.CELL_SIZE * 3;
-        const height = UiConfig.CELL_SIZE * 2;
+        // 上下边距各20，宽度改为4个格子，高度减去上下边距以适配
+        const topMargin = 20;
+        const bottomMargin = 20;
+        const width = UiConfig.CELL_SIZE * 4;
+        const height = UiConfig.CELL_SIZE * 2 - topMargin - bottomMargin;
         transform.setAnchorPoint(0, 0);
         transform.setContentSize(width, height);
+        
+        // 设置位置：底部边距20（由于锚点在左下角，y位置就是底部边距）
+        this.node.setPosition(0, bottomMargin, 0);
         
         // 初始化 Graphics 组件
         this.graphics = this.node.getComponent(Graphics);
@@ -54,16 +59,36 @@ export class WeaponContainer extends Component {
             { type: WeaponType.ROCKET, prefab: this.rocketWeaponPrefab }
         ];
         
+        const transform = this.node.getComponent(UITransform);
+        if (!transform) return;
+        
+        const containerWidth = transform.width;
+        const containerHeight = transform.height;
         const cellSize = UiConfig.CELL_SIZE;
+        const cardCount = weaponConfigs.length;
+        
+        // 计算横向均匀排布
+        // 卡片总宽度
+        const totalCardWidth = cellSize * cardCount;
+        // 剩余空间
+        const remainingSpace = containerWidth - totalCardWidth;
+        // 间距数：卡片前、卡片之间、卡片后（共 cardCount + 1 个间距）
+        const spacingCount = cardCount + 1;
+        // 每个间距
+        const spacing = remainingSpace / spacingCount;
+        
+        // 计算竖向居中
+        const cardHeight = cellSize;
+        const centerY = (containerHeight - cardHeight) / 2;
         
         // 为每种武器类型动态创建一个武器卡片节点
         weaponConfigs.forEach((config, index) => {
             const weaponCardNode = this.createWeaponCardNode(config.type, config.prefab, cellSize);
             
-            // 设置位置：水平排列，每个卡片占一个格子
-            // 卡片锚点在左下角 (0, 0)，所以位置从 0 开始
-            const x = index * cellSize;
-            const y = 0; // 底部对齐
+            // 横向均匀排布：第一个间距 + 前面所有卡片和间距的宽度
+            const x = spacing + index * (cellSize + spacing);
+            // 竖向居中
+            const y = centerY;
             weaponCardNode.setPosition(x, y, 0);
         });
     }
@@ -98,8 +123,5 @@ export class WeaponContainer extends Component {
         return weaponCardNode;
     }
 
-    update(deltaTime: number) {
-        // 更新逻辑可以在这里添加
-    }
 }
 

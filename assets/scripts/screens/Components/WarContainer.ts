@@ -1,6 +1,5 @@
-import { _decorator, Component, Graphics, UITransform, Color } from 'cc';
+import { _decorator, Component, Graphics, UITransform } from 'cc';
 import { UiConfig } from '../../config/Index';
-import { DrawHelper } from '../../utils/Index';
 const { ccclass } = _decorator;
 
 /**
@@ -12,7 +11,7 @@ export class WarContainer extends Component {
     
     onLoad() {
         this.initTransform();
-        this.drawBackground();
+        // 红色背景绘制已移除
     }
 
     /**
@@ -31,24 +30,6 @@ export class WarContainer extends Component {
         this.node.setPosition(0, UiConfig.CELL_SIZE * 2, 0);
     }
 
-    /**
-     * 绘制红色背景
-     */
-    private drawBackground() {
-        const graphics = this.node.getComponent(Graphics);
-        const transform = this.node.getComponent(UITransform);
-        
-        if (!graphics || !transform) return;
-        
-        DrawHelper.drawSolidBackground(
-            graphics,
-            0,
-            0,
-            transform.width,
-            transform.height,
-            Color.RED
-        );
-    }
 
     start() {
         // 初始化完成后的逻辑可以在这里添加
