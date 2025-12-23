@@ -1,4 +1,5 @@
 import { Button, Label, Color, UITransform } from 'cc';
+import { CyberpunkColors } from '../constants/Index';
 
 /**
  * 游戏状态按钮渲染器
@@ -6,8 +7,8 @@ import { Button, Label, Color, UITransform } from 'cc';
  * 参考原游戏实现
  */
 export class GameStateBtnRenderer {
-    // 按钮颜色配置
-    private static readonly BUTTON_COLOR = new Color(255, 200, 0, 255); // 金黄色
+    // 按钮颜色配置 - 赛博朋克风格：霓虹黄色
+    private static readonly BUTTON_COLOR = CyberpunkColors.NEON_YELLOW;
     
     // 文字样式配置
     private static readonly LABEL_FONT_SIZE = 20;

@@ -123,5 +123,13 @@ export class EnemyManager {
     setManagers(bulletManager: BulletManager, weaponManager: WeaponManager) {
         this.updateHandler.setManagers(bulletManager, weaponManager);
     }
+    
+    /**
+     * 设置敌人生成特效预制体
+     * @param prefab 特效预制体
+     */
+    setSpawnEffectPrefab(prefab: Prefab) {
+        this.spawnHandler.setSpawnEffectPrefab(prefab);
+    }
 }
 

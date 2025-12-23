@@ -5,6 +5,7 @@ import { EnemyBase } from '../enemys/Index';
 import { WeaponManager } from './WeaponManager';
 import { WeaponBase } from '../weapons/Index';
 import { BulletType } from '../constants/Index';
+import { GameManager } from './GameManager';
 
 /**
  * 子弹管理器
@@ -67,6 +68,12 @@ export class BulletManager {
      * @param deltaTime 帧时间
      */
     update(deltaTime: number) {
+        // 检查游戏状态，如果游戏未开始或已暂停，不更新子弹
+        const gameManager = GameManager.getInstance();
+        if (!gameManager.canUpdate()) {
+            return;
+        }
+        
         for (let i = this.bullets.length - 1; i >= 0; i--) {
             const bullet = this.bullets[i];
             

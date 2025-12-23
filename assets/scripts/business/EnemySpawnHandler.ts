@@ -1,8 +1,9 @@
-import { Node, Prefab, instantiate, UITransform } from 'cc';
+import { Node, Prefab, instantiate, UITransform, Vec3 } from 'cc';
 import { UiConfig } from '../config/Index';
 import { EnemyType, getEnemyConfig, ENEMY_CONFIGS } from '../constants/Index';
 import { WaveManager } from '../managers/WaveManager';
 import { EnemyBase } from '../enemys/Index';
+import { EnemySpawnEffect } from '../effects/Index';
 
 /**
  * 敌人生成处理器
@@ -11,6 +12,7 @@ import { EnemyBase } from '../enemys/Index';
 export class EnemySpawnHandler {
     private containerNode: Node;
     private enemyPrefabs: Map<EnemyType, Prefab> = new Map(); // 敌人类型到预制体的映射
+    private spawnEffectPrefab: Prefab | null = null; // 敌人生成特效预制体
     private spawnInterval: number = 2; // 生成间隔（秒）
     private spawnTimer: number = 0;
     private enabledTypes: EnemyType[] = []; // 启用的敌人类型列表
@@ -93,6 +95,9 @@ export class EnemySpawnHandler {
         const startX = cellSize / 2; // 第一个格子的中心X
         const startY = randomRow * cellSize + cellSize / 2; // 随机行的中心Y
 
+        // 创建敌人生成特效
+        this.createSpawnEffect(startX, startY, selectedType);
+        
         // 创建敌人
         const enemy = instantiate(prefab);
         enemy.setParent(this.containerNode);
@@ -173,6 +178,35 @@ export class EnemySpawnHandler {
      */
     getEnabledTypes(): EnemyType[] {
         return [...this.enabledTypes];
+    }
+    
+    /**
+     * 设置敌人生成特效预制体
+     * @param prefab 特效预制体
+     */
+    setSpawnEffectPrefab(prefab: Prefab) {
+        this.spawnEffectPrefab = prefab;
+    }
+    
+    /**
+     * 创建敌人生成特效
+     * @param x 特效X坐标
+     * @param y 特效Y坐标
+     * @param enemyType 敌人类型
+     */
+    private createSpawnEffect(x: number, y: number, enemyType: EnemyType) {
+        // 如果提供了预制体，使用预制体创建
+        if (this.spawnEffectPrefab) {
+            const effectNode = instantiate(this.spawnEffectPrefab);
+            effectNode.setParent(this.containerNode);
+            effectNode.setPosition(x, y, 0);
+            
+            // 获取特效组件并初始化
+            const effectComponent = effectNode.getComponent(EnemySpawnEffect);
+            if (effectComponent) {
+                effectComponent.init(new Vec3(x, y, 0), enemyType);
+            }
+        }
     }
 }
 

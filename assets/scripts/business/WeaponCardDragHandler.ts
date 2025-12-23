@@ -1,9 +1,7 @@
 import { Node, EventTouch, Vec2, Vec3, Graphics, Color, instantiate, Component, UITransform } from 'cc';
 import { GridHelper } from '../utils/Index';
 import { UiConfig } from '../config/Index';
-import { WarView } from '../screens/Components/Index';
-import { WarScreen } from '../screens/Index';
-import { WeaponCard } from '../screens/Components/Index';
+import { WarView, WarScreen, WeaponCard } from '../screens/Index';
 import { GoldManager } from '../managers/Index';
 import { WeaponType } from '../constants/Index';
 import { getWeaponBuildCost } from '../config/Index';

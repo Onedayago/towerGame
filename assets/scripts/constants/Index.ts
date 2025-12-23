@@ -7,4 +7,5 @@ export * from './EnemyConstants';
 export * from './WeaponConstants';
 export * from './BulletConstants';
 export * from './UiColors';
+export * from './CyberpunkColors';
 

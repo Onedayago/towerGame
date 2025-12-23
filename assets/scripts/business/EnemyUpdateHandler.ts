@@ -76,6 +76,12 @@ export class EnemyUpdateHandler {
                 }
             }
             
+            // 更新出现动画（如果正在出现动画中）
+            if (typeof (enemyComponent as any).updateSpawnAnimation === 'function') {
+                (enemyComponent as any).updateSpawnAnimation(deltaTime);
+            }
+            
+            // 更新位置（出现动画完成后才移动）
             if (typeof (enemyComponent as any).updatePosition === 'function') {
                 (enemyComponent as any).updatePosition(deltaTime, this.containerWidth);
             }

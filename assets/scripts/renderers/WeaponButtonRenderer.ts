@@ -1,5 +1,6 @@
 import { Graphics, Color, UITransform, Button, Sprite, Label, Node as CCNode } from 'cc';
 import { UiConfig } from '../config/Index';
+import { CyberpunkColors } from '../constants/Index';
 
 /**
  * 武器按钮渲染器
@@ -13,14 +14,14 @@ export class WeaponButtonRenderer {
     private static readonly BUTTON_RADIUS = 8; // 圆角半径
     private static readonly BORDER_WIDTH = 2; // 边框宽度
     
-    // 升级按钮颜色
-    private static readonly UPGRADE_BG_COLOR = new Color(76, 175, 80, 255); // 绿色背景 #4CAF50
-    private static readonly UPGRADE_BORDER_COLOR = new Color(56, 142, 60, 255); // 深绿色边框 #388E3C
+    // 升级按钮颜色 - 赛博朋克风格：霓虹绿色
+    private static readonly UPGRADE_BG_COLOR = CyberpunkColors.NEON_GREEN;
+    private static readonly UPGRADE_BORDER_COLOR = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_GREEN, 0.8);
     private static readonly UPGRADE_ICON_COLOR = Color.WHITE; // 白色图标
     
-    // 移除按钮颜色
-    private static readonly REMOVE_BG_COLOR = new Color(244, 67, 54, 255); // 红色背景 #F44336
-    private static readonly REMOVE_BORDER_COLOR = new Color(198, 40, 40, 255); // 深红色边框 #C62828
+    // 移除按钮颜色 - 赛博朋克风格：霓虹红色
+    private static readonly REMOVE_BG_COLOR = CyberpunkColors.ENEMY_PRIMARY;
+    private static readonly REMOVE_BORDER_COLOR = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.8);
     private static readonly REMOVE_ICON_COLOR = Color.WHITE; // 白色图标
     
     // 悬停效果颜色（稍微变亮）

@@ -48,8 +48,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -696.1419999999999,
-      "y": -187.462,
+      "x": -1232.451,
+      "y": -121.395,
       "z": 0
     },
     "_lrot": {
@@ -379,8 +379,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
+      "x": -58,
+      "y": 72,
       "z": 0
     },
     "_lrot": {
@@ -506,10 +506,10 @@
       "b": 0,
       "a": 255
     },
-    "_string": "button",
+    "_string": "升级 120",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.833333333333332,
+    "_actualFontSize": 20.52,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -579,8 +579,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 40
+      "width": 80,
+      "height": 30
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -751,8 +751,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
+      "x": 58,
+      "y": 72,
       "z": 0
     },
     "_lrot": {
@@ -878,10 +878,10 @@
       "b": 0,
       "a": 255
     },
-    "_string": "button",
+    "_string": "卖掉 80",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.833333333333332,
+    "_actualFontSize": 20.52,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -951,8 +951,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 40
+      "width": 80,
+      "height": 30
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1107,13 +1107,13 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 100
+      "width": 64,
+      "height": 64
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
+      "x": 0.5,
+      "y": 0.5
     },
     "_id": ""
   },

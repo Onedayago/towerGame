@@ -1,5 +1,5 @@
 import { Graphics, Color } from 'cc';
-import { EnemyType, getEnemyColor } from '../../constants/Index';
+import { EnemyType, getEnemyColor, CyberpunkColors } from '../../constants/Index';
 
 /**
  * 普通坦克敌人渲染器
@@ -186,8 +186,8 @@ export class EnemyTankRenderer {
         graphics.rect(-hullWidth / 2 + 8, -size * 0.12, hullWidth - 16, size * 0.24);
         graphics.stroke();
         
-        // 装甲板细节纹理（3条加强筋）
-        graphics.strokeColor = new Color(239, 68, 68, 89); // rgba(239, 68, 68, 0.35)
+        // 装甲板细节纹理（3条加强筋）- 赛博朋克风格：霓虹红色
+        graphics.strokeColor = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.35);
         graphics.lineWidth = 1;
         for (let i = 0; i < 3; i++) {
             const grooveY = -size * 0.08 + i * (size * 0.16 / 2);
@@ -203,8 +203,8 @@ export class EnemyTankRenderer {
     private static drawTurretSystem(graphics: Graphics, size: number, turretRadius: number): void {
         const turretY = -size * 0.06;
         
-        // 炮塔主体（圆形）
-        graphics.fillColor = new Color(239, 68, 68, 204); // rgba(239, 68, 68, 0.8)
+        // 炮塔主体（圆形）- 赛博朋克风格：霓虹红色
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.8);
         graphics.circle(0, turretY, turretRadius);
         graphics.fill();
         
@@ -222,10 +222,10 @@ export class EnemyTankRenderer {
             graphics.stroke();
         }
         
-        // 炮塔顶部指挥舱
+        // 炮塔顶部指挥舱 - 赛博朋克风格：霓虹红色
         const hatchWidth = size * 0.14;
         const hatchHeight = size * 0.32;
-        graphics.fillColor = new Color(239, 68, 68, 242); // rgba(239, 68, 68, 0.95)
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.95);
         graphics.rect(-hatchWidth / 2, -size * 0.22, hatchWidth, hatchHeight);
         graphics.fill();
         
@@ -239,8 +239,8 @@ export class EnemyTankRenderer {
      * 绘制主炮
      */
     private static drawMainGun(graphics: Graphics, barrelLength: number, barrelHalfHeight: number): void {
-        // 炮管主体
-        graphics.strokeColor = new Color(239, 68, 68, 255); // #ef4444
+        // 炮管主体 - 赛博朋克风格：霓虹红色
+        graphics.strokeColor = CyberpunkColors.ENEMY_PRIMARY;
         graphics.lineWidth = barrelHalfHeight * 2;
         graphics.moveTo(0, -barrelHalfHeight);
         graphics.lineTo(barrelLength, -barrelHalfHeight);
@@ -263,13 +263,13 @@ export class EnemyTankRenderer {
         const muzzleEndX = barrelLength;
         const muzzleRadius = barrelHalfHeight * 0.6;
         
-        // 最外层光晕
-        graphics.fillColor = new Color(239, 68, 68, 102); // rgba(239, 68, 68, 0.4)
+        // 最外层光晕 - 赛博朋克风格：霓虹红色
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.4);
         graphics.circle(muzzleEndX, 0, muzzleRadius * 1.5);
         graphics.fill();
         
-        // 中层
-        graphics.fillColor = new Color(239, 68, 68, 242); // rgba(239, 68, 68, 0.95)
+        // 中层 - 赛博朋克风格：霓虹红色
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.95);
         graphics.circle(muzzleEndX, 0, muzzleRadius);
         graphics.fill();
         
@@ -288,18 +288,18 @@ export class EnemyTankRenderer {
         const mainIndicatorY = -size * 0.02;
         const mainRadius = size * 0.095;
         
-        // 外层脉冲光晕
-        graphics.fillColor = new Color(239, 68, 68, 128); // rgba(239, 68, 68, 0.5)
+        // 外层脉冲光晕 - 赛博朋克风格：霓虹红色
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.5);
         graphics.circle(mainIndicatorX, mainIndicatorY, mainRadius * 1.4);
         graphics.fill();
         
-        // 中层（径向渐变模拟）
-        graphics.fillColor = new Color(239, 68, 68, 242); // rgba(239, 68, 68, 0.95)
+        // 中层（径向渐变模拟）- 赛博朋克风格：霓虹红色
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.ENEMY_PRIMARY, 0.95);
         graphics.circle(mainIndicatorX, mainIndicatorY, mainRadius * 0.8);
         graphics.fill();
         
-        // 边框
-        graphics.strokeColor = new Color(251, 113, 133, 255); // #fb7185
+        // 边框 - 赛博朋克风格：霓虹粉色
+        graphics.strokeColor = CyberpunkColors.NEON_PINK;
         graphics.lineWidth = 2;
         graphics.circle(mainIndicatorX, mainIndicatorY, mainRadius * 0.8);
         graphics.stroke();

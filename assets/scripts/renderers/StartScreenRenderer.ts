@@ -37,12 +37,21 @@ export class StartScreenRenderer {
 
         const width = transform.width;
         const height = transform.height;
+        
+        // 获取锚点（应该是 0.5, 0.5 中心点）
+        const anchorPoint = transform.anchorPoint;
+        const anchorX = width * anchorPoint.x;
+        const anchorY = height * anchorPoint.y;
 
         graphics.clear();
 
         // 绘制渐变背景（从黑色到深蓝紫色）
+        // 锚点在中心时，需要从 -width/2 和 -height/2 开始绘制
         const gradientSteps = UiColors.START_SCREEN_GRADIENT_STEPS;
         const stepHeight = height / gradientSteps;
+        
+        // 起始Y坐标（从底部开始，考虑锚点在中心）
+        const startY = -height / 2;
 
         for (let i = 0; i < gradientSteps; i++) {
             const ratio = i / (gradientSteps - 1);
@@ -54,10 +63,11 @@ export class StartScreenRenderer {
                 ratio
             );
             
-            const y = stepHeight * i;
+            const y = startY + stepHeight * i;
             
             graphics.fillColor = color;
-            graphics.rect(0, y, width, stepHeight + 1); // +1 避免间隙
+            // 从 -width/2 开始绘制，考虑锚点在中心
+            graphics.rect(-width / 2, y, width, stepHeight + 1); // +1 避免间隙
             graphics.fill();
         }
     }

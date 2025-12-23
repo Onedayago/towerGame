@@ -37,19 +37,19 @@ export const BULLET_CONFIGS: Record<BulletType, BulletConfig> = {
     // 武器子弹配置
     [BulletType.WEAPON_BASIC]: {
         type: BulletType.WEAPON_BASIC,
-        speed: 200,          // 基础武器子弹速度：200像素/秒（基础速度，参考加农炮）
+        speed: 100,          // 基础武器子弹速度：200像素/秒（基础速度，参考加农炮）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 2000    // 最大飞行距离：2000像素
     },
     [BulletType.WEAPON_LASER]: {
         type: BulletType.WEAPON_LASER,
-        speed: 180,          // 激光武器子弹速度：180像素/秒（减小速度）
+        speed: 90,          // 激光武器子弹速度：180像素/秒（减小速度）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 2500    // 最大飞行距离：2500像素
     },
     [BulletType.WEAPON_ROCKET]: {
         type: BulletType.WEAPON_ROCKET,
-        speed: 300,          // 火箭塔子弹速度：300像素/秒（基础速度 * 1.5，参考追踪火箭）
+        speed: 150,          // 火箭塔子弹速度：300像素/秒（基础速度 * 1.5，参考追踪火箭）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 3000    // 最大飞行距离：3000像素
     },
@@ -57,25 +57,25 @@ export const BULLET_CONFIGS: Record<BulletType, BulletConfig> = {
     // 敌人子弹配置
     [BulletType.ENEMY_TANK]: {
         type: BulletType.ENEMY_TANK,
-        speed: 120,          // 坦克子弹速度：120像素/秒（原速度的30%）
+        speed: 60,          // 坦克子弹速度：120像素/秒（原速度的30%）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 1500    // 最大飞行距离：1500像素
     },
     [BulletType.ENEMY_FAST_TANK]: {
         type: BulletType.ENEMY_FAST_TANK,
-        speed: 150,          // 快速坦克子弹速度：150像素/秒（原速度的30%）
+        speed: 80,          // 快速坦克子弹速度：150像素/秒（原速度的30%）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 1200    // 最大飞行距离：1200像素
     },
     [BulletType.ENEMY_HEAVY_TANK]: {
         type: BulletType.ENEMY_HEAVY_TANK,
-        speed: 105,          // 重型坦克子弹速度：105像素/秒（原速度的30%）
+        speed: 50,          // 重型坦克子弹速度：105像素/秒（原速度的30%）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 1800    // 最大飞行距离：1800像素
     },
     [BulletType.ENEMY_BOSS]: {
         type: BulletType.ENEMY_BOSS,
-        speed: 135,          // Boss子弹速度：135像素/秒（原速度的30%）
+        speed: 70,          // Boss子弹速度：135像素/秒（原速度的30%）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 2000    // 最大飞行距离：2000像素
     }

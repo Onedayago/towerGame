@@ -1,5 +1,5 @@
 import { Graphics, Color } from 'cc';
-import { WeaponType, getWeaponColor } from '../../constants/Index';
+import { WeaponType, getWeaponColor, CyberpunkColors } from '../../constants/Index';
 
 /**
  * 基础武器渲染器

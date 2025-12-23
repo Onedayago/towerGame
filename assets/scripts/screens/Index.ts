@@ -3,8 +3,8 @@
  * 导出所有屏幕相关类
  */
 
-export { StartScreen } from './StartScreen';
-export { WarScreen } from './WarScreen';
+// 导出开始界面
+export * from './start/Index';
 
-// 导出组件
-export * from './Components/Index';
+// 导出游戏界面
+export * from './game/Index';

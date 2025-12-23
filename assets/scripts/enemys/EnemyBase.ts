@@ -1,10 +1,11 @@
-import { _decorator, Component, Graphics, UITransform, Prefab, instantiate, Vec3, Node } from 'cc';
+import { _decorator, Component, Graphics, UITransform, Prefab, instantiate, Vec3, Node, UIOpacity } from 'cc';
 import { UiConfig } from '../config/Index';
 import { EnemyType, getEnemyConfig, EnemyConfig, ENEMY_COMMON_CONFIG } from '../constants/Index';
 import { BulletManager } from '../managers/BulletManager';
 import { WeaponManager } from '../managers/WeaponManager';
 import { BulletBase } from '../bullets/Index';
 import { TargetFinder, HealthBarHelper } from '../utils/Index';
+import { HitParticleEffect, ExplosionEffect } from '../effects/Index';
 const { ccclass, property } = _decorator;
 
 /**
@@ -16,6 +17,12 @@ export class EnemyBase extends Component {
     
     @property({ type: Prefab, displayName: '子弹预制体', tooltip: '敌人发射的子弹预制体（可选，如果不设置则根据敌人类型自动选择）' })
     protected bulletPrefab: Prefab | null = null;
+    
+    @property({ type: Prefab, displayName: '被攻击特效预制体', tooltip: '敌人被攻击时的粒子特效预制体' })
+    protected hitEffectPrefab: Prefab | null = null;
+    
+    @property({ type: Prefab, displayName: '爆炸特效预制体', tooltip: '敌人死亡时的爆炸特效预制体' })
+    protected explosionEffectPrefab: Prefab | null = null;
     
     protected moveSpeed: number = 0;
     protected attackSpeed: number = 0;
@@ -31,6 +38,12 @@ export class EnemyBase extends Component {
     protected weaponManager: WeaponManager | null = null; // 武器管理器
     protected maxHealth: number = 0; // 最大生命值（用于血条显示）
     private baseHealth: number = 0; // 基础生命值（未加成前的血量）
+    
+    // 出现动画相关
+    private isSpawning: boolean = true; // 是否正在出现动画中
+    private spawnAnimationDuration: number = 0.6; // 出现动画持续时间（秒），与特效持续时间一致
+    private spawnAnimationElapsed: number = 0; // 出现动画已用时间
+    private uiOpacity: UIOpacity | null = null; // 透明度组件
     
     // 子节点引用（从预制体中获取）
     protected healthBarNode: Node | null = null; // 血条节点
@@ -96,6 +109,77 @@ export class EnemyBase extends Component {
         
         // 初始化血条
         this.updateHealthBar();
+        
+        // 初始化出现动画
+        this.initSpawnAnimation();
+    }
+    
+    /**
+     * 初始化出现动画
+     * 设置初始状态：缩放为0，透明度为0
+     */
+    private initSpawnAnimation() {
+        // 设置初始缩放为0（从小到大）
+        this.node.setScale(0, 0, 1);
+        
+        // 添加或获取 UIOpacity 组件（用于透明度控制）
+        this.uiOpacity = this.node.getComponent(UIOpacity);
+        if (!this.uiOpacity) {
+            this.uiOpacity = this.node.addComponent(UIOpacity);
+        }
+        // 设置初始透明度为0（从隐身到显示）
+        this.uiOpacity.opacity = 0;
+        
+        // 初始化动画状态
+        this.isSpawning = true;
+        this.spawnAnimationElapsed = 0;
+    }
+    
+    /**
+     * 更新出现动画
+     * @param deltaTime 帧时间
+     */
+    updateSpawnAnimation(deltaTime: number) {
+        if (!this.isSpawning) return;
+        
+        this.spawnAnimationElapsed += deltaTime;
+        const progress = Math.min(this.spawnAnimationElapsed / this.spawnAnimationDuration, 1);
+        
+        // 缩放动画：从0到1
+        const scale = progress;
+        this.node.setScale(scale, scale, 1);
+        
+        // 透明度动画：从0到255
+        const opacity = Math.floor(progress * 255);
+        if (this.uiOpacity) {
+            this.uiOpacity.opacity = opacity;
+        }
+        
+        // 血条也跟随透明度变化
+        if (this.healthBarNode) {
+            let healthBarOpacity = this.healthBarNode.getComponent(UIOpacity);
+            if (!healthBarOpacity) {
+                healthBarOpacity = this.healthBarNode.addComponent(UIOpacity);
+            }
+            healthBarOpacity.opacity = opacity;
+        }
+        
+        // 动画完成后，允许移动
+        if (progress >= 1) {
+            this.isSpawning = false;
+            // 确保最终状态正确
+            this.node.setScale(1, 1, 1);
+            if (this.uiOpacity) {
+                this.uiOpacity.opacity = 255;
+            }
+            // 血条也恢复完全不透明
+            if (this.healthBarNode) {
+                const healthBarOpacity = this.healthBarNode.getComponent(UIOpacity);
+                if (healthBarOpacity) {
+                    healthBarOpacity.opacity = 255;
+                }
+            }
+        }
     }
     
     /**
@@ -151,6 +235,11 @@ export class EnemyBase extends Component {
      * @param boundaryWidth 右边界宽度（容器宽度）
      */
     updatePosition(deltaTime: number, boundaryWidth: number) {
+        // 如果正在出现动画中，不移动
+        if (this.isSpawning) {
+            return;
+        }
+        
         // 如果锁定了目标或正在攻击，停止移动
         if (this.lockedTarget || this.isAttacking) {
             return;
@@ -442,6 +531,9 @@ export class EnemyBase extends Component {
     takeDamage(damage: number) {
         if (!this.config) return;
         
+        // 创建被攻击特效
+        this.createHitEffect();
+        
         this.config.health -= damage;
         
         // 更新血条
@@ -452,15 +544,54 @@ export class EnemyBase extends Component {
         }
     }
     
+    /**
+     * 创建被攻击特效
+     */
+    private createHitEffect() {
+        if (!this.hitEffectPrefab) return;
+        
+        const position = this.node.position;
+        const effectNode = instantiate(this.hitEffectPrefab);
+        effectNode.setParent(this.node.parent);
+        effectNode.setPosition(position);
+        
+        // 获取特效组件并初始化
+        const effectComponent = effectNode.getComponent(HitParticleEffect);
+        if (effectComponent) {
+            effectComponent.init(position);
+        }
+    }
+    
 
     /**
      * 死亡处理
      * 子类可以重写此方法实现不同的死亡效果
      */
     protected onDeath() {
+        // 创建爆炸特效
+        this.createExplosionEffect();
+        
         // 移除血条
         HealthBarHelper.removeHealthBar(this.node);
         this.node.destroy();
+    }
+    
+    /**
+     * 创建爆炸特效
+     */
+    private createExplosionEffect() {
+        if (!this.explosionEffectPrefab) return;
+        
+        const position = this.node.position;
+        const effectNode = instantiate(this.explosionEffectPrefab);
+        effectNode.setParent(this.node.parent);
+        effectNode.setPosition(position);
+        
+        // 获取特效组件并初始化
+        const effectComponent = effectNode.getComponent(ExplosionEffect);
+        if (effectComponent) {
+            effectComponent.init(position);
+        }
     }
 }
 
