@@ -8,5 +8,6 @@ export { GameManager } from './GameManager';
 export { WeaponManager } from './WeaponManager';
 export { BulletManager } from './BulletManager';
 export { GoldManager } from './GoldManager';
+export { ObstacleManager } from './ObstacleManager';
 export { WaveManager } from './WaveManager';
 

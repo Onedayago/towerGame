@@ -189,6 +189,8 @@ export class Guide extends Component {
             if (this.backgroundNode) {
                 this.backgroundNode.active = true;
             }
+            // 禁用地图拖拽、小地图和暂停按钮
+            this.disableInteractions();
             this.stepManager.start();
         }
     }
@@ -200,6 +202,8 @@ export class Guide extends Component {
         if (this.stepManager) {
             this.stepManager.skip();
         }
+        // 启用地图拖拽、小地图和暂停按钮
+        this.enableInteractions();
     }
     
     /**
@@ -246,6 +250,56 @@ export class Guide extends Component {
         if (this.nextButton) {
             const hasNext = this.stepManager.hasNextStep();
             this.nextButton.node.active = hasNext;
+        }
+    }
+    
+    /**
+     * 禁用交互（地图拖拽、暂停按钮）
+     */
+    private disableInteractions() {
+        // 禁用地图拖拽
+        if (this.warView) {
+            const dragHandler = (this.warView as any).dragHandler;
+            if (dragHandler && typeof dragHandler.setEnabled === 'function') {
+                dragHandler.setEnabled(false);
+            }
+        }
+        
+        // 禁用暂停按钮
+        const scene = this.node.scene;
+        if (scene) {
+            const gameStateBtnNode = this.findNodeWithComponent(scene, 'GameStateBtn' as any);
+            if (gameStateBtnNode) {
+                const gameStateBtn = gameStateBtnNode.getComponent('GameStateBtn') as any;
+                if (gameStateBtn && typeof gameStateBtn.setEnabled === 'function') {
+                    gameStateBtn.setEnabled(false);
+                }
+            }
+        }
+    }
+    
+    /**
+     * 启用交互（地图拖拽、暂停按钮）
+     */
+    enableInteractions() {
+        // 启用地图拖拽
+        if (this.warView) {
+            const dragHandler = (this.warView as any).dragHandler;
+            if (dragHandler && typeof dragHandler.setEnabled === 'function') {
+                dragHandler.setEnabled(true);
+            }
+        }
+        
+        // 启用暂停按钮
+        const scene = this.node.scene;
+        if (scene) {
+            const gameStateBtnNode = this.findNodeWithComponent(scene, 'GameStateBtn' as any);
+            if (gameStateBtnNode) {
+                const gameStateBtn = gameStateBtnNode.getComponent('GameStateBtn') as any;
+                if (gameStateBtn && typeof gameStateBtn.setEnabled === 'function') {
+                    gameStateBtn.setEnabled(true);
+                }
+            }
         }
     }
     

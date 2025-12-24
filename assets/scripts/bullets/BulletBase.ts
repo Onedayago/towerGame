@@ -1,6 +1,7 @@
 import { _decorator, Color, Component, Graphics, UITransform, Vec3 } from 'cc';
 import { UiConfig } from '../config/Index';
 import { BulletType, getBulletConfig, BulletConfig, DEFAULT_BULLET_TYPE } from '../constants/Index';
+import { GameManager } from '../managers/GameManager';
 const { ccclass } = _decorator;
 
 /**
@@ -129,6 +130,12 @@ export class BulletBase extends Component {
      * @param deltaTime 帧时间
      */
     update(deltaTime: number) {
+        // 检查游戏状态，如果游戏未开始或已暂停，不更新子弹
+        const gameManager = GameManager.getInstance();
+        if (!gameManager.canUpdate()) {
+            return;
+        }
+        
         if (!this.direction) return;
 
         // 计算移动距离

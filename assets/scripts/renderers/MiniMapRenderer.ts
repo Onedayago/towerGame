@@ -14,6 +14,7 @@ export class MiniMapRenderer {
     // 小地图标记尺寸
     private static readonly ENEMY_SIZE = 2; // 敌人圆点半径
     private static readonly WEAPON_SIZE = 3; // 武器方块边长的一半
+    private static readonly BASE_SIZE = 4; // 基地方块边长的一半
 
     /**
      * 绘制小地图背景
@@ -161,6 +162,58 @@ export class MiniMapRenderer {
         const scaleY = minimapHeight / warViewHeight;
 
         return { scaleX, scaleY };
+    }
+
+    /**
+     * 绘制基地位置
+     * @param graphics Graphics 组件
+     * @param minimapWidth 小地图宽度
+     * @param minimapHeight 小地图高度
+     * @param warViewNode WarView 节点
+     * @param baseNode 基地节点（Home 节点）
+     */
+    static renderBase(
+        graphics: Graphics,
+        minimapWidth: number,
+        minimapHeight: number,
+        warViewNode: Node,
+        baseNode: Node | null
+    ): void {
+        if (!graphics || !warViewNode || !baseNode || !baseNode.isValid) return;
+
+        const warViewTransform = warViewNode.getComponent(UITransform);
+        if (!warViewTransform) return;
+
+        // 计算缩放比例和偏移量
+        const scale = this.calculateScale(minimapWidth, minimapHeight, warViewTransform);
+        const offset = this.calculateOffset(minimapWidth, minimapHeight, warViewTransform, scale);
+
+        // 获取基地位置
+        const basePos = baseNode.position;
+        const minimapX = offset.x + basePos.x * scale.scaleX;
+        const minimapY = offset.y + basePos.y * scale.scaleY;
+
+        // 绘制基地（青色方块，参考原游戏）
+        const baseColor = new Color(0, 255, 255, 255); // 霓虹青色，完全不透明
+        graphics.fillColor = baseColor;
+        graphics.rect(
+            minimapX - this.BASE_SIZE,
+            minimapY - this.BASE_SIZE,
+            this.BASE_SIZE * 2,
+            this.BASE_SIZE * 2
+        );
+        graphics.fill();
+        
+        // 绘制基地边框（增强可见性）
+        graphics.strokeColor = new Color(255, 255, 255, 200); // 白色边框
+        graphics.lineWidth = 1;
+        graphics.rect(
+            minimapX - this.BASE_SIZE,
+            minimapY - this.BASE_SIZE,
+            this.BASE_SIZE * 2,
+            this.BASE_SIZE * 2
+        );
+        graphics.stroke();
     }
 
     /**

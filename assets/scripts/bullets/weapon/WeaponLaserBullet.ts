@@ -3,6 +3,7 @@ import { BulletBase } from '../BulletBase';
 import { BulletType } from '../../constants/Index';
 import { WeaponLaserBulletRenderer } from '../../renderers/Index';
 import { EnemyBase } from '../../enemys/Index';
+import { GameManager } from '../../managers/GameManager';
 const { ccclass } = _decorator;
 
 /**
@@ -86,6 +87,12 @@ export class WeaponLaserBullet extends BulletBase {
      * 激光束不需要移动，只需要更新持续时间和跟踪目标
      */
     update(deltaTime: number) {
+        // 检查游戏状态，如果游戏未开始或已暂停，不更新激光束
+        const gameManager = GameManager.getInstance();
+        if (!gameManager.canUpdate()) {
+            return;
+        }
+        
         // 更新持续时间
         this.duration -= deltaTime;
         

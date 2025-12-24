@@ -4,6 +4,7 @@ import { BulletType } from '../../constants/Index';
 import { WeaponRocketBulletRenderer } from '../../renderers/Index';
 import { EnemyBase } from '../../enemys/Index';
 import { UiConfig } from '../../config/Index';
+import { GameManager } from '../../managers/GameManager';
 const { ccclass } = _decorator;
 
 /**
@@ -88,6 +89,12 @@ export class WeaponRocketBullet extends BulletBase {
      * 更新追踪火箭
      */
     update(deltaTime: number) {
+        // 检查游戏状态，如果游戏未开始或已暂停，不更新火箭
+        const gameManager = GameManager.getInstance();
+        if (!gameManager.canUpdate()) {
+            return;
+        }
+        
         // 更新生命周期
         this.lifetime += deltaTime;
         if (this.lifetime >= WeaponRocketBullet.MAX_LIFETIME) {

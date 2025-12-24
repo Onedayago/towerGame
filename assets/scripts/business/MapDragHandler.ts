@@ -9,6 +9,7 @@ export class MapDragHandler {
     private containerTransform: UITransform | null = null;
     private lastTouchPos: Vec2 = new Vec2();
     private isDragging: boolean = false;
+    private enabled: boolean = true; // 是否启用拖拽
 
     constructor(targetNode: Node, containerNode: Node | null = null) {
         this.targetNode = targetNode;
@@ -23,6 +24,7 @@ export class MapDragHandler {
      * 处理触摸开始事件
      */
     onTouchStart(event: EventTouch) {
+        if (!this.enabled) return;
         this.isDragging = true;
         const touchLocation = event.getUILocation();
         this.lastTouchPos = new Vec2(touchLocation.x, touchLocation.y);
@@ -91,6 +93,17 @@ export class MapDragHandler {
         y = Math.max(minY, Math.min(maxY, y));
 
         return { x, y };
+    }
+
+    /**
+     * 设置是否启用拖拽
+     * @param enabled 是否启用
+     */
+    setEnabled(enabled: boolean) {
+        this.enabled = enabled;
+        if (!enabled) {
+            this.isDragging = false;
+        }
     }
 
     /**

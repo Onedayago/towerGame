@@ -123,6 +123,22 @@ export class GuideStepManager {
             this.blinkTimer += deltaTime;
             this.redrawHighlight();
         }
+        
+        // 更新引导文字闪烁
+        this.updateLabelBlink(deltaTime);
+    }
+    
+    /**
+     * 更新引导文字闪烁效果
+     */
+    private updateLabelBlink(deltaTime: number) {
+        if (!this.guideLabel || !this.guideLabel.node.active) return;
+        
+        // 使用与高亮框相同的闪烁逻辑
+        const alpha = Math.floor(150 + 105 * Math.sin((this.blinkTimer / this.blinkInterval) * Math.PI * 2));
+        const color = this.guideLabel.color.clone();
+        color.a = alpha;
+        this.guideLabel.color = color;
     }
     
     /**
@@ -155,12 +171,20 @@ export class GuideStepManager {
         // 引导完成后，开始游戏
         const gameManager = GameManager.getInstance();
         gameManager.startGame();
+        // 通知引导组件启用交互
+        if (this.guideComponent && typeof (this.guideComponent as any).enableInteractions === 'function') {
+            (this.guideComponent as any).enableInteractions();
+        }
     }
     
     /**
      * 跳过引导
      */
     skip() {
+        // 通知引导组件启用交互
+        if (this.guideComponent && typeof (this.guideComponent as any).enableInteractions === 'function') {
+            (this.guideComponent as any).enableInteractions();
+        }
         this.complete();
     }
     

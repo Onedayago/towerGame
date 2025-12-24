@@ -11,4 +11,5 @@ export { MiniMap } from './MiniMap';
 export { ViewPoint } from './ViewPoint';
 export { GoldView } from './GoldView';
 export { WaveView } from './WaveView';
+export { PauseView } from './PauseView';
 

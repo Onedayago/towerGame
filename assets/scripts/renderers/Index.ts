@@ -13,8 +13,11 @@ export { GuideButtonRenderer } from './GuideButtonRenderer';
 export { GuideLabelRenderer } from './GuideLabelRenderer';
 export { WarGridRenderer } from './WarGridRenderer';
 export { WarScreenRenderer } from './WarScreenRenderer';
+export { BaseRenderer } from './BaseRenderer';
+export { PauseViewRenderer } from './PauseViewRenderer';
 export * from './weapons/Index';
 export * from './enemies/Index';
 export * from './bullets/Index';
 export * from './effects/Index';
+export * from './obstacles/Index';
 

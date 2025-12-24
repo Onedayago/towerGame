@@ -1,6 +1,7 @@
-import { _decorator, Component, Button, Label } from 'cc';
+import { _decorator, Component, Button, Label, Node } from 'cc';
 import { GameManager } from '../../managers/Index';
 import { GameStateBtnRenderer } from '../../renderers/Index';
+import { PauseView } from './components/Index';
 const { ccclass } = _decorator;
 
 /**
@@ -12,13 +13,43 @@ export class GameStateBtn extends Component {
     private button: Button | null = null;
     private label: Label | null = null;
     private gameManager: GameManager;
+    private enabled: boolean = true; // 是否启用按钮
+    private pauseView: PauseView | null = null;
 
     onLoad() {
         this.gameManager = GameManager.getInstance();
         this.initComponents();
         this.styleButton();
         this.initButtonEvents();
+        this.findPauseView();
         this.updateButtonText();
+    }
+    
+    /**
+     * 查找 PauseView 组件
+     */
+    private findPauseView() {
+        const scene = this.node.scene;
+        if (!scene) return;
+        
+        // 递归查找 PauseView 组件
+        this.pauseView = this.findNodeWithComponent(scene, PauseView)?.getComponent(PauseView) || null;
+    }
+    
+    /**
+     * 递归查找包含指定组件的节点
+     */
+    private findNodeWithComponent(node: Node, componentType: typeof Component): Node | null {
+        if (node.getComponent(componentType)) {
+            return node;
+        }
+        for (let child of node.children) {
+            const result = this.findNodeWithComponent(child, componentType);
+            if (result) {
+                return result;
+            }
+        }
+        return null;
     }
 
     /**
@@ -75,16 +106,37 @@ export class GameStateBtn extends Component {
      * 按钮点击事件处理
      */
     private onButtonClick() {
+        if (!this.enabled) return;
+        
         if (this.gameManager.isPaused()) {
             // 如果已暂停，则恢复游戏
             this.gameManager.resumeGame();
+            // 隐藏暂停界面
+            if (this.pauseView) {
+                this.pauseView.hide();
+            }
         } else {
             // 如果未暂停，则暂停游戏
             this.gameManager.pauseGame();
+            // 显示暂停界面
+            if (this.pauseView) {
+                this.pauseView.show();
+            }
         }
         
         // 更新按钮文本
         this.updateButtonText();
+    }
+    
+    /**
+     * 设置是否启用按钮
+     * @param enabled 是否启用
+     */
+    setEnabled(enabled: boolean) {
+        this.enabled = enabled;
+        if (this.button) {
+            this.button.interactable = enabled;
+        }
     }
 
     /**

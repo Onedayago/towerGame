@@ -16,6 +16,7 @@ export class MiniMap extends Component {
     private warViewComponent: WarView | null = null;
     private enemyManager: EnemyManager | null = null;
     private weaponManager: WeaponManager | null = null;
+    private baseNode: Node | null = null;
     
     // 更新间隔（秒）
     private readonly UPDATE_INTERVAL = 0.1;
@@ -93,6 +94,9 @@ export class MiniMap extends Component {
             if (this.warViewComponent) {
                 this.enemyManager = this.warViewComponent.getEnemyManager();
                 this.weaponManager = this.warViewComponent.getWeaponManager();
+                
+                // 查找基地节点（Home 节点）
+                this.baseNode = this.warViewNode.getChildByName('Home');
             }
         }
     }
@@ -155,6 +159,15 @@ export class MiniMap extends Component {
             minimapHeight,
             this.warViewNode,
             this.weaponManager
+        );
+
+        // 使用渲染器绘制基地位置
+        MiniMapRenderer.renderBase(
+            this.graphics,
+            minimapWidth,
+            minimapHeight,
+            this.warViewNode,
+            this.baseNode
         );
     }
 
