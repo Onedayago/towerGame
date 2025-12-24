@@ -22,7 +22,7 @@ export class WarContainer extends Component {
         
         // 设置大小为画布宽度 x 4个格子高
         const width = UiConfig.GAME_WIDTH;
-        const height = UiConfig.CELL_SIZE * 4;
+        const height = UiConfig.CELL_SIZE * 6;
         transform.setContentSize(width, height);
         transform.setAnchorPoint(0, 0);
         

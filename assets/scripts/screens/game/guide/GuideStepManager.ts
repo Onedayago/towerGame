@@ -1,5 +1,5 @@
 import { Component, Label, Node, UITransform, Graphics, Color, Vec3 } from 'cc';
-import { UiConfig } from '../../../config/Index';
+import { UiConfig, UiMarginConfig, UiBorderConfig } from '../../../config/Index';
 import { CyberpunkColors } from '../../../constants/Index';
 import { WeaponManager, GameManager } from '../../../managers/Index';
 import { GuideStepBase } from './GuideStepBase';
@@ -255,7 +255,8 @@ export class GuideStepManager {
         const rectX = localPos.x - anchorPoint.x * width;
         const rectY = localPos.y - anchorPoint.y * height;
         
-        const padding = 8;
+        const padding = UiMarginConfig.GUIDE_HIGHLIGHT_PADDING;
+        const glowPadding = UiMarginConfig.GUIDE_HIGHLIGHT_GLOW_PADDING;
         const alpha = Math.floor(150 + 105 * Math.sin((this.blinkTimer / this.blinkInterval) * Math.PI * 2));
         
         // 绘制高亮框
@@ -265,7 +266,7 @@ export class GuideStepManager {
             CyberpunkColors.NEON_CYAN.b,
             alpha
         );
-        this.highlightGraphics.lineWidth = 4;
+        this.highlightGraphics.lineWidth = UiBorderConfig.THICK_BORDER_WIDTH;
         this.highlightGraphics.rect(
             rectX - padding,
             rectY - padding,
@@ -281,12 +282,12 @@ export class GuideStepManager {
             CyberpunkColors.NEON_CYAN.b,
             Math.floor(alpha * 0.5)
         );
-        this.highlightGraphics.lineWidth = 2;
+        this.highlightGraphics.lineWidth = UiBorderConfig.DEFAULT_BORDER_WIDTH;
         this.highlightGraphics.rect(
-            rectX - padding - 3,
-            rectY - padding - 3,
-            width + (padding + 3) * 2,
-            height + (padding + 3) * 2
+            rectX - padding - glowPadding,
+            rectY - padding - glowPadding,
+            width + (padding + glowPadding) * 2,
+            height + (padding + glowPadding) * 2
         );
         this.highlightGraphics.stroke();
     }

@@ -136,7 +136,7 @@ export class MiniMap extends Component {
         // 获取 WarView 的 UITransform（用于绘制网格）
         const warViewTransform = this.warViewNode.getComponent(UITransform);
 
-        // 使用渲染器绘制背景（包含网格）
+        // 使用渲染器绘制背景（只绘制边框）
         MiniMapRenderer.renderBackground(this.graphics, minimapWidth, minimapHeight, warViewTransform || undefined);
 
         // 使用渲染器绘制敌人位置

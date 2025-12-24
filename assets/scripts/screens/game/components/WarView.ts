@@ -62,7 +62,7 @@ export class WarView extends Component {
         const transform = this.node.getComponent(UITransform);
         
         const width = UiConfig.GAME_WIDTH * 2;
-        const height = UiConfig.CELL_SIZE * 8;
+        const height = UiConfig.CELL_SIZE * 12;
         transform.setContentSize(width, height);
         transform.setAnchorPoint(0, 0);
         this.node.setPosition(0, 0, 0);

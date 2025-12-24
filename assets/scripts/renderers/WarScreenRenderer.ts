@@ -1,6 +1,7 @@
 import { Graphics, UITransform } from 'cc';
-import { UiConfig } from '../config/Index';
+import { UiBorderConfig } from '../config/Index';
 import { CyberpunkColors } from '../constants/Index';
+import { DrawHelper } from '../utils/Index';
 
 /**
  * 战争界面渲染器
@@ -20,26 +21,8 @@ export class WarScreenRenderer {
 
         graphics.clear();
 
-        // 绘制渐变背景（从深蓝紫色到更深色，赛博朋克风格）
-        const gradientSteps = 50;
-        const stepHeight = height / gradientSteps;
-
-        for (let i = 0; i < gradientSteps; i++) {
-            const ratio = i / (gradientSteps - 1);
-            
-            // 创建渐变颜色（从深蓝紫色到更深色）
-            const color = CyberpunkColors.createGradientColor(
-                CyberpunkColors.START_SCREEN_BG_START,
-                CyberpunkColors.START_SCREEN_BG_END,
-                ratio
-            );
-            
-            const y = stepHeight * i;
-            
-            graphics.fillColor = color;
-            graphics.rect(0, y, width, stepHeight + 1); // +1 避免间隙
-            graphics.fill();
-        }
+        // 只绘制边框
+        DrawHelper.drawRectBorder(graphics, 0, 0, width, height, CyberpunkColors.NEON_CYAN, UiBorderConfig.DEFAULT_BORDER_WIDTH);
     }
 }
 

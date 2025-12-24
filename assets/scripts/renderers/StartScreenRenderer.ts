@@ -1,6 +1,7 @@
 import { Graphics, UITransform, Label, Node, Button, Color } from 'cc';
 import { UiColors } from '../constants/Index';
-import { UiConfig } from '../config/Index';
+import { UiFontConfig, UiBorderConfig } from '../config/Index';
+import { DrawHelper, UIStyleHelper } from '../utils/Index';
 
 /**
  * 开始界面渲染器
@@ -9,7 +10,7 @@ import { UiConfig } from '../config/Index';
  */
 export class StartScreenRenderer {
     // 标题样式配置
-    private static readonly TITLE_FONT_SIZE = 48;
+    private static readonly TITLE_FONT_SIZE = UiFontConfig.LARGE_FONT_SIZE;
     private static readonly TITLE_COLOR = new Color(255, 165, 0, 255); // 橙色（火箭塔颜色）
     private static readonly TITLE_GRADIENT_COLORS = [
         new Color(255, 165, 0, 255), // 橙色
@@ -18,7 +19,7 @@ export class StartScreenRenderer {
     ];
     
     // 副标题样式配置
-    private static readonly SUBTITLE_FONT_SIZE = 24;
+    private static readonly SUBTITLE_FONT_SIZE = UiFontConfig.MEDIUM_FONT_SIZE;
     private static readonly SUBTITLE_COLOR = new Color(200, 200, 200, 255); // 浅灰色
     
     // 按钮样式配置
@@ -45,31 +46,10 @@ export class StartScreenRenderer {
 
         graphics.clear();
 
-        // 绘制渐变背景（从黑色到深蓝紫色）
-        // 锚点在中心时，需要从 -width/2 和 -height/2 开始绘制
-        const gradientSteps = UiColors.START_SCREEN_GRADIENT_STEPS;
-        const stepHeight = height / gradientSteps;
-        
-        // 起始Y坐标（从底部开始，考虑锚点在中心）
-        const startY = -height / 2;
-
-        for (let i = 0; i < gradientSteps; i++) {
-            const ratio = i / (gradientSteps - 1);
-            
-            // 使用常量创建渐变颜色
-            const color = UiColors.createGradientColor(
-                UiColors.START_SCREEN_BG_START,
-                UiColors.START_SCREEN_BG_END,
-                ratio
-            );
-            
-            const y = startY + stepHeight * i;
-            
-            graphics.fillColor = color;
-            // 从 -width/2 开始绘制，考虑锚点在中心
-            graphics.rect(-width / 2, y, width, stepHeight + 1); // +1 避免间隙
-            graphics.fill();
-        }
+        // 只绘制边框
+        const x = -width / 2;
+        const y = -height / 2;
+        DrawHelper.drawRectBorder(graphics, x, y, width, height, UiColors.START_SCREEN_BG_END, UiBorderConfig.DEFAULT_BORDER_WIDTH);
     }
     
     /**
@@ -79,23 +59,15 @@ export class StartScreenRenderer {
     static styleTitleLabel(label: Label | null): void {
         if (!label) return;
         
-        // 设置标题样式（参考原游戏）
         label.string = '塔防游戏';
-        label.fontSize = this.TITLE_FONT_SIZE;
-        label.color = this.TITLE_COLOR;
-        label.horizontalAlign = Label.HorizontalAlign.CENTER;
-        label.verticalAlign = Label.VerticalAlign.CENTER;
-        
-        // 启用描边和阴影效果（增强视觉效果）
-        label.enableOutline = true;
-        label.outlineWidth = 3;
-        label.outlineColor = new Color(0, 0, 0, 200); // 黑色描边
-        
-        // 确保节点居中
-        const transform = label.node.getComponent(UITransform);
-        if (transform) {
-            transform.setAnchorPoint(0.5, 0.5);
-        }
+        UIStyleHelper.styleLabel(
+            label,
+            this.TITLE_FONT_SIZE,
+            this.TITLE_COLOR,
+            3,
+            new Color(0, 0, 0, 200),
+            true
+        );
     }
     
     /**
@@ -105,23 +77,15 @@ export class StartScreenRenderer {
     static styleSubtitleLabel(label: Label | null): void {
         if (!label) return;
         
-        // 设置副标题样式
         label.string = '点击开始游戏';
-        label.fontSize = this.SUBTITLE_FONT_SIZE;
-        label.color = this.SUBTITLE_COLOR;
-        label.horizontalAlign = Label.HorizontalAlign.CENTER;
-        label.verticalAlign = Label.VerticalAlign.CENTER;
-        
-        // 启用描边
-        label.enableOutline = true;
-        label.outlineWidth = 2;
-        label.outlineColor = new Color(0, 0, 0, 150); // 黑色描边，半透明
-        
-        // 确保节点居中
-        const transform = label.node.getComponent(UITransform);
-        if (transform) {
-            transform.setAnchorPoint(0.5, 0.5);
-        }
+        UIStyleHelper.styleLabel(
+            label,
+            this.SUBTITLE_FONT_SIZE,
+            this.SUBTITLE_COLOR,
+            2,
+            new Color(0, 0, 0, 150),
+            true
+        );
     }
     
     /**
@@ -131,29 +95,8 @@ export class StartScreenRenderer {
     static styleStartButton(button: Button | null): void {
         if (!button) return;
         
-        // 设置按钮颜色（参考原游戏：橙色）
-        button.normalColor = this.BUTTON_COLORS.START;
-        
-        // 悬停状态：稍微变亮
-        const hoverColor = this.BUTTON_COLORS.START.clone();
-        hoverColor.r = Math.min(255, hoverColor.r * 1.2);
-        hoverColor.g = Math.min(255, hoverColor.g * 1.2);
-        hoverColor.b = Math.min(255, hoverColor.b * 1.2);
-        button.hoverColor = hoverColor;
-        
-        // 按下状态：稍微变暗
-        const pressedColor = this.BUTTON_COLORS.START.clone();
-        pressedColor.r = Math.max(0, pressedColor.r * 0.8);
-        pressedColor.g = Math.max(0, pressedColor.g * 0.8);
-        pressedColor.b = Math.max(0, pressedColor.b * 0.8);
-        button.pressedColor = pressedColor;
-        
-        // 禁用状态：灰色
-        button.disabledColor = new Color(128, 128, 128, 255);
-        button.transition = Button.Transition.COLOR;
-        
-        // 设置按钮文字
-        this.setButtonLabel(button.node, '开始游戏', Color.WHITE);
+        UIStyleHelper.styleButton(button, this.BUTTON_COLORS.START);
+        UIStyleHelper.setButtonLabel(button.node, '开始游戏', Color.WHITE);
     }
     
     /**
@@ -163,72 +106,7 @@ export class StartScreenRenderer {
     static styleHelpButton(button: Button | null): void {
         if (!button) return;
         
-        // 设置按钮颜色（参考原游戏：青色）
-        button.normalColor = this.BUTTON_COLORS.HELP;
-        
-        // 悬停状态：稍微变亮
-        const hoverColor = this.BUTTON_COLORS.HELP.clone();
-        hoverColor.r = Math.min(255, hoverColor.r * 1.2);
-        hoverColor.g = Math.min(255, hoverColor.g * 1.2);
-        hoverColor.b = Math.min(255, hoverColor.b * 1.2);
-        button.hoverColor = hoverColor;
-        
-        // 按下状态：稍微变暗
-        const pressedColor = this.BUTTON_COLORS.HELP.clone();
-        pressedColor.r = Math.max(0, pressedColor.r * 0.8);
-        pressedColor.g = Math.max(0, pressedColor.g * 0.8);
-        pressedColor.b = Math.max(0, pressedColor.b * 0.8);
-        button.pressedColor = pressedColor;
-        
-        // 禁用状态：灰色
-        button.disabledColor = new Color(128, 128, 128, 255);
-        button.transition = Button.Transition.COLOR;
-        
-        // 设置按钮文字
-        this.setButtonLabel(button.node, '游戏帮助', Color.WHITE);
-    }
-    
-    /**
-     * 设置按钮标签文字
-     * @param buttonNode 按钮节点
-     * @param text 文字内容
-     * @param textColor 文字颜色
-     */
-    private static setButtonLabel(buttonNode: Node, text: string, textColor: Color): void {
-        if (!buttonNode) return;
-        
-        // 查找或创建 Label 子节点
-        let labelNode = buttonNode.getChildByName('Label');
-        let label: Label | null = null;
-        
-        if (!labelNode) {
-            // 如果没有 Label 子节点，尝试在按钮节点本身查找
-            label = buttonNode.getComponent(Label);
-            if (label) {
-                label.string = text;
-                label.color = textColor;
-                label.fontSize = 20;
-                label.horizontalAlign = Label.HorizontalAlign.CENTER;
-                label.verticalAlign = Label.VerticalAlign.CENTER;
-                label.enableOutline = true;
-                label.outlineWidth = 2;
-                label.outlineColor = new Color(0, 0, 0, 200);
-                return;
-            }
-        } else {
-            label = labelNode.getComponent(Label);
-        }
-        
-        // 如果找到了 Label，设置文字
-        if (label) {
-            label.string = text;
-            label.color = textColor;
-            label.fontSize = 20;
-            label.horizontalAlign = Label.HorizontalAlign.CENTER;
-            label.verticalAlign = Label.VerticalAlign.CENTER;
-            label.enableOutline = true;
-            label.outlineWidth = 2;
-            label.outlineColor = new Color(0, 0, 0, 200);
-        }
+        UIStyleHelper.styleButton(button, this.BUTTON_COLORS.HELP);
+        UIStyleHelper.setButtonLabel(button.node, '游戏帮助', Color.WHITE);
     }
 }

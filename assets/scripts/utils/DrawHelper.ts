@@ -189,5 +189,89 @@ export class DrawHelper {
         graphics.rect(x, y, width, height);
         graphics.fill();
     }
+
+    /**
+     * 绘制矩形边框（使用 moveTo 和 lineTo，不填充）
+     * @param graphics Graphics 组件
+     * @param x 起始X坐标
+     * @param y 起始Y坐标
+     * @param width 宽度
+     * @param height 高度
+     * @param strokeColor 边框颜色
+     * @param lineWidth 边框宽度
+     */
+    static drawRectBorder(
+        graphics: Graphics,
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+        strokeColor: Color,
+        lineWidth: number = 1
+    ): void {
+        if (!graphics) return;
+
+        graphics.strokeColor = strokeColor;
+        graphics.lineWidth = lineWidth;
+        // 绘制矩形边框：上、右、下、左
+        graphics.moveTo(x, y);
+        graphics.lineTo(x + width, y);
+        graphics.lineTo(x + width, y + height);
+        graphics.lineTo(x, y + height);
+        graphics.lineTo(x, y);
+        graphics.stroke();
+    }
+
+    /**
+     * 绘制水平线
+     * @param graphics Graphics 组件
+     * @param x1 起始X坐标
+     * @param y Y坐标
+     * @param x2 结束X坐标
+     * @param strokeColor 线条颜色
+     * @param lineWidth 线条宽度
+     */
+    static drawHorizontalLine(
+        graphics: Graphics,
+        x1: number,
+        y: number,
+        x2: number,
+        strokeColor: Color,
+        lineWidth: number = 1
+    ): void {
+        if (!graphics) return;
+
+        graphics.strokeColor = strokeColor;
+        graphics.lineWidth = lineWidth;
+        graphics.moveTo(x1, y);
+        graphics.lineTo(x2, y);
+        graphics.stroke();
+    }
+
+    /**
+     * 绘制垂直线
+     * @param graphics Graphics 组件
+     * @param x X坐标
+     * @param y1 起始Y坐标
+     * @param y2 结束Y坐标
+     * @param strokeColor 线条颜色
+     * @param lineWidth 线条宽度
+     */
+    static drawVerticalLine(
+        graphics: Graphics,
+        x: number,
+        y1: number,
+        y2: number,
+        strokeColor: Color,
+        lineWidth: number = 1
+    ): void {
+        if (!graphics) return;
+
+        graphics.strokeColor = strokeColor;
+        graphics.lineWidth = lineWidth;
+        graphics.moveTo(x, y1);
+        graphics.lineTo(x, y2);
+        graphics.stroke();
+    }
 }
 

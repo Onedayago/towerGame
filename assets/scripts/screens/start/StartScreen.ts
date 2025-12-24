@@ -129,7 +129,7 @@ export class StartScreen extends Component {
 
     /**
      * 渲染背景
-     * 使用渲染器处理绘制逻辑
+     * 使用渲染器处理绘制逻辑（只绘制边框）
      */
     private renderBackground() {
         if (!this.graphics) return;

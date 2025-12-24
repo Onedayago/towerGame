@@ -3,6 +3,7 @@ import { UiColors } from '../constants/Index';
 import { EnemyManager, WeaponManager } from '../managers/Index';
 import { WeaponBase } from '../weapons/Index';
 import { getWeaponColor } from '../constants/Index';
+import { DrawHelper } from '../utils/Index';
 
 /**
  * 小地图渲染器
@@ -24,40 +25,25 @@ export class MiniMapRenderer {
     static renderBackground(graphics: Graphics, width: number, height: number, warViewTransform?: UITransform): void {
         if (!graphics) return;
 
-        // 绘制渐变背景（从深蓝紫色到更深的蓝紫色）
-        const gradientSteps = UiColors.MINIMAP_GRADIENT_STEPS;
-        const stepHeight = height / gradientSteps;
-
-        for (let i = 0; i < gradientSteps; i++) {
-            const ratio = i / (gradientSteps - 1);
-            
-            // 使用常量创建渐变颜色
-            const color = UiColors.createGradientColor(
-                UiColors.MINIMAP_BG_START,
-                UiColors.MINIMAP_BG_END,
-                ratio
-            );
-            
-            const y = stepHeight * i;
-            
-            graphics.fillColor = color;
-            graphics.rect(0, y, width, stepHeight + 1);
-            graphics.fill();
-        }
-
         // 网格绘制已移除
 
         // 绘制外边框（发光效果，青色）
-        graphics.strokeColor = UiColors.MINIMAP_BORDER_COLOR;
-        graphics.lineWidth = UiColors.MINIMAP_BORDER_WIDTH;
-        graphics.rect(0, 0, width, height);
-        graphics.stroke();
+        DrawHelper.drawRectBorder(
+            graphics,
+            0, 0,
+            width, height,
+            UiColors.MINIMAP_BORDER_COLOR,
+            UiColors.MINIMAP_BORDER_WIDTH
+        );
 
         // 绘制内边框（高光，白色半透明）
-        graphics.strokeColor = UiColors.MINIMAP_INNER_BORDER_COLOR;
-        graphics.lineWidth = UiColors.MINIMAP_INNER_BORDER_WIDTH;
-        graphics.rect(1, 1, width - 2, height - 2);
-        graphics.stroke();
+        DrawHelper.drawRectBorder(
+            graphics,
+            1, 1,
+            width - 2, height - 2,
+            UiColors.MINIMAP_INNER_BORDER_COLOR,
+            UiColors.MINIMAP_INNER_BORDER_WIDTH
+        );
     }
 
     /**

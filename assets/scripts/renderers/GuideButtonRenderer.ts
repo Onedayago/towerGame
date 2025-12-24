@@ -1,5 +1,7 @@
 import { Button, Label, Color } from 'cc';
 import { CyberpunkColors } from '../constants/Index';
+import { UIStyleHelper } from '../utils/Index';
+import { UiFontConfig, UiOutlineConfig } from '../config/Index';
 
 /**
  * 引导按钮渲染器
@@ -13,9 +15,9 @@ export class GuideButtonRenderer {
     private static readonly SKIP_BUTTON_COLOR = CyberpunkColors.NEON_ORANGE;
     
     // 文字样式配置
-    private static readonly LABEL_FONT_SIZE = 18;
+    private static readonly LABEL_FONT_SIZE = UiFontConfig.GUIDE_BUTTON_FONT_SIZE;
     private static readonly LABEL_COLOR = Color.WHITE;
-    private static readonly LABEL_OUTLINE_WIDTH = 2;
+    private static readonly LABEL_OUTLINE_WIDTH = UiOutlineConfig.DEFAULT_OUTLINE_WIDTH;
     private static readonly LABEL_OUTLINE_COLOR = new Color(0, 0, 0, 200);
     
     /**
@@ -44,26 +46,7 @@ export class GuideButtonRenderer {
      * @param baseColor 基础颜色
      */
     private static styleButton(button: Button, baseColor: Color): void {
-        // 设置按钮颜色
-        button.normalColor = baseColor;
-        
-        // 悬停状态：稍微变亮
-        const hoverColor = baseColor.clone();
-        hoverColor.r = Math.min(255, hoverColor.r * 1.2);
-        hoverColor.g = Math.min(255, hoverColor.g * 1.2);
-        hoverColor.b = Math.min(255, hoverColor.b * 1.2);
-        button.hoverColor = hoverColor;
-        
-        // 按下状态：稍微变暗
-        const pressedColor = baseColor.clone();
-        pressedColor.r = Math.max(0, pressedColor.r * 0.8);
-        pressedColor.g = Math.max(0, pressedColor.g * 0.8);
-        pressedColor.b = Math.max(0, pressedColor.b * 0.8);
-        button.pressedColor = pressedColor;
-        
-        // 禁用状态：灰色
-        button.disabledColor = new Color(128, 128, 128, 255);
-        button.transition = Button.Transition.COLOR;
+        UIStyleHelper.styleButton(button, baseColor);
     }
     
     /**
@@ -71,18 +54,13 @@ export class GuideButtonRenderer {
      * @param label Label 组件
      */
     static styleLabel(label: Label | null): void {
-        if (!label) return;
-        
-        // 设置文字样式
-        label.fontSize = this.LABEL_FONT_SIZE;
-        label.color = this.LABEL_COLOR;
-        label.horizontalAlign = Label.HorizontalAlign.CENTER;
-        label.verticalAlign = Label.VerticalAlign.CENTER;
-        
-        // 启用描边效果
-        label.enableOutline = true;
-        label.outlineWidth = this.LABEL_OUTLINE_WIDTH;
-        label.outlineColor = this.LABEL_OUTLINE_COLOR;
+        UIStyleHelper.styleLabel(
+            label,
+            this.LABEL_FONT_SIZE,
+            this.LABEL_COLOR,
+            this.LABEL_OUTLINE_WIDTH,
+            this.LABEL_OUTLINE_COLOR
+        );
     }
 }
 

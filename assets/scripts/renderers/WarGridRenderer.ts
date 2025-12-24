@@ -1,5 +1,5 @@
 import { Graphics, Color } from 'cc';
-import { UiConfig } from '../config/Index';
+import { UiConfig, UiLineConfig } from '../config/Index';
 import { CyberpunkColors } from '../constants/Index';
 
 /**
@@ -10,7 +10,7 @@ import { CyberpunkColors } from '../constants/Index';
 export class WarGridRenderer {
     // 格子线条颜色 - 赛博朋克风格：深色半透明
     private static readonly GRID_LINE_COLOR = new Color(0, 255, 255, 30); // 霓虹青色，低透明度
-    private static readonly GRID_LINE_WIDTH = 1;
+    private static readonly GRID_LINE_WIDTH = UiLineConfig.GRID_LINE_WIDTH;
     
     /**
      * 绘制战场格子

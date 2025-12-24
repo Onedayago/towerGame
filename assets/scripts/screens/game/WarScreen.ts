@@ -37,7 +37,7 @@ export class WarScreen extends Component {
             this.graphics = this.node.addComponent(Graphics);
         }
         
-        // 绘制背景
+        // 绘制背景（只绘制边框）
         const transform = this.node.getComponent(UITransform);
         if (transform && this.graphics) {
             WarScreenRenderer.renderBackground(this.graphics, transform);

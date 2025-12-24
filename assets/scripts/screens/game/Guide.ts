@@ -55,30 +55,30 @@ export class Guide extends Component {
         this.backgroundGraphics = this.backgroundNode.addComponent(Graphics);
         
         // 绘制透明背景
-        this.renderBackground();
+        // this.renderBackground();
     }
     
     /**
      * 绘制透明背景
      */
-    private renderBackground() {
-        if (!this.backgroundGraphics) return;
-        
-        this.backgroundGraphics.clear();
-        
-        // 绘制半透明深色背景（赛博朋克风格）
-        const bgColor = CyberpunkColors.createNeonGlow(CyberpunkColors.DARK_BG, 0.7);
-        this.backgroundGraphics.fillColor = bgColor;
-        this.backgroundGraphics.rect(0, 0, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
-        this.backgroundGraphics.fill();
-        
-        // 绘制边框（霓虹青色，低透明度）
-        const borderColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.3);
-        this.backgroundGraphics.strokeColor = borderColor;
-        this.backgroundGraphics.lineWidth = 2;
-        this.backgroundGraphics.rect(0, 0, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
-        this.backgroundGraphics.stroke();
-    }
+    // private renderBackground() {
+    //     if (!this.backgroundGraphics) return;
+    //     
+    //     this.backgroundGraphics.clear();
+    //     
+    //     // 绘制半透明深色背景（赛博朋克风格）
+    //     const bgColor = CyberpunkColors.createNeonGlow(CyberpunkColors.DARK_BG, 0.7);
+    //     this.backgroundGraphics.fillColor = bgColor;
+    //     this.backgroundGraphics.rect(0, 0, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
+    //     this.backgroundGraphics.fill();
+    //     
+    //     // 绘制边框（霓虹青色，低透明度）
+    //     const borderColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.3);
+    //     this.backgroundGraphics.strokeColor = borderColor;
+    //     this.backgroundGraphics.lineWidth = 2;
+    //     this.backgroundGraphics.rect(0, 0, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
+    //     this.backgroundGraphics.stroke();
+    // }
     
     /**
      * 初始化节点变换属性

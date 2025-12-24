@@ -22,7 +22,7 @@ export class WaveView extends Component {
         this.waveManager.init();
         
         // 绘制背景
-        this.drawBackground();
+        // this.drawBackground();
         
         // 初始化UI
         this.initUI();
@@ -55,40 +55,40 @@ export class WaveView extends Component {
      * 参考微信小游戏，简单的深色背景和紫色边框
      * 根据节点的锚点计算绘制起点
      */
-    private drawBackground() {
-        // 获取或创建 Graphics 组件
-        this.graphics = this.node.getComponent(Graphics);
-        if (!this.graphics) {
-            this.graphics = this.node.addComponent(Graphics);
-        }
-        
-        const transform = this.node.getComponent(UITransform);
-        if (!transform || !this.graphics) return;
-        
-        const width = transform.width;
-        const height = transform.height;
-        const anchorPoint = transform.anchorPoint;
-        
-        // 清除之前的绘制
-        this.graphics.clear();
-        
-        // 根据锚点计算绘制起点
-        const x = -width * anchorPoint.x;
-        const y = -height * anchorPoint.y;
-        
-        // 绘制深色半透明背景
-        const bgColor = new Color(30, 35, 45, 230); // 深色背景
-        this.graphics.fillColor = bgColor;
-        this.graphics.rect(x, y, width, height);
-        this.graphics.fill();
-        
-        // 绘制紫色边框（参考原游戏）
-        const borderColor = new Color(157, 0, 255, 255); // 紫色边框
-        this.graphics.strokeColor = borderColor;
-        this.graphics.lineWidth = 2;
-        this.graphics.rect(x, y, width, height);
-        this.graphics.stroke();
-    }
+    // private drawBackground() {
+    //     // 获取或创建 Graphics 组件
+    //     this.graphics = this.node.getComponent(Graphics);
+    //     if (!this.graphics) {
+    //         this.graphics = this.node.addComponent(Graphics);
+    //     }
+    //     
+    //     const transform = this.node.getComponent(UITransform);
+    //     if (!transform || !this.graphics) return;
+    //     
+    //     const width = transform.width;
+    //     const height = transform.height;
+    //     const anchorPoint = transform.anchorPoint;
+    //     
+    //     // 清除之前的绘制
+    //     this.graphics.clear();
+    //     
+    //     // 根据锚点计算绘制起点
+    //     const x = -width * anchorPoint.x;
+    //     const y = -height * anchorPoint.y;
+    //     
+    //     // 绘制深色半透明背景
+    //     const bgColor = new Color(30, 35, 45, 230); // 深色背景
+    //     this.graphics.fillColor = bgColor;
+    //     this.graphics.rect(x, y, width, height);
+    //     this.graphics.fill();
+    //     
+    //     // 绘制紫色边框（参考原游戏）
+    //     const borderColor = new Color(157, 0, 255, 255); // 紫色边框
+    //     this.graphics.strokeColor = borderColor;
+    //     this.graphics.lineWidth = 2;
+    //     this.graphics.rect(x, y, width, height);
+    //     this.graphics.stroke();
+    // }
     
     /**
      * 初始化UI
