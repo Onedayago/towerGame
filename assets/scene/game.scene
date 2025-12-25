@@ -2912,8 +2912,12 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "waveLabel": null,
-    "progressLabel": null,
+    "waveLabel": {
+      "__id__": 104
+    },
+    "progressLabel": {
+      "__id__": 107
+    },
     "_id": "95b9J6VDlNl6FPskNN+ptG"
   },
   {
@@ -4396,7 +4400,6 @@
     "menuButton": {
       "__id__": 166
     },
-    "pauseBtn": null,
     "_id": "79Ol0vYhlJS4Ydu4sbg9vD"
   },
   {
