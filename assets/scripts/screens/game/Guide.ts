@@ -3,7 +3,6 @@ import { WeaponManager } from '../../managers/Index';
 import { WarView } from './components/Index';
 import { GuideStepManager } from './guide/GuideStepManager';
 import { GuideButtonRenderer, GuideLabelRenderer } from '../../renderers/Index';
-import { CyberpunkColors } from '../../constants/Index';
 import { UiConfig } from '../../config/Index';
 const { ccclass, property } = _decorator;
 
@@ -14,17 +13,35 @@ const { ccclass, property } = _decorator;
 @ccclass('Guide')
 export class Guide extends Component {
     
+    // 组件引用（通过编辑器绑定）
+    @property({ type: Label, displayName: '引导文字标签' })
     private guideLabel: Label | null = null;
-    private weaponManager: WeaponManager | null = null;
-    private warView: WarView | null = null;
-    private stepManager: GuideStepManager | null = null;
+    
+    @property({ type: Button, displayName: '下一步按钮' })
     private nextButton: Button | null = null;
+    
+    @property({ type: Button, displayName: '跳过按钮' })
     private skipButton: Button | null = null;
+    
+    @property({ type: WarView, displayName: '战场视图组件' })
+    private warView: WarView | null = null;
+    
+    @property({ type: Node, displayName: '小地图节点' })
+    private miniMapNode: Node | null = null;
+    
+    @property({ type: Node, displayName: '金币视图节点' })
+    private goldViewNode: Node | null = null;
+    
+    @property({ type: Node, displayName: '波次视图节点' })
+    private waveViewNode: Node | null = null;
+    
+    @property({ type: Node, displayName: '暂停按钮节点' })
+    private pauseButtonNode: Node | null = null;
+    
+    private weaponManager: WeaponManager | null = null;
+    private stepManager: GuideStepManager | null = null;
     private backgroundGraphics: Graphics | null = null;
     private backgroundNode: Node | null = null;
-    
-    @property({ displayName: '引导持续时间（秒）', tooltip: '每个引导步骤的显示时间' })
-    public stepDuration: number = 2.0;
     
     @property({ displayName: '是否自动开始引导', tooltip: '游戏开始后是否自动显示引导' })
     public autoStart: boolean = true;
@@ -54,31 +71,9 @@ export class Guide extends Component {
         // 添加 Graphics 组件用于绘制背景
         this.backgroundGraphics = this.backgroundNode.addComponent(Graphics);
         
-        // 绘制透明背景
-        // this.renderBackground();
+    
     }
     
-    /**
-     * 绘制透明背景
-     */
-    // private renderBackground() {
-    //     if (!this.backgroundGraphics) return;
-    //     
-    //     this.backgroundGraphics.clear();
-    //     
-    //     // 绘制半透明深色背景（赛博朋克风格）
-    //     const bgColor = CyberpunkColors.createNeonGlow(CyberpunkColors.DARK_BG, 0.7);
-    //     this.backgroundGraphics.fillColor = bgColor;
-    //     this.backgroundGraphics.rect(0, 0, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
-    //     this.backgroundGraphics.fill();
-    //     
-    //     // 绘制边框（霓虹青色，低透明度）
-    //     const borderColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.3);
-    //     this.backgroundGraphics.strokeColor = borderColor;
-    //     this.backgroundGraphics.lineWidth = 2;
-    //     this.backgroundGraphics.rect(0, 0, UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
-    //     this.backgroundGraphics.stroke();
-    // }
     
     /**
      * 初始化节点变换属性
@@ -103,55 +98,36 @@ export class Guide extends Component {
      * 初始化组件
      */
     private initComponents() {
-        // 自动查找引导文字节点（在 Guide 组件下查找名为 'GuideLabelNode' 的子节点）
-        const labelNode = this.node.getChildByName('GuideLabelNode');
-        
-        if (labelNode) {
-            // 直接获取 Label 组件
-            this.guideLabel = labelNode.getComponent(Label);
-            // 美化引导文字
-            if (this.guideLabel) {
-                GuideLabelRenderer.styleLabel(this.guideLabel);
-            }
+        // 美化引导文字
+        if (this.guideLabel) {
+            GuideLabelRenderer.styleLabel(this.guideLabel);
         }
         
-        // 自动查找下一步按钮（在 Guide 组件下查找名为 'NextButton' 的子节点）
-        const nextButtonNode = this.node.getChildByName('NextButton');
-        if (nextButtonNode) {
-            this.nextButton = nextButtonNode.getComponent(Button);
-            if (this.nextButton) {
-                this.nextButton.node.on(Button.EventType.CLICK, this.onNextButtonClick, this);
-                // 美化下一步按钮
-                GuideButtonRenderer.styleNextButton(this.nextButton);
-                // 美化按钮文字
-                const nextLabel = this.nextButton.node.getComponent(Label) || 
-                                 this.nextButton.node.getChildByName('Label')?.getComponent(Label);
-                GuideButtonRenderer.styleLabel(nextLabel);
-            }
+        // 初始化下一步按钮
+        if (this.nextButton) {
+            this.nextButton.node.on(Button.EventType.CLICK, this.onNextButtonClick, this);
+            // 美化下一步按钮
+            GuideButtonRenderer.styleNextButton(this.nextButton);
+            // 美化按钮文字
+            const nextLabel = this.nextButton.node.getComponent(Label) || 
+                             this.nextButton.node.getChildByName('Label')?.getComponent(Label);
+            GuideButtonRenderer.styleLabel(nextLabel);
         }
         
-        // 自动查找跳过按钮（在 Guide 组件下查找名为 'SkipButton' 的子节点）
-        const skipButtonNode = this.node.getChildByName('SkipButton');
-        if (skipButtonNode) {
-            this.skipButton = skipButtonNode.getComponent(Button);
-            if (this.skipButton) {
-                this.skipButton.node.on(Button.EventType.CLICK, this.onSkipButtonClick, this);
-                // 美化跳过按钮
-                GuideButtonRenderer.styleSkipButton(this.skipButton);
-                // 美化按钮文字
-                const skipLabel = this.skipButton.node.getComponent(Label) || 
-                                 this.skipButton.node.getChildByName('Label')?.getComponent(Label);
-                GuideButtonRenderer.styleLabel(skipLabel);
-            }
+        // 初始化跳过按钮
+        if (this.skipButton) {
+            this.skipButton.node.on(Button.EventType.CLICK, this.onSkipButtonClick, this);
+            // 美化跳过按钮
+            GuideButtonRenderer.styleSkipButton(this.skipButton);
+            // 美化按钮文字
+            const skipLabel = this.skipButton.node.getComponent(Label) || 
+                             this.skipButton.node.getChildByName('Label')?.getComponent(Label);
+            GuideButtonRenderer.styleLabel(skipLabel);
         }
         
-        // 查找 WarView 组件和 WeaponManager
-        const scene = this.node.scene;
-        if (scene) {
-            this.warView = this.findNodeWithComponent(scene, WarView)?.getComponent(WarView) || null;
-            if (this.warView) {
-                this.weaponManager = this.warView.getWeaponManager();
-            }
+        // 获取 WeaponManager
+        if (this.warView) {
+            this.weaponManager = this.warView.getWeaponManager();
         }
         
         // 初始化步骤管理器
@@ -159,24 +135,13 @@ export class Guide extends Component {
             this,
             this.guideLabel,
             this.weaponManager,
-            this.stepDuration
-        );
-    }
-    
-    /**
-     * 递归查找包含指定组件的节点
-     */
-    private findNodeWithComponent(node: Node, componentType: typeof Component): Node | null {
-        if (node.getComponent(componentType)) {
-            return node;
-        }
-        for (let child of node.children) {
-            const result = this.findNodeWithComponent(child, componentType);
-            if (result) {
-                return result;
+            {
+                miniMapNode: this.miniMapNode,
+                goldViewNode: this.goldViewNode,
+                waveViewNode: this.waveViewNode,
+                pauseButtonNode: this.pauseButtonNode
             }
-        }
-        return null;
+        );
     }
     
     /**
@@ -266,14 +231,10 @@ export class Guide extends Component {
         }
         
         // 禁用暂停按钮
-        const scene = this.node.scene;
-        if (scene) {
-            const gameStateBtnNode = this.findNodeWithComponent(scene, 'GameStateBtn' as any);
-            if (gameStateBtnNode) {
-                const gameStateBtn = gameStateBtnNode.getComponent('GameStateBtn') as any;
-                if (gameStateBtn && typeof gameStateBtn.setEnabled === 'function') {
-                    gameStateBtn.setEnabled(false);
-                }
+        if (this.pauseButtonNode) {
+            const pauseBtn = this.pauseButtonNode.getComponent('PauseBtn' as any) as any;
+            if (pauseBtn && typeof pauseBtn.setEnabled === 'function') {
+                pauseBtn.setEnabled(false);
             }
         }
     }
@@ -291,14 +252,10 @@ export class Guide extends Component {
         }
         
         // 启用暂停按钮
-        const scene = this.node.scene;
-        if (scene) {
-            const gameStateBtnNode = this.findNodeWithComponent(scene, 'GameStateBtn' as any);
-            if (gameStateBtnNode) {
-                const gameStateBtn = gameStateBtnNode.getComponent('GameStateBtn') as any;
-                if (gameStateBtn && typeof gameStateBtn.setEnabled === 'function') {
-                    gameStateBtn.setEnabled(true);
-                }
+        if (this.pauseButtonNode) {
+            const pauseBtn = this.pauseButtonNode.getComponent('PauseBtn' as any) as any;
+            if (pauseBtn && typeof pauseBtn.setEnabled === 'function') {
+                pauseBtn.setEnabled(true);
             }
         }
     }

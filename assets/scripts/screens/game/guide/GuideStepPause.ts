@@ -5,13 +5,10 @@ import { GuideStepBase } from './GuideStepBase';
  * 暂停引导步骤
  */
 export class GuideStepPause extends GuideStepBase {
-    private stepDuration: number = 2.0;
-    private elapsed: number = 0;
     private completed: boolean = false;
     
-    constructor(guideComponent: Component, guideLabel: Label | null, stepDuration: number = 2.0) {
+    constructor(guideComponent: Component, guideLabel: Label | null) {
         super(guideComponent, guideLabel);
-        this.stepDuration = stepDuration;
     }
     
     getStepId(): string {
@@ -27,12 +24,11 @@ export class GuideStepPause extends GuideStepBase {
     }
     
     getTargetNodeName(): string | null {
-        return 'GameStateBtn';
+        return 'PauseBtn';
     }
     
     start(): void {
         this.completed = false;
-        this.elapsed = 0;
         this.showText(this.getStepText());
     }
     

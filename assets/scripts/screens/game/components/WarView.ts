@@ -16,7 +16,10 @@ export class WarView extends Component {
     private obstacleManager: ObstacleManager | null = null;
     private dragHandler: MapDragHandler | null = null;
     private gameManager: GameManager;
-    private homeNode: Node | null = null; // 基地节点
+    
+    // 组件引用（通过编辑器绑定）
+    @property({ type: Node, displayName: '基地节点' })
+    private baseNode: Node | null = null;
 
     @property(Prefab)
     public enemyTankPrefab: Prefab = null;
@@ -71,14 +74,13 @@ export class WarView extends Component {
     
     /**
      * 初始化我方基地
-     * 在 Home 节点创建基地，位置在战场右边中间
+     * 在基地节点创建基地，位置在战场右边中间
      */
     private initBase() {
-        // 查找或创建 Home 节点
-        this.homeNode = this.node.getChildByName('Home');
-        if (!this.homeNode) {
-            this.homeNode = new Node('Home');
-            this.homeNode.setParent(this.node);
+        // 如果未绑定基地节点，则跳过初始化
+        if (!this.baseNode) {
+            console.warn('WarView: 基地节点未绑定，请通过编辑器绑定');
+            return;
         }
         
         // 获取战场尺寸
@@ -93,28 +95,26 @@ export class WarView extends Component {
         const baseWidth = cellSize * 2;
         const baseHeight = cellSize * 2;
         
-        // 设置 Home 节点的变换
-        const homeTransform = this.homeNode.getComponent(UITransform);
-        if (!homeTransform) {
-            this.homeNode.addComponent(UITransform);
+        // 设置基地节点的变换
+        let baseTransform = this.baseNode.getComponent(UITransform);
+        if (!baseTransform) {
+            baseTransform = this.baseNode.addComponent(UITransform);
         }
-        const homeUITransform = this.homeNode.getComponent(UITransform);
-        if (homeUITransform) {
-            homeUITransform.setAnchorPoint(0, 0);
-            homeUITransform.setContentSize(baseWidth, baseHeight);
-        }
+        
+        baseTransform.setAnchorPoint(0, 0);
+        baseTransform.setContentSize(baseWidth, baseHeight);
         
         // 计算位置：右边中间
         // X 位置：战场宽度 - 基地宽度（右边对齐）
         const baseX = battlefieldWidth - baseWidth;
         // Y 位置：战场高度的一半 - 基地高度的一半（垂直居中）
         const baseY = (battlefieldHeight - baseHeight) / 2;
-        this.homeNode.setPosition(baseX, baseY, 0);
+        this.baseNode.setPosition(baseX, baseY, 0);
         
         // 添加 Graphics 组件并绘制基地
-        let baseGraphics = this.homeNode.getComponent(Graphics);
+        let baseGraphics = this.baseNode.getComponent(Graphics);
         if (!baseGraphics) {
-            baseGraphics = this.homeNode.addComponent(Graphics);
+            baseGraphics = this.baseNode.addComponent(Graphics);
         }
         
         // 绘制基地
@@ -123,7 +123,7 @@ export class WarView extends Component {
         // 基地创建后，生成障碍物（排除基地周围3个格子范围）
         this.generateRandomObstacles(undefined, 0.08);
     }
-
+    
     /**
      * 初始化节点变换属性
      */
@@ -218,19 +218,19 @@ export class WarView extends Component {
         
         // 计算基地周围3个格子范围的排除位置
         const excludePositions: { x: number; y: number }[] = [];
-        if (this.homeNode) {
-            const homePos = this.homeNode.position;
-            const homeTransform = this.homeNode.getComponent(UITransform);
-            if (homeTransform) {
+        if (this.baseNode) {
+            const basePos = this.baseNode.position;
+            const baseTransform = this.baseNode.getComponent(UITransform);
+            if (baseTransform) {
                 const cellSize = UiConfig.CELL_SIZE;
-                const baseWidth = homeTransform.width;
-                const baseHeight = homeTransform.height;
+                const baseWidth = baseTransform.width;
+                const baseHeight = baseTransform.height;
                 
                 // 基地占据的格子范围
-                const baseStartCol = Math.floor(homePos.x / cellSize);
-                const baseEndCol = Math.floor((homePos.x + baseWidth) / cellSize);
-                const baseStartRow = Math.floor(homePos.y / cellSize);
-                const baseEndRow = Math.floor((homePos.y + baseHeight) / cellSize);
+                const baseStartCol = Math.floor(basePos.x / cellSize);
+                const baseEndCol = Math.floor((basePos.x + baseWidth) / cellSize);
+                const baseStartRow = Math.floor(basePos.y / cellSize);
+                const baseEndRow = Math.floor((basePos.y + baseHeight) / cellSize);
                 
                 // 基地周围3个格子的范围
                 const excludeStartCol = Math.max(0, baseStartCol - 3);
@@ -407,6 +407,35 @@ export class WarView extends Component {
      */
     getObstacleManager(): ObstacleManager | null {
         return this.obstacleManager;
+    }
+    
+    /**
+     * 获取基地节点（供外部调用）
+     * @returns 基地节点，如果未绑定则返回 null
+     */
+    getBaseNode(): Node | null {
+        return this.baseNode;
+    }
+    
+    /**
+     * 获取基地中心位置（供外部调用）
+     * @returns 基地中心位置，如果未绑定则返回 null
+     */
+    getBaseCenterPosition(): Vec3 | null {
+        if (!this.baseNode) {
+            return null;
+        }
+        const basePos = this.baseNode.position;
+        const baseTransform = this.baseNode.getComponent(UITransform);
+        if (!baseTransform) {
+            return new Vec3(basePos.x, basePos.y, 0);
+        }
+        // 基地锚点在左下角 (0, 0)，所以中心点是 position + size / 2
+        return new Vec3(
+            basePos.x + baseTransform.width / 2,
+            basePos.y + baseTransform.height / 2,
+            0
+        );
     }
 
 }

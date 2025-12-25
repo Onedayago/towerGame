@@ -5,13 +5,10 @@ import { GuideStepBase } from './GuideStepBase';
  * 金币引导步骤
  */
 export class GuideStepGold extends GuideStepBase {
-    private stepDuration: number = 2.0;
-    private elapsed: number = 0;
     private completed: boolean = false;
     
-    constructor(guideComponent: Component, guideLabel: Label | null, stepDuration: number = 2.0) {
+    constructor(guideComponent: Component, guideLabel: Label | null) {
         super(guideComponent, guideLabel);
-        this.stepDuration = stepDuration;
     }
     
     getStepId(): string {
@@ -32,7 +29,6 @@ export class GuideStepGold extends GuideStepBase {
     
     start(): void {
         this.completed = false;
-        this.elapsed = 0;
         this.showText(this.getStepText());
     }
     

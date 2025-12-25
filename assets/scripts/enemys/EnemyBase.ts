@@ -88,8 +88,8 @@ export class EnemyBase extends Component {
         
         transform.setAnchorPoint(0.5, 0.5);
         
-        // 所有敌人大小相同（缩小到80%）
-        const sizeScale = 0.8;
+        // 所有敌人大小相同（整体缩小）
+        const sizeScale = 0.6;
         const width = UiConfig.CELL_SIZE * sizeScale;
         const height = UiConfig.CELL_SIZE * sizeScale;
         transform.setContentSize(width, height);

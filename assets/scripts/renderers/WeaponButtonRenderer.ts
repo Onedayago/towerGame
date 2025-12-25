@@ -8,10 +8,10 @@ import { CyberpunkColors } from '../constants/Index';
  * 参考微信小游戏的按钮设计
  */
 export class WeaponButtonRenderer {
-    // 按钮配置常量
-    private static readonly BUTTON_SIZE = 40; // 按钮高度（像素）
-    private static readonly BUTTON_WIDTH = 70; // 按钮宽度（像素）- 增大以容纳文字
-    private static readonly BUTTON_RADIUS = 8; // 圆角半径
+    // 按钮配置常量（适配缩小）
+    private static readonly BUTTON_SIZE = 32; // 按钮高度（像素）- 从40缩小到32
+    private static readonly BUTTON_WIDTH = 65; // 按钮宽度（像素）- 增大以容纳文字
+    private static readonly BUTTON_RADIUS = 6; // 圆角半径 - 从8缩小到6
     private static readonly BORDER_WIDTH = 2; // 边框宽度
     
     // 升级按钮颜色 - 赛博朋克风格：霓虹绿色
@@ -239,7 +239,7 @@ export class WeaponButtonRenderer {
         if (label) {
             label.string = `升级 ${upgradeCost}`;
             label.color = Color.WHITE;
-            label.fontSize = 16; // 设置合适的字体大小
+            label.fontSize = 14; // 字体大小 - 从16缩小到14（适配按钮缩小）
             label.horizontalAlign = Label.HorizontalAlign.CENTER;
             label.verticalAlign = Label.VerticalAlign.CENTER;
             label.enableOutline = true;
@@ -309,7 +309,7 @@ export class WeaponButtonRenderer {
         if (label) {
             label.string = `卖掉 ${sellValue}`;
             label.color = Color.WHITE;
-            label.fontSize = 16; // 设置合适的字体大小
+            label.fontSize = 14; // 字体大小 - 从16缩小到14（适配按钮缩小）
             label.horizontalAlign = Label.HorizontalAlign.CENTER;
             label.verticalAlign = Label.VerticalAlign.CENTER;
             label.enableOutline = true;

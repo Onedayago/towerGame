@@ -1,5 +1,4 @@
 import { _decorator, Component, Node, Graphics, UITransform, UIOpacity } from 'cc';
-import { UiConfig } from '../../../config/Index';
 import { WarView } from './Index';
 import { EnemyManager, WeaponManager } from '../../../managers/Index';
 import { MiniMapRenderer } from '../../../renderers/Index';
@@ -12,11 +11,17 @@ const { ccclass, property } = _decorator;
 @ccclass('MiniMap')
 export class MiniMap extends Component {
     private graphics: Graphics | null = null;
-    private warViewNode: Node | null = null;
+    
+    // 组件引用（通过编辑器绑定）
+    @property({ type: WarView, displayName: '战场视图组件' })
     private warViewComponent: WarView | null = null;
+    
+    @property({ type: Node, displayName: '基地节点' })
+    private baseNode: Node | null = null;
+    
     private enemyManager: EnemyManager | null = null;
     private weaponManager: WeaponManager | null = null;
-    private baseNode: Node | null = null;
+    private warViewNode: Node | null = null;
     
     // 更新间隔（秒）
     private readonly UPDATE_INTERVAL = 0.1;
@@ -26,7 +31,7 @@ export class MiniMap extends Component {
         this.initTransform();
         this.initOpacity();
         this.initGraphics();
-        this.findWarView();
+        this.initManagers();
     }
     
     /**
@@ -79,46 +84,14 @@ export class MiniMap extends Component {
     }
 
     /**
-     * 查找 WarView 节点
+     * 初始化管理器引用
      */
-    private findWarView() {
-        const scene = this.node.scene;
-        if (!scene) return;
-
-        // 递归查找 WarView 组件
-        this.warViewNode = this.findNodeWithComponent(scene, WarView);
-    
-        if (this.warViewNode) {
-            this.warViewComponent = this.warViewNode.getComponent(WarView);
-            
-            if (this.warViewComponent) {
-                this.enemyManager = this.warViewComponent.getEnemyManager();
-                this.weaponManager = this.warViewComponent.getWeaponManager();
-                
-                // 查找基地节点（Home 节点）
-                this.baseNode = this.warViewNode.getChildByName('Home');
-            }
+    private initManagers() {
+        if (this.warViewComponent) {
+            this.warViewNode = this.warViewComponent.node;
+            this.enemyManager = this.warViewComponent.getEnemyManager();
+            this.weaponManager = this.warViewComponent.getWeaponManager();
         }
-    }
-
-
-    /**
-     * 递归查找包含指定组件的节点
-     * @param node 起始节点
-     * @param componentType 组件类型
-     * @returns 找到的节点，如果没有则返回 null
-     */
-    private findNodeWithComponent(node: Node, componentType: typeof Component): Node | null {
-        if (node.getComponent(componentType)) {
-            return node;
-        }
-        for (let child of node.children) {
-            const result = this.findNodeWithComponent(child, componentType);
-            if (result) {
-                return result;
-            }
-        }
-        return null;
     }
 
     /**

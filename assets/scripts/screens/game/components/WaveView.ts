@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Label, UITransform, Graphics, Color } from 'cc';
+import { _decorator, Component, Label } from 'cc';
 import { WaveManager } from '../../../managers/Index';
 const { ccclass, property } = _decorator;
 
@@ -10,22 +10,21 @@ const { ccclass, property } = _decorator;
 export class WaveView extends Component {
     
     private waveManager: WaveManager | null = null;
+    
+    // 组件引用（通过编辑器绑定）
+    @property({ type: Label, displayName: '波次标签' })
     private waveLabel: Label | null = null;
+    
+    @property({ type: Label, displayName: '进度标签' })
     private progressLabel: Label | null = null;
+    
     private lastWaveLevel: number = -1;
     private lastProgress: { current: number; max: number } | null = null;
-    private graphics: Graphics | null = null;
     
     onLoad() {
         // 初始化波次管理器
         this.waveManager = WaveManager.getInstance();
         this.waveManager.init();
-        
-        // 绘制背景
-        // this.drawBackground();
-        
-        // 初始化UI
-        this.initUI();
     }
     
     start() {
@@ -47,26 +46,6 @@ export class WaveView extends Component {
                 this.lastWaveLevel = currentWave;
                 this.lastProgress = { ...currentProgress };
             }
-        }
-    }
-    
-   
-    
-    /**
-     * 初始化UI
-     * 查找已存在的子节点
-     */
-    private initUI() {
-        // 查找波次标签
-        const waveLabelNode = this.node.getChildByName('WaveLabel');
-        if (waveLabelNode) {
-            this.waveLabel = waveLabelNode.getComponent(Label);
-        }
-        
-        // 查找进度标签
-        const progressLabelNode = this.node.getChildByName('ProgressLabel');
-        if (progressLabelNode) {
-            this.progressLabel = progressLabelNode.getComponent(Label);
         }
     }
     

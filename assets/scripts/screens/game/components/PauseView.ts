@@ -13,32 +13,22 @@ export class PauseView extends Component {
     private graphics: Graphics | null = null;
     private gameManager: GameManager;
     
-    // UI 节点引用（自动查找子节点）
+    // 组件引用（通过编辑器绑定）
+    @property({ type: Label, displayName: '标题标签' })
     private titleLabel: Label | null = null;
+    
+    @property({ type: Button, displayName: '继续按钮' })
     private resumeButton: Button | null = null;
+    
+    @property({ type: Button, displayName: '返回主菜单按钮' })
     private menuButton: Button | null = null;
     
     onLoad() {
         this.gameManager = GameManager.getInstance();
-        this.initTransform();
         this.initGraphics();
-        this.initComponents();
         this.styleUI();
-        this.initButtonEvents();
         // 初始时隐藏
         this.node.active = false;
-    }
-    
-    /**
-     * 初始化节点变换属性
-     */
-    private initTransform() {
-        const transform = this.node.getComponent(UITransform);
-        if (!transform) {
-            this.node.addComponent(UITransform);
-        }
-        
-       
     }
     
     /**
@@ -49,27 +39,6 @@ export class PauseView extends Component {
         if (!this.graphics) {
             this.graphics = this.node.addComponent(Graphics);
         }
-    }
-    
-    /**
-     * 初始化组件引用（自动查找子节点）
-     */
-    private initComponents() {
-        // 自动查找子节点
-        this.titleLabel = this.findComponent<Label>(this.node, 'TitleLabel', Label);
-        this.resumeButton = this.findComponent<Button>(this.node, 'ResumeButton', Button);
-        this.menuButton = this.findComponent<Button>(this.node, 'MenuButton', Button);
-    }
-    
-    /**
-     * 查找组件（辅助方法）
-     */
-    private findComponent<T>(parent: Node, name: string, componentType: typeof Component): T | null {
-        const child = parent.getChildByName(name);
-        if (child) {
-            return child.getComponent(componentType) as T;
-        }
-        return null;
     }
     
     /**
@@ -89,34 +58,54 @@ export class PauseView extends Component {
     }
     
     /**
-     * 初始化按钮事件
+     * 继续按钮点击事件（通过编辑器绑定）
      */
-    private initButtonEvents() {
-        // 继续按钮
-        if (this.resumeButton) {
-            this.resumeButton.node.on(Button.EventType.CLICK, this.onResumeClick, this);
-        }
-        
-        // 返回主菜单按钮
-        if (this.menuButton) {
-            this.menuButton.node.on(Button.EventType.CLICK, this.onMenuClick, this);
-        }
-    }
-    
-    /**
-     * 继续按钮点击事件
-     */
-    private onResumeClick() {
+    public onResumeClick() {
         if (this.gameManager.isPaused()) {
             this.gameManager.resumeGame();
             this.hide();
+            // 更新暂停按钮的文字（使用时动态查找）
+            this.updatePauseButtonText();
         }
     }
     
     /**
-     * 返回主菜单按钮点击事件
+     * 更新暂停按钮的文字
      */
-    private onMenuClick() {
+    private updatePauseButtonText() {
+        const scene = this.node.scene;
+        if (!scene) return;
+        
+        // 查找 PauseBtn 组件
+        const pauseBtnNode = this.findNodeWithComponent(scene, 'PauseBtn');
+        if (pauseBtnNode) {
+            const pauseBtn = pauseBtnNode.getComponent('PauseBtn' as any) as any;
+            if (pauseBtn && typeof pauseBtn.updateButtonText === 'function') {
+                pauseBtn.updateButtonText();
+            }
+        }
+    }
+    
+    /**
+     * 递归查找包含指定组件的节点
+     */
+    private findNodeWithComponent(node: Node, componentName: string): Node | null {
+        if (node.getComponent(componentName as any)) {
+            return node;
+        }
+        for (let child of node.children) {
+            const result = this.findNodeWithComponent(child, componentName);
+            if (result) {
+                return result;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 返回主菜单按钮点击事件（通过编辑器绑定）
+     */
+    public onMenuClick() {
         // TODO: 实现返回主菜单的逻辑
         console.log('返回主菜单');
     }
@@ -140,16 +129,5 @@ export class PauseView extends Component {
      */
     hide() {
         this.node.active = false;
-    }
-    
-    onDestroy() {
-        // 清理事件监听
-        if (this.resumeButton) {
-            this.resumeButton.node.off(Button.EventType.CLICK, this.onResumeClick, this);
-        }
-        
-        if (this.menuButton) {
-            this.menuButton.node.off(Button.EventType.CLICK, this.onMenuClick, this);
-        }
     }
 }

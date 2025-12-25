@@ -9,7 +9,7 @@ import { HealthBarComponent } from '../components/HealthBarComponent';
  */
 export class HealthBarHelper {
     private static readonly HEALTH_BAR_WIDTH_RATIO = 0.9; // 血条宽度比例
-    private static readonly HEALTH_BAR_OFFSET_Y = 0.1; // 血条Y偏移比例
+    private static readonly HEALTH_BAR_OFFSET_Y = 0.25; // 血条Y偏移比例（增大间距）
     
     /**
      * 创建或更新血条

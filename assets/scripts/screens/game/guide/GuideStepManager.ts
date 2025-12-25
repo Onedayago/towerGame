@@ -25,23 +25,37 @@ export class GuideStepManager {
     private blinkInterval: number = 0.6;
     private targetNode: Node | null = null;
     private isHighlighting: boolean = false;
+    private targetNodes: Map<string, Node | null> = new Map();
     
     constructor(
         guideComponent: Component,
         guideLabel: Label | null,
         weaponManager: WeaponManager | null,
-        stepDuration: number = 2.0
+        targetNodes?: {
+            miniMapNode?: Node | null;
+            goldViewNode?: Node | null;
+            waveViewNode?: Node | null;
+            pauseButtonNode?: Node | null;
+        }
     ) {
         this.guideComponent = guideComponent;
         this.guideLabel = guideLabel;
         this.weaponManager = weaponManager;
         
+        // 存储目标节点映射
+        if (targetNodes) {
+            this.targetNodes.set('MiniMapView', targetNodes.miniMapNode || null);
+            this.targetNodes.set('GoldView', targetNodes.goldViewNode || null);
+            this.targetNodes.set('WaveView', targetNodes.waveViewNode || null);
+            this.targetNodes.set('PauseBtn', targetNodes.pauseButtonNode || null);
+        }
+        
         // 初始化步骤列表
         this.steps = [
-            new GuideStepMiniMap(guideComponent, guideLabel, stepDuration),
-            new GuideStepGold(guideComponent, guideLabel, stepDuration),
-            new GuideStepWave(guideComponent, guideLabel, stepDuration),
-            new GuideStepPause(guideComponent, guideLabel, stepDuration),
+            new GuideStepMiniMap(guideComponent, guideLabel),
+            new GuideStepGold(guideComponent, guideLabel),
+            new GuideStepWave(guideComponent, guideLabel),
+            new GuideStepPause(guideComponent, guideLabel),
             new GuideStepWeaponDrag(guideComponent, guideLabel, weaponManager)
         ];
         
@@ -208,9 +222,15 @@ export class GuideStepManager {
             }
         }
         
-        // 如果通过步骤获取不到，且提供了节点名称，则通过名称查找
+        // 如果通过步骤获取不到，且提供了节点名称，则先尝试从映射中获取
         if (!targetNode && targetNodeName) {
-            targetNode = this.findNodeByName(scene, targetNodeName);
+            // 先从映射中查找（编辑器绑定的节点）
+            targetNode = this.targetNodes.get(targetNodeName) || null;
+            
+            // 如果映射中没有，则通过名称查找（向后兼容）
+            if (!targetNode) {
+                targetNode = this.findNodeByName(scene, targetNodeName);
+            }
         }
         
         // 如果还是找不到，且节点名称为 null（表示需要通过组件查找），尝试通过组件查找

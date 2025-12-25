@@ -1,6 +1,5 @@
 import { _decorator, Component, Node, Label, UITransform, Graphics, Color } from 'cc';
 import { GoldManager } from '../../../managers/Index';
-import { UiConfig } from '../../../config/Index';
 const { ccclass, property } = _decorator;
 
 /**
@@ -11,10 +10,15 @@ const { ccclass, property } = _decorator;
 export class GoldView extends Component {
     
     private goldManager: GoldManager | null = null;
+    
+    // 组件引用（通过编辑器绑定）
+    @property({ type: Label, displayName: '金币标签' })
     private goldLabel: Label | null = null;
+    
+    @property({ type: Node, displayName: '金币图标节点' })
     private goldIconNode: Node | null = null;
+    
     private lastGoldValue: number = -1; // 缓存上次的金币值，避免重复更新
-    private graphics: Graphics | null = null;
     
     onLoad() {
         // 初始化金币管理器
@@ -24,11 +28,13 @@ export class GoldView extends Component {
             this.goldManager.init(1000);
         }
         
-        // 绘制背景
-        // this.drawBackground();
-        
-        // 初始化UI
-        this.initUI();
+        // 如果图标节点存在且有 Graphics 组件，绘制图标
+        if (this.goldIconNode) {
+            let graphics = this.goldIconNode.getComponent(Graphics);
+            if (graphics) {
+                this.drawGoldIcon(graphics);
+            }
+        }
     }
     
     start() {
@@ -47,68 +53,6 @@ export class GoldView extends Component {
         }
     }
     
-    /**
-     * 绘制背景
-     * 参考微信小游戏，简单的深色背景和金色边框
-     * 根据节点的锚点计算绘制起点
-     */
-    // private drawBackground() {
-    //     // 获取或创建 Graphics 组件
-    //     this.graphics = this.node.getComponent(Graphics);
-    //     if (!this.graphics) {
-    //         this.graphics = this.node.addComponent(Graphics);
-    //     }
-    //     
-    //     const transform = this.node.getComponent(UITransform);
-    //     if (!transform || !this.graphics) return;
-    //     
-    //     const width = transform.width;
-    //     const height = transform.height;
-    //     const anchorPoint = transform.anchorPoint;
-    //     
-    //     // 清除之前的绘制
-    //     this.graphics.clear();
-    //     
-    //     // 根据锚点计算绘制起点
-    //     const x = -width * anchorPoint.x;
-    //     const y = -height * anchorPoint.y;
-    //     
-    //     // 绘制深色半透明背景
-    //     const bgColor = new Color(30, 35, 45, 230); // 深色背景
-    //     this.graphics.fillColor = bgColor;
-    //     this.graphics.rect(x, y, width, height);
-    //     this.graphics.fill();
-    //     
-    //     // 绘制金色边框
-    //     const borderColor = new Color(255, 215, 0, 255); // 金色边框
-    //     this.graphics.strokeColor = borderColor;
-    //     this.graphics.lineWidth = 2;
-    //     this.graphics.rect(x, y, width, height);
-    //     this.graphics.stroke();
-    // }
-    
-    /**
-     * 初始化UI
-     * 查找已存在的子节点
-     */
-    private initUI() {
-        // 查找金币数量标签
-        const labelNode = this.node.getChildByName('GoldLabel');
-        if (labelNode) {
-            this.goldLabel = labelNode.getComponent(Label);
-        }
-        
-        // 查找金币图标节点
-        this.goldIconNode = this.node.getChildByName('GoldIcon');
-        
-        // 如果图标节点存在且有 Graphics 组件，绘制图标
-        if (this.goldIconNode) {
-            let graphics = this.goldIconNode.getComponent(Graphics);
-            if (graphics) {
-                this.drawGoldIcon(graphics);
-            }
-        }
-    }
     
     /**
      * 绘制金币图标

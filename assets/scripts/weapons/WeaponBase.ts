@@ -6,6 +6,7 @@ import { BulletManager, WeaponManager, GoldManager } from '../managers/Index';
 import { BulletBase } from '../bullets/Index';
 import { TargetFinder, HealthBarHelper } from '../utils/Index';
 import { WeaponButtonRenderer } from '../renderers/Index';
+import { HealthBarRenderer } from '../renderers/HealthBarRenderer';
 const { ccclass, property } = _decorator;
 
 /**
@@ -50,8 +51,8 @@ export class WeaponBase extends Component {
         
         transform.setAnchorPoint(0.5, 0.5);
         
-        // 所有武器大小相同（缩小到80%）
-        const sizeScale = 0.8;
+        // 所有武器大小相同（整体缩小）
+        const sizeScale = 0.6;
         const width = UiConfig.CELL_SIZE * sizeScale;
         const height = UiConfig.CELL_SIZE * sizeScale;
         transform.setContentSize(width, height);
@@ -152,7 +153,11 @@ export class WeaponBase extends Component {
     protected initButtons() {
         const buttonSize = WeaponButtonRenderer.getRecommendedSize();
         const buttonWidth = WeaponButtonRenderer.getRecommendedWidth();
-        const buttonOffsetY = (UiConfig.CELL_SIZE * 0.8) / 2 + buttonSize / 2 + 10; // 按钮在武器上方
+        // 武器大小现在是 0.6，血条在武器上方（偏移0.25），按钮需要在血条上方
+        const weaponHeight = UiConfig.CELL_SIZE * 0.6;
+        const healthBarOffset = UiConfig.CELL_SIZE * 0.25; // 血条偏移（与 HealthBarHelper 保持一致）
+        const healthBarHeight = HealthBarRenderer.getHeight(); // 血条高度
+        const buttonOffsetY = (weaponHeight / 2) + healthBarOffset + (healthBarHeight / 2) + buttonSize / 2 + 10; // 按钮在血条上方
         const buttonSpacing = buttonWidth + 10; // 按钮之间的间距（使用宽度）
         
         // 从配置中获取当前等级的升级成本和出售价格

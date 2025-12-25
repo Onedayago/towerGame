@@ -4,7 +4,7 @@
  */
 
 export { WarScreen } from './WarScreen';
-export { GameStateBtn } from './GameStateBtn';
+export { PauseBtn } from './PauseBtn';
 export { Guide } from './Guide';
 
 // 导出游戏组件
