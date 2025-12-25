@@ -3,6 +3,8 @@ import { UiConfig } from '../config/Index';
 import { EnemyType, getEnemyConfig, EnemyConfig, ENEMY_COMMON_CONFIG } from '../constants/Index';
 import { BulletManager } from '../managers/BulletManager';
 import { WeaponManager } from '../managers/WeaponManager';
+import { GoldManager } from '../managers/GoldManager';
+import { AudioManager } from '../managers/AudioManager';
 import { BulletBase } from '../bullets/Index';
 import { TargetFinder, HealthBarHelper } from '../utils/Index';
 import { HitParticleEffect, ExplosionEffect } from '../effects/Index';
@@ -568,12 +570,38 @@ export class EnemyBase extends Component {
      * 子类可以重写此方法实现不同的死亡效果
      */
     protected onDeath() {
+        // 播放爆炸音效
+        const audioManager = AudioManager.getInstance();
+        audioManager.playBoomSound();
+        
+        // 发放金币奖励
+        this.giveReward();
+        
         // 创建爆炸特效
         this.createExplosionEffect();
         
         // 移除血条
         HealthBarHelper.removeHealthBar(this.node);
         this.node.destroy();
+    }
+    
+    /**
+     * 发放击败敌人的金币奖励
+     */
+    private giveReward() {
+        if (!this.config) return;
+        
+        // 获取敌人配置中的奖励金币数量
+        const reward = this.config.reward || 0;
+        
+        if (reward > 0) {
+            // 通过 GoldManager 增加金币
+            const goldManager = GoldManager.getInstance();
+            goldManager.addGold(reward);
+            
+            // 可选：输出日志用于调试
+            // console.log(`击败 ${this.enemyType}，获得 ${reward} 金币`);
+        }
     }
     
     /**

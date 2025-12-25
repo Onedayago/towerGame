@@ -27,6 +27,7 @@ export interface EnemyConfig {
     attackRange: number;     // 攻击范围（像素）
     attackDuration: number;  // 攻击持续时间（秒）
     spawnInterval?: number;  // 生成间隔（秒）
+    reward?: number;         // 击败后奖励的金币数量
 }
 
 /**
@@ -41,7 +42,8 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
         damage: 10,
         attackRange: 300,      // 攻击范围：300像素
         attackDuration: 0.3,  // 攻击持续时间：0.3秒
-        spawnInterval: 2.0    // 每2秒生成一个
+        spawnInterval: 2.0,   // 每2秒生成一个
+        reward: 10            // 击败后奖励10金币
     },
     [EnemyType.FAST_TANK]: {
         type: EnemyType.FAST_TANK,
@@ -51,7 +53,8 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
         damage: 8,
         attackRange: 250,      // 攻击范围：250像素
         attackDuration: 0.25,  // 攻击持续时间：0.25秒
-        spawnInterval: 1.5     // 每1.5秒生成一个
+        spawnInterval: 1.5,    // 每1.5秒生成一个
+        reward: 8              // 击败后奖励8金币
     },
     [EnemyType.HEAVY_TANK]: {
         type: EnemyType.HEAVY_TANK,
@@ -61,7 +64,8 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
         damage: 20,
         attackRange: 350,      // 攻击范围：350像素
         attackDuration: 0.4,  // 攻击持续时间：0.4秒
-        spawnInterval: 3.0     // 每3秒生成一个
+        spawnInterval: 3.0,    // 每3秒生成一个
+        reward: 20             // 击败后奖励20金币
     },
     [EnemyType.BOSS]: {
         type: EnemyType.BOSS,
@@ -71,7 +75,8 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
         damage: 30,
         attackRange: 400,      // 攻击范围：400像素
         attackDuration: 0.35, // 攻击持续时间：0.35秒
-        spawnInterval: 10.0   // 每10秒生成一个
+        spawnInterval: 10.0,      // 每10秒生成一个
+        reward: 50             // 击败后奖励50金币
     }
 };
 

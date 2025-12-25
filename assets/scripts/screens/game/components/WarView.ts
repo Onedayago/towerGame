@@ -1,6 +1,6 @@
-import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab, Vec3 } from 'cc';
+import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab, Vec3, AudioClip } from 'cc';
 import { UiConfig, GOLD_CONFIG } from '../../../config/Index';
-import { EnemyManager, GameManager, WeaponManager, BulletManager, GoldManager, ObstacleManager } from '../../../managers/Index';
+import { EnemyManager, GameManager, WeaponManager, BulletManager, GoldManager, ObstacleManager, AudioManager } from '../../../managers/Index';
 import { MapDragHandler } from '../../../business/Index';
 import { EnemyType, ObstacleType } from '../../../constants/Index';
 import { WarGridRenderer, BaseRenderer } from '../../../renderers/Index';
@@ -47,6 +47,12 @@ export class WarView extends Component {
     
     @property({ type: Prefab, displayName: '箱子障碍物预制体', tooltip: '箱子障碍物预制体' })
     public boxObstaclePrefab: Prefab | null = null;
+    
+    @property({ type: AudioClip, displayName: '背景音乐', tooltip: '游戏背景音乐音频剪辑' })
+    public backgroundMusicClip: AudioClip | null = null;
+    
+    @property({ type: AudioClip, displayName: '爆炸音效', tooltip: '敌人爆炸音效音频剪辑' })
+    public boomSoundClip: AudioClip | null = null;
 
     onLoad() {
         this.initTransform();
@@ -177,6 +183,31 @@ export class WarView extends Component {
         this.bulletManager.setEnemyManager(this.enemyManager);
         this.bulletManager.setWeaponManager(this.weaponManager);
         this.enemyManager.setManagers(this.bulletManager, this.weaponManager);
+        
+        // 初始化音频管理器
+        this.initAudioManager();
+    }
+    
+    /**
+     * 初始化音频管理器
+     */
+    private initAudioManager() {
+        const audioManager = AudioManager.getInstance();
+        
+        // 设置音频管理器节点（使用当前 WarView 节点）
+        audioManager.setAudioNode(this.node);
+        
+        // 设置音频资源
+        if (this.backgroundMusicClip) {
+            audioManager.setBackgroundMusic(this.backgroundMusicClip);
+        }
+        if (this.boomSoundClip) {
+            audioManager.setBoomSound(this.boomSoundClip);
+        }
+        
+        // 初始化并播放背景音乐
+        audioManager.initBackgroundMusic();
+        audioManager.playBackgroundMusic();
     }
     
     /**

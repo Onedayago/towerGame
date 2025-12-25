@@ -17,7 +17,7 @@ export class MiniMapRenderer {
     private static readonly BASE_SIZE = 4; // 基地方块边长的一半
 
     /**
-     * 绘制小地图背景
+     * 绘制小地图背景（赛博朋克风格）
      * @param graphics Graphics 组件
      * @param width 宽度
      * @param height 高度
@@ -26,9 +26,24 @@ export class MiniMapRenderer {
     static renderBackground(graphics: Graphics, width: number, height: number, warViewTransform?: UITransform): void {
         if (!graphics) return;
 
-        // 网格绘制已移除
+        graphics.clear();
 
-        // 绘制外边框（发光效果，青色）
+        // 1. 绘制深色渐变背景（参考 wegame：从深蓝紫色到更深的颜色）
+        const bgStart = UiColors.MINIMAP_BG_START;
+        const bgEnd = UiColors.MINIMAP_BG_END;
+        const steps = UiColors.MINIMAP_GRADIENT_STEPS;
+        
+        for (let i = 0; i < steps; i++) {
+            const ratio = i / (steps - 1);
+            const color = UiColors.createGradientColor(bgStart, bgEnd, ratio);
+            
+            const stepHeight = height / steps;
+            graphics.fillColor = color;
+            graphics.rect(0, i * stepHeight, width, stepHeight + 1);
+            graphics.fill();
+        }
+
+        // 2. 绘制外边框（发光效果，青色）
         DrawHelper.drawRectBorder(
             graphics,
             0, 0,
@@ -37,7 +52,7 @@ export class MiniMapRenderer {
             UiColors.MINIMAP_BORDER_WIDTH
         );
 
-        // 绘制内边框（高光，白色半透明）
+        // 3. 绘制内边框（高光，白色半透明）
         DrawHelper.drawRectBorder(
             graphics,
             1, 1,

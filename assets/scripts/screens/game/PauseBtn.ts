@@ -1,5 +1,5 @@
 import { _decorator, Component, Button, Label } from 'cc';
-import { GameManager } from '../../managers/Index';
+import { GameManager, AudioManager } from '../../managers/Index';
 import { GameStateBtnRenderer } from '../../renderers/Index';
 import { PauseView } from './components/Index';
 const { ccclass, property } = _decorator;
@@ -46,9 +46,13 @@ export class PauseBtn extends Component {
     public onButtonClick() {
         if (!this.buttonEnabled) return;
         
+        const audioManager = AudioManager.getInstance();
+        
         if (this.gameManager.isPaused()) {
             // 如果已暂停，则恢复游戏
             this.gameManager.resumeGame();
+            // 恢复背景音乐
+            audioManager.resumeBackgroundMusic();
             // 隐藏暂停界面
             if (this.pauseView) {
                 this.pauseView.hide();
@@ -56,6 +60,8 @@ export class PauseBtn extends Component {
         } else {
             // 如果未暂停，则暂停游戏
             this.gameManager.pauseGame();
+            // 暂停背景音乐
+            audioManager.pauseBackgroundMusic();
             // 显示暂停界面
             if (this.pauseView) {
                 this.pauseView.show();

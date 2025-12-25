@@ -1,5 +1,5 @@
 import { Graphics, Label, Button, Color, UITransform } from 'cc';
-import { CyberpunkColors } from '../constants/Index';
+import { CyberpunkColors, UiColors } from '../constants/Index';
 import { UiFontConfig, UiOutlineConfig, UiBorderConfig } from '../config/Index';
 import { DrawHelper, UIStyleHelper } from '../utils/Index';
 
@@ -24,7 +24,7 @@ export class PauseViewRenderer {
     };
     
     /**
-     * 绘制暂停界面背景（半透明遮罩）
+     * 绘制暂停界面背景（赛博朋克风格半透明遮罩）
      * @param graphics Graphics 组件
      * @param transform UITransform 组件
      */
@@ -36,27 +36,55 @@ export class PauseViewRenderer {
         
         // 获取锚点（应该是 0.5, 0.5 中心点）
         const anchorPoint = transform.anchorPoint;
-        const anchorX = width * anchorPoint.x;
-        const anchorY = height * anchorPoint.y;
+        const x = -width / 2;
+        const y = -height / 2;
 
         graphics.clear();
 
-        // 绘制半透明黑色遮罩（参考原游戏）
-        const x = -width / 2;
-        const y = -height / 2;
-        graphics.fillColor = new Color(0, 0, 0, 200); // 半透明黑色
-        graphics.rect(x, y, width, height);
-        graphics.fill();
+        // 1. 绘制半透明深色渐变遮罩（参考 wegame：深色背景 + 半透明）
+        const darkPurpleBg = { r: 15, g: 10, b: 30, a: 0.78 }; // 半透明深蓝紫色
+        const darkBg = { r: 5, g: 5, b: 15, a: 0.78 }; // 半透明深色
         
-        // 绘制外边框（霓虹青色发光）
+        // 绘制渐变背景（从上到下）
+        const steps = 30;
+        for (let i = 0; i < steps; i++) {
+            const ratio = i / (steps - 1);
+            const color = UiColors.createGradientColor(darkPurpleBg, darkBg, ratio);
+            
+            const stepHeight = height / steps;
+            graphics.fillColor = color;
+            graphics.rect(x, y + i * stepHeight, width, stepHeight + 1);
+            graphics.fill();
+        }
+        
+        // 2. 绘制外边框（霓虹青色发光，多层叠加增强发光效果）
+        const borderColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.8);
+        
+        // 外层发光（更透明，更宽）
         DrawHelper.drawRectBorder(
             graphics,
             x, y, width, height,
-            CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.8),
+            new Color(borderColor.r, borderColor.g, borderColor.b, 100),
+            UiBorderConfig.THICK_BORDER_WIDTH + 2
+        );
+        
+        // 中层边框（中等透明度）
+        DrawHelper.drawRectBorder(
+            graphics,
+            x, y, width, height,
+            new Color(borderColor.r, borderColor.g, borderColor.b, 150),
+            UiBorderConfig.THICK_BORDER_WIDTH + 1
+        );
+        
+        // 内层边框（主边框，正常透明度）
+        DrawHelper.drawRectBorder(
+            graphics,
+            x, y, width, height,
+            borderColor,
             UiBorderConfig.THICK_BORDER_WIDTH
         );
         
-        // 绘制内边框（高光）
+        // 3. 绘制内边框（高光，白色半透明）
         const innerPadding = 3;
         DrawHelper.drawRectBorder(
             graphics,

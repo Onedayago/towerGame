@@ -1,4 +1,4 @@
-import { _decorator, Component, Button, EventTouch, Label, director } from 'cc';
+import { _decorator, Component, Button, EventTouch, Label, director, Graphics, UITransform } from 'cc';
 import { GameManager } from '../../managers/Index';
 import { StartScreenRenderer } from '../../renderers/Index';
 const { ccclass, property } = _decorator;
@@ -12,6 +12,7 @@ const { ccclass, property } = _decorator;
 export class StartScreen extends Component {
 
     private gameManager: GameManager;
+    private graphics: Graphics | null = null;
     
     // 组件引用（通过编辑器绑定）
     @property({ type: Label, displayName: '标题标签' })
@@ -27,8 +28,32 @@ export class StartScreen extends Component {
     private helpButton: Button | null = null;
 
     onLoad() {
+        this.initGraphics();
         this.initGameManager();
         this.styleUIElements();
+        this.renderBackground();
+    }
+    
+    /**
+     * 初始化 Graphics 组件
+     */
+    private initGraphics() {
+        this.graphics = this.node.getComponent(Graphics);
+        if (!this.graphics) {
+            this.graphics = this.node.addComponent(Graphics);
+        }
+    }
+    
+    /**
+     * 绘制背景
+     */
+    private renderBackground() {
+        if (!this.graphics) return;
+        
+        const transform = this.node.getComponent(UITransform);
+        if (!transform) return;
+        
+        StartScreenRenderer.renderBackground(this.graphics, transform);
     }
     
     /**

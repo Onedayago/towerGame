@@ -1679,6 +1679,14 @@
       "__uuid__": "cd3d9d44-8444-46cc-8ca4-8a0581147112",
       "__expectedType__": "cc.Prefab"
     },
+    "backgroundMusicClip": {
+      "__uuid__": "e70b3bbe-6a9a-4216-bba7-255999704672",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "boomSoundClip": {
+      "__uuid__": "7840980d-79f4-4c02-af28-e5b64f812743",
+      "__expectedType__": "cc.AudioClip"
+    },
     "_id": "23MJ2QMH5B+Z9FUI17Su7+"
   },
   {
@@ -3985,7 +3993,7 @@
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 920,
+      "x": 850,
       "y": 440,
       "z": 0
     },
@@ -5390,7 +5398,7 @@
     "_alignFlags": 33,
     "_target": null,
     "_left": 0,
-    "_right": 30,
+    "_right": 100,
     "_top": 20,
     "_bottom": 0,
     "_horizontalCenter": 0,

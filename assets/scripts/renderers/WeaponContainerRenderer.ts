@@ -9,7 +9,7 @@ import { DrawHelper } from '../utils/Index';
  */
 export class WeaponContainerRenderer {
     /**
-     * 绘制武器容器背景
+     * 绘制武器容器背景（赛博朋克风格）
      * @param graphics Graphics 组件
      * @param width 宽度
      * @param height 高度
@@ -19,7 +19,22 @@ export class WeaponContainerRenderer {
 
         graphics.clear();
 
-        // 绘制顶部高光线（增强立体感）
+        // 1. 绘制深色渐变背景（参考 wegame：从深蓝灰色到更深的颜色）
+        const bgStart = UiColors.WEAPON_CONTAINER_BG_START;
+        const bgEnd = UiColors.WEAPON_CONTAINER_BG_END;
+        const steps = UiColors.WEAPON_CONTAINER_GRADIENT_STEPS;
+        
+        for (let i = 0; i < steps; i++) {
+            const ratio = i / (steps - 1);
+            const color = UiColors.createGradientColor(bgStart, bgEnd, ratio);
+            
+            const stepHeight = height / steps;
+            graphics.fillColor = color;
+            graphics.rect(0, i * stepHeight, width, stepHeight + 1);
+            graphics.fill();
+        }
+
+        // 2. 绘制顶部高光线（增强立体感）
         DrawHelper.drawHorizontalLine(
             graphics,
             0, height - 1, width,
@@ -27,7 +42,7 @@ export class WeaponContainerRenderer {
             1
         );
 
-        // 绘制底部阴影线（增强立体感）
+        // 3. 绘制底部阴影线（增强立体感）
         DrawHelper.drawHorizontalLine(
             graphics,
             0, 1, width,

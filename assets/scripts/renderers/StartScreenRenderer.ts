@@ -1,5 +1,5 @@
 import { Graphics, UITransform, Label, Node, Button, Color } from 'cc';
-import { UiColors } from '../constants/Index';
+import { UiColors, CyberpunkColors } from '../constants/Index';
 import { UiFontConfig, UiBorderConfig } from '../config/Index';
 import { DrawHelper, UIStyleHelper } from '../utils/Index';
 
@@ -9,27 +9,22 @@ import { DrawHelper, UIStyleHelper } from '../utils/Index';
  * 参考原游戏实现
  */
 export class StartScreenRenderer {
-    // 标题样式配置
+    // 标题样式配置（参考原游戏：ROCKET_TOWER 紫色）
     private static readonly TITLE_FONT_SIZE = UiFontConfig.LARGE_FONT_SIZE;
-    private static readonly TITLE_COLOR = new Color(255, 165, 0, 255); // 橙色（火箭塔颜色）
-    private static readonly TITLE_GRADIENT_COLORS = [
-        new Color(255, 165, 0, 255), // 橙色
-        new Color(255, 255, 255, 255), // 白色
-        new Color(255, 200, 100, 255) // 浅橙色
-    ];
+    private static readonly TITLE_COLOR = new Color(157, 0, 255, 255); // 紫色（ROCKET_TOWER: 0x9d00ff）
     
-    // 副标题样式配置
+    // 副标题样式配置（参考原游戏：TEXT_LIGHT 浅灰色）
     private static readonly SUBTITLE_FONT_SIZE = UiFontConfig.MEDIUM_FONT_SIZE;
-    private static readonly SUBTITLE_COLOR = new Color(200, 200, 200, 255); // 浅灰色
+    private static readonly SUBTITLE_COLOR = new Color(204, 204, 204, 230); // 浅灰色（TEXT_LIGHT: 0xcccccc，90%透明度）
     
-    // 按钮样式配置
+    // 按钮样式配置（参考原游戏）
     private static readonly BUTTON_COLORS = {
-        START: new Color(255, 165, 0, 255), // 橙色（火箭塔颜色）
-        HELP: new Color(0, 255, 255, 255), // 青色（激光塔颜色）
+        START: new Color(157, 0, 255, 255), // 紫色（ROCKET_TOWER: 0x9d00ff）
+        HELP: new Color(0, 255, 65, 255), // 绿色（LASER_TOWER: 0x00ff41）
     };
     
     /**
-     * 绘制开始界面背景
+     * 绘制开始界面背景（参考原游戏：简单渐变背景）
      * @param graphics Graphics 组件
      * @param transform UITransform 组件
      */
@@ -41,15 +36,27 @@ export class StartScreenRenderer {
         
         // 获取锚点（应该是 0.5, 0.5 中心点）
         const anchorPoint = transform.anchorPoint;
-        const anchorX = width * anchorPoint.x;
-        const anchorY = height * anchorPoint.y;
+        const x = -width / 2;
+        const y = -height / 2;
 
         graphics.clear();
 
-        // 只绘制边框
-        const x = -width / 2;
-        const y = -height / 2;
-        DrawHelper.drawRectBorder(graphics, x, y, width, height, UiColors.START_SCREEN_BG_END, UiBorderConfig.DEFAULT_BORDER_WIDTH);
+        // 参考原游戏：简单的渐变背景（从黑色到深蓝灰色）
+        // rgba(0, 0, 0, 0.85) -> rgba(26, 26, 46, 0.9)
+        const black = { r: 0, g: 0, b: 0, a: 0.85 };
+        const darkBlueGray = { r: 26, g: 26, b: 46, a: 0.9 };
+        
+        // 绘制渐变背景（从上到下）
+        const steps = 30;
+        for (let i = 0; i < steps; i++) {
+            const ratio = i / (steps - 1);
+            const color = UiColors.createGradientColor(black, darkBlueGray, ratio);
+            
+            const stepHeight = height / steps;
+            graphics.fillColor = color;
+            graphics.rect(x, y + i * stepHeight, width, stepHeight + 1);
+            graphics.fill();
+        }
     }
     
     /**
