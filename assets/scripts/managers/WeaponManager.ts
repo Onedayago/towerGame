@@ -2,6 +2,7 @@ import { Node, UITransform } from 'cc';
 import { WeaponBase } from '../weapons/Index';
 import { BulletManager } from './BulletManager';
 import { EnemyManager } from './EnemyManager';
+import { UiConfig } from '../config/Index';
 
 /**
  * 武器管理器
@@ -10,6 +11,7 @@ import { EnemyManager } from './EnemyManager';
 export class WeaponManager {
     private containerNode: Node;
     private weapons: Node[] = [];
+    private weaponGridPositions: Map<Node, { gridX: number; gridY: number }> = new Map(); // 武器网格坐标映射
     private bulletManager: BulletManager | null = null;
     private enemyManager: EnemyManager | null = null;
     private selectedWeapon: Node | null = null; // 当前选中的武器
@@ -33,6 +35,14 @@ export class WeaponManager {
     setEnemyManager(enemyManager: EnemyManager) {
         this.enemyManager = enemyManager;
     }
+    
+    /**
+     * 获取敌人管理器
+     * @returns 敌人管理器实例，如果未设置则返回 null
+     */
+    getEnemyManager(): EnemyManager | null {
+        return this.enemyManager;
+    }
 
     /**
      * 添加武器
@@ -53,6 +63,12 @@ export class WeaponManager {
         }
     
         this.weapons.push(weaponNode);
+        
+        // 计算并存储武器的网格坐标
+        const weaponPos = weaponNode.position;
+        const gridX = Math.floor(weaponPos.x / UiConfig.CELL_SIZE);
+        const gridY = Math.floor(weaponPos.y / UiConfig.CELL_SIZE);
+        this.weaponGridPositions.set(weaponNode, { gridX, gridY });
     }
 
     /**
@@ -63,6 +79,8 @@ export class WeaponManager {
         const index = this.weapons.indexOf(weaponNode);
         if (index !== -1) {
             this.weapons.splice(index, 1);
+            // 移除武器的网格坐标
+            this.weaponGridPositions.delete(weaponNode);
         }
     }
 
@@ -80,6 +98,8 @@ export class WeaponManager {
             // 检查武器节点是否有效
             if (!weapon || !weapon.isValid) {
                 this.weapons.splice(i, 1);
+                // 同时清理网格坐标
+                this.weaponGridPositions.delete(weapon);
                 continue;
             }
 
@@ -101,6 +121,7 @@ export class WeaponManager {
             }
         });
         this.weapons = [];
+        this.weaponGridPositions.clear();
     }
 
     /**
@@ -202,6 +223,25 @@ export class WeaponManager {
      */
     getSelectedWeapon(): Node | null {
         return this.selectedWeapon;
+    }
+    
+    /**
+     * 获取所有武器的网格坐标集合（用于寻路）
+     * @returns 网格坐标集合，格式为 Set<string>，每个字符串为 "gridX,gridY"
+     */
+    getWeaponGridPositions(): Set<string> {
+        const gridSet = new Set<string>();
+        
+        // 清理无效的武器引用
+        for (const [weapon, gridPos] of this.weaponGridPositions.entries()) {
+            if (!weapon || !weapon.isValid) {
+                this.weaponGridPositions.delete(weapon);
+                continue;
+            }
+            gridSet.add(`${gridPos.gridX},${gridPos.gridY}`);
+        }
+        
+        return gridSet;
     }
 }
 

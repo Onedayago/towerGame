@@ -1,5 +1,5 @@
 import { _decorator, Component, Node, Label, Button, Graphics, UITransform, UIOpacity, Color, director, EventTouch, Vec2, tween } from 'cc';
-import { GameManager } from '../../../managers/Index';
+import { GameManager, AudioManager } from '../../../managers/Index';
 import { CyberpunkColors } from '../../../constants/Index';
 import { UiFontConfig, UiConfig } from '../../../config/Index';
 import { UIStyleHelper } from '../../../utils/Index';
@@ -242,6 +242,10 @@ export class PauseView extends Component {
         if (this.gameManager) {
             this.gameManager.pauseGame();
         }
+        
+        // 暂停背景音乐
+        const audioManager = AudioManager.getInstance();
+        audioManager.pauseBackgroundMusic();
     }
 
     /**
@@ -265,6 +269,11 @@ export class PauseView extends Component {
 
         if (this.gameManager && this.gameManager.isPaused()) {
             this.gameManager.resumeGame();
+            
+            // 恢复背景音乐
+            const audioManager = AudioManager.getInstance();
+            audioManager.resumeBackgroundMusic();
+            
             this.hide();
             // 更新暂停按钮的文字（使用时动态查找）
             this.updatePauseButtonText();

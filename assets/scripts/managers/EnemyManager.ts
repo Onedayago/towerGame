@@ -127,6 +127,40 @@ export class EnemyManager {
     }
     
     /**
+     * 检查指定位置是否有敌人
+     * @param x X坐标（世界坐标）
+     * @param y Y坐标（世界坐标）
+     * @returns 是否有敌人
+     */
+    hasEnemyAt(x: number, y: number): boolean {
+        const enemies = this.getAllEnemies();
+        const epsilon = 0.1; // 允许的误差范围
+        
+        for (const enemy of enemies) {
+            if (!enemy || !enemy.isValid) continue;
+            
+            const enemyPos = enemy.position;
+            const enemyTransform = enemy.getComponent(UITransform);
+            if (!enemyTransform) continue;
+            
+            // 敌人锚点在中心，计算敌人占据的范围
+            const enemyWidth = enemyTransform.width;
+            const enemyHeight = enemyTransform.height;
+            const enemyLeft = enemyPos.x - enemyWidth / 2;
+            const enemyRight = enemyPos.x + enemyWidth / 2;
+            const enemyBottom = enemyPos.y - enemyHeight / 2;
+            const enemyTop = enemyPos.y + enemyHeight / 2;
+            
+            // 检查位置是否在敌人范围内
+            if (x >= enemyLeft - epsilon && x <= enemyRight + epsilon &&
+                y >= enemyBottom - epsilon && y <= enemyTop + epsilon) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * 设置子弹管理器和武器管理器
      * @param bulletManager 子弹管理器
      * @param weaponManager 武器管理器
@@ -148,13 +182,17 @@ export class EnemyManager {
     /**
      * 初始化寻路器
      * @param obstacleManager 障碍物管理器
+     * @param weaponManager 武器管理器（可选，用于将武器作为障碍物）
      * @returns 初始化后的寻路器实例
      */
-    initPathfinder(obstacleManager: ObstacleManager): PathFinder {
+    initPathfinder(obstacleManager: ObstacleManager, weaponManager?: WeaponManager): PathFinder {
         if (!this.pathFinder) {
             this.pathFinder = new PathFinder();
         }
-        this.pathFinder.init(obstacleManager, this.containerWidth, this.containerHeight);
+        this.pathFinder.init(obstacleManager, this.containerWidth, this.containerHeight, weaponManager);
+        if (weaponManager) {
+            this.pathFinder.setWeaponManager(weaponManager);
+        }
         return this.pathFinder;
     }
     

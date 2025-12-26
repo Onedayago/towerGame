@@ -121,11 +121,32 @@ export class WarView extends Component {
         baseTransform.setAnchorPoint(0, 0);
         baseTransform.setContentSize(baseWidth, baseHeight);
         
-        // 计算位置：右边中间
-        // X 位置：战场宽度 - 基地宽度（右边对齐）
-        const baseX = battlefieldWidth - baseWidth;
-        // Y 位置：战场高度的一半 - 基地高度的一半（垂直居中）
-        const baseY = (battlefieldHeight - baseHeight) / 2;
+        // 计算位置（对齐到网格）
+        let baseX: number;
+        let baseY: number;
+        
+        // 检查最右边是否不足一列
+        const fullColumns = Math.floor(battlefieldWidth / cellSize);
+        const remainingWidth = battlefieldWidth - fullColumns * cellSize;
+        const hasIncompleteColumn = remainingWidth > 0 && remainingWidth < cellSize;
+        
+        if (hasIncompleteColumn) {
+            // 如果最右边不足一列，基地移动到倒数第二列和倒数第三列（从右往左数）
+            // 基地宽度是2个格子，所以放在倒数第二列和倒数第三列
+            // 对齐到网格：倒数第三列的起始位置（从0开始计数）
+            const targetColumn = fullColumns - 3; // 倒数第三列（基地占据倒数第三列和倒数第二列）
+            baseX = targetColumn * cellSize; // 对齐到网格左下角
+        } else {
+            // 否则放在右边（倒数第一列和第二列）
+            // 对齐到网格：倒数第二列的起始位置（从0开始计数）
+            const targetColumn = fullColumns - 2; // 倒数第二列（基地占据倒数第二列和倒数第一列）
+            baseX = targetColumn * cellSize; // 对齐到网格左下角
+        }
+        
+        // Y 位置：对齐到网格，垂直居中
+        const fullRows = Math.floor(battlefieldHeight / cellSize);
+        const targetRow = Math.floor((fullRows - 2) / 2); // 垂直居中，考虑基地高度是2个格子
+        baseY = targetRow * cellSize; // 对齐到网格左下角
         this.baseNode.setPosition(baseX, baseY, 0);
         
         // 添加 Graphics 组件并绘制基地
@@ -140,9 +161,13 @@ export class WarView extends Component {
         // 初始化基地管理器
         const baseManager = BaseManager.getInstance();
         baseManager.init(this.baseNode, 1000); // 基地初始生命值1000
+        baseManager.reset(); // 重置基地生命值
         baseManager.setOnDestroyedCallback(() => {
             this.onBaseDestroyed();
         });
+        
+        // 初始化基地血条显示
+        baseManager.updateHealthBar();
         
         // 基地创建后，生成障碍物（排除基地周围3个格子范围）
         this.generateRandomObstacles(undefined, 0.08);
@@ -152,6 +177,11 @@ export class WarView extends Component {
      * 基地被摧毁时的处理
      */
     private onBaseDestroyed() {
+        // 停止游戏
+        if (this.gameManager) {
+            this.gameManager.stopGame();
+        }
+        
         // 获取当前波次
         const waveManager = WaveManager.getInstance();
         const finalWave = waveManager.getWaveLevel();
@@ -317,7 +347,8 @@ export class WarView extends Component {
             const baseCenter = this.getBaseCenterPosition();
             if (baseCenter) {
                 // 获取EnemyManager内部的PathFinder实例（通过initPathfinder返回）
-                const pathFinder = this.enemyManager.initPathfinder(this.obstacleManager);
+                // 传入 weaponManager，使武器也成为障碍物
+                const pathFinder = this.enemyManager.initPathfinder(this.obstacleManager, this.weaponManager);
                 this.enemyManager.setPathfinding(pathFinder, baseCenter);
             }
         }

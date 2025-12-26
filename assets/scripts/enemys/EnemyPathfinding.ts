@@ -14,12 +14,21 @@ export class EnemyPathfinding {
     private targetPosition: Vec3 | null = null;
     private needsPathUpdate: boolean = true;
     private enemyNode: Node;
+    private appearanceNode: Node | null = null; // 外观节点（用于旋转）
     private moveSpeed: number = 0;
     private readonly EPSILON = 0.5; // 到达格子中心的误差范围
 
-    constructor(enemyNode: Node, moveSpeed: number) {
+    constructor(enemyNode: Node, moveSpeed: number, appearanceNode: Node | null = null) {
         this.enemyNode = enemyNode;
+        this.appearanceNode = appearanceNode;
         this.moveSpeed = moveSpeed;
+    }
+    
+    /**
+     * 设置外观节点
+     */
+    setAppearanceNode(appearanceNode: Node | null) {
+        this.appearanceNode = appearanceNode;
     }
 
     /**
@@ -44,6 +53,9 @@ export class EnemyPathfinding {
             // 如果没有寻路器，使用简单向右移动
             const currentPos = this.enemyNode.position;
             const newX = currentPos.x + this.moveSpeed * deltaTime;
+            // 面向右方
+            const rightDirection = new Vec3(1, 0, 0);
+            this.updateRotation(rightDirection);
             this.enemyNode.setPosition(newX, currentPos.y, 0);
             return false;
         }
@@ -69,6 +81,9 @@ export class EnemyPathfinding {
             // 如果计算路径后仍然为空，使用简单移动
             if (this.path.length === 0) {
                 const newX = currentPos.x + this.moveSpeed * deltaTime;
+                // 简单移动时，面向右方
+                const rightDirection = new Vec3(1, 0, 0);
+                this.updateRotation(rightDirection);
                 this.enemyNode.setPosition(newX, currentPos.y, 0);
                 return false;
             }
@@ -120,6 +135,10 @@ export class EnemyPathfinding {
             }
 
             Vec3.normalize(direction, direction);
+            
+            // 根据移动方向旋转敌人外观
+            this.updateRotation(direction);
+            
             const moveDistance = this.moveSpeed * deltaTime;
             const newPos = new Vec3();
             Vec3.scaleAndAdd(newPos, currentPos, direction, moveDistance);
@@ -171,6 +190,21 @@ export class EnemyPathfinding {
      */
     setMoveSpeed(speed: number) {
         this.moveSpeed = speed;
+    }
+    
+    /**
+     * 根据移动方向更新敌人外观旋转
+     * @param direction 移动方向向量（已归一化）
+     */
+    private updateRotation(direction: Vec3) {
+        if (!this.appearanceNode) return;
+        
+        // 计算角度（弧度转角度）
+        const angleRad = Math.atan2(direction.y, direction.x);
+        const angleDeg = angleRad * (180 / Math.PI);
+        
+        // 更新外观节点旋转
+        this.appearanceNode.setRotationFromEuler(0, 0, angleDeg);
     }
 }
 

@@ -109,11 +109,9 @@ export class WeaponCardDragHandler {
             costDisplayNode.active = false;
         }
         
-        // 设置半透明红色，表示正在拖拽
-        const graphics = dragNode.getComponent(Graphics);
-        if (graphics) {
-            graphics.fillColor = new Color(255, 0, 0, 128);
-        }
+        // 创建背景圆圈节点（用于显示可放置状态）
+        // 需要在隐藏金币后创建，以便正确计算位置
+        this.createBackgroundCircle(dragNode);
         
         return dragNode;
     }
@@ -153,6 +151,9 @@ export class WeaponCardDragHandler {
         // 更新拖拽节点的位置，跟随手指移动
         this.dragNode.setPosition(localPos);
         this.lastTouchPos = new Vec2(touchLocation.x, touchLocation.y);
+        
+        // 更新拖拽节点的背景颜色（根据是否可以放置）
+        this.updateDragNodeBackground(event);
     }
 
     /**
@@ -250,8 +251,25 @@ export class WeaponCardDragHandler {
         const warViewComponent = this.warViewNode!.getComponent(WarView);
         if (!warViewComponent) return false;
 
+        // 检查是否有武器
         const weaponManager = warViewComponent.getWeaponManager();
-        return weaponManager ? weaponManager.getWeaponAtPosition(x, y) !== null : false;
+        if (weaponManager && weaponManager.getWeaponAtPosition(x, y) !== null) {
+            return true;
+        }
+
+        // 检查是否有障碍物
+        const obstacleManager = warViewComponent.getObstacleManager();
+        if (obstacleManager && obstacleManager.hasObstacleAt(x, y)) {
+            return true;
+        }
+
+        // 检查是否有敌人
+        const enemyManager = warViewComponent.getEnemyManager();
+        if (enemyManager && enemyManager.hasEnemyAt(x, y)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -309,6 +327,155 @@ export class WeaponCardDragHandler {
         }
     }
 
+    /**
+     * 创建背景圆圈节点
+     * @param dragNode 拖拽节点
+     */
+    private createBackgroundCircle(dragNode: Node) {
+        // 查找或创建背景圆圈节点
+        let backgroundNode = dragNode.getChildByName('BackgroundCircle');
+        if (!backgroundNode) {
+            backgroundNode = new Node('BackgroundCircle');
+            backgroundNode.setParent(dragNode);
+            
+            // 将背景节点移到最下层（索引0）
+            backgroundNode.setSiblingIndex(0);
+            
+            // 添加 UITransform
+            const transform = backgroundNode.addComponent(UITransform);
+            const cardTransform = dragNode.getComponent(UITransform);
+            if (cardTransform) {
+                // 背景圆圈大小略大于武器图标
+                const size = Math.max(cardTransform.width, cardTransform.height) * 1.2;
+                transform.setContentSize(size, size);
+                transform.setAnchorPoint(0.5, 0.5); // 中心锚点
+                
+                // 查找武器节点，获取其位置
+                // 武器节点通常是第一个子节点（除了 CostDisplay 和 BackgroundCircle）
+                let weaponNode: Node | null = null;
+                for (let child of dragNode.children) {
+                    if (child.name !== 'CostDisplay' && child.name !== 'BackgroundCircle') {
+                        weaponNode = child;
+                        break;
+                    }
+                }
+                
+                if (weaponNode) {
+                    // 背景位置在武器节点的位置（武器在卡片中心偏上）
+                    const weaponPos = weaponNode.position;
+                    backgroundNode.setPosition(weaponPos.x, weaponPos.y, 0);
+                } else {
+                    // 如果没有找到武器节点，使用卡片中心偏上的位置
+                    // 卡片锚点在左下角(0,0)，武器通常在中心偏上
+                    const centerX = cardTransform.width / 2;
+                    const centerY = cardTransform.height / 2 + cardTransform.height * 0.15;
+                    backgroundNode.setPosition(centerX, centerY, 0);
+                }
+            } else {
+                // 如果没有卡片变换组件，默认位置在 (0, 0)
+                backgroundNode.setPosition(0, 0, 0);
+            }
+            
+            // 添加 Graphics
+            backgroundNode.addComponent(Graphics);
+        }
+    }
+    
+    /**
+     * 更新拖拽节点的背景颜色（根据是否可以放置）
+     * @param event 触摸事件
+     */
+    private updateDragNodeBackground(event: EventTouch) {
+        if (!this.dragNode || !this.warViewNode) return;
+        
+        // 获取触摸位置并转换为 WarView 的本地坐标
+        const touchLocalPos = this.getTouchLocalPosition(event);
+        if (!touchLocalPos) {
+            this.setBackgroundColor(false);
+            return;
+        }
+        
+        const warViewTransform = this.warViewNode.getComponent(UITransform);
+        if (!warViewTransform) {
+            this.setBackgroundColor(false);
+            return;
+        }
+        
+        // 对齐到网格中心（武器锚点在中心）
+        const snapped = GridHelper.snapToGrid(touchLocalPos.x, touchLocalPos.y, UiConfig.CELL_SIZE, true);
+        
+        // 检查是否可以放置
+        const canPlace = this.canPlaceWeapon(snapped.x, snapped.y, warViewTransform);
+        
+        // 更新背景颜色
+        this.setBackgroundColor(canPlace);
+    }
+    
+    /**
+     * 检查是否可以放置武器
+     * @param x X坐标
+     * @param y Y坐标
+     * @param warViewTransform WarView 的变换组件
+     * @returns 是否可以放置
+     */
+    private canPlaceWeapon(x: number, y: number, warViewTransform: UITransform): boolean {
+        // 检查是否在 WarView 范围内
+        if (!GridHelper.isInBounds(x, y, warViewTransform.width, warViewTransform.height)) {
+            return false;
+        }
+        
+        // 检查位置是否已被占用
+        if (this.isPositionOccupied(x, y)) {
+            return false;
+        }
+        
+        // 检查金币是否足够
+        const weaponCardComponent = this.cardNode.getComponent(WeaponCard);
+        if (!weaponCardComponent) return false;
+        
+        const weaponType = weaponCardComponent.weaponType;
+        const cost = getWeaponBuildCost(weaponType);
+        const goldManager = GoldManager.getInstance();
+        if (!goldManager.canAfford(cost)) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 设置背景圆圈颜色
+     * @param canPlace 是否可以放置
+     */
+    private setBackgroundColor(canPlace: boolean) {
+        if (!this.dragNode) return;
+        
+        const backgroundNode = this.dragNode.getChildByName('BackgroundCircle');
+        if (!backgroundNode) return;
+        
+        const graphics = backgroundNode.getComponent(Graphics);
+        if (!graphics) return;
+        
+        const transform = backgroundNode.getComponent(UITransform);
+        if (!transform) return;
+        
+        graphics.clear();
+        
+        // 根据是否可以放置设置颜色
+        if (canPlace) {
+            // 绿色圆圈（可以放置）
+            graphics.fillColor = new Color(0, 255, 0, 150); // 半透明绿色
+        } else {
+            // 红色圆圈（不可放置）
+            graphics.fillColor = new Color(255, 0, 0, 150); // 半透明红色
+        }
+        
+        // 绘制圆圈（考虑锚点在中心）
+        const radius = Math.min(transform.width, transform.height) / 2;
+        graphics.circle(0, 0, radius);
+        graphics.fill();
+    }
+    
     /**
      * 清理资源
      */

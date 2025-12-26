@@ -26,9 +26,18 @@ export class PathFinder {
      * @param obstacleManager 障碍物管理器
      * @param containerWidth 容器宽度
      * @param containerHeight 容器高度
+     * @param weaponManager 武器管理器（可选，用于将武器作为障碍物）
      */
-    init(obstacleManager: ObstacleManager, containerWidth: number, containerHeight: number) {
-        this.utils.init(obstacleManager, containerWidth, containerHeight);
+    init(obstacleManager: ObstacleManager, containerWidth: number, containerHeight: number, weaponManager?: any) {
+        this.utils.init(obstacleManager, containerWidth, containerHeight, weaponManager);
+    }
+    
+    /**
+     * 设置武器管理器（用于将武器作为障碍物）
+     * @param weaponManager 武器管理器
+     */
+    setWeaponManager(weaponManager: any) {
+        this.utils.setWeaponManager(weaponManager);
     }
 
     /**

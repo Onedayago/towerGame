@@ -94,8 +94,8 @@ export class EnemyBase extends Component {
     private initModules() {
         if (!this.config) return;
 
-        // 初始化寻路模块
-        this.pathfinding = new EnemyPathfinding(this.node, this.moveSpeed);
+        // 初始化寻路模块（传入外观节点，用于旋转）
+        this.pathfinding = new EnemyPathfinding(this.node, this.moveSpeed, this.appearanceNode);
 
         // 初始化攻击模块
         this.attack = new EnemyAttack(this.node, this.appearanceNode, this.config, this.healthBarNode);

@@ -93,7 +93,6 @@ export class AudioManager {
         
         const audioNode = this.ensureAudioManagerNode();
         if (!audioNode) {
-            console.warn('AudioManager: 场景未准备好，无法初始化音效池');
             return;
         }
         
@@ -250,11 +249,30 @@ export class AudioManager {
      * 恢复背景音乐
      */
     resumeBackgroundMusic() {
-        if (this.bgMusicSource && this.bgMusicSource.isValid && !this.musicMuted) {
+        if (this.musicMuted) {
+            return;
+        }
+        
+        // 如果音频源无效，重新初始化
+        if (!this.bgMusicSource || !this.bgMusicSource.isValid) {
+            this.initBackgroundMusic();
+        }
+        
+        // 确保音频源有效且有音频剪辑
+        if (this.bgMusicSource && this.bgMusicSource.isValid && this.bgMusicClip) {
+            // 如果音频源没有设置剪辑，重新设置
+            if (!this.bgMusicSource.clip) {
+                this.bgMusicSource.clip = this.bgMusicClip;
+                this.bgMusicSource.loop = true;
+                this.bgMusicSource.volume = this.musicVolume;
+            }
+            
+            // 如果正在播放，不需要操作
             if (this.bgMusicSource.playing) {
-                // 如果正在播放，不需要操作
                 return;
             }
+            
+            // 恢复播放
             this.bgMusicSource.play();
         }
     }

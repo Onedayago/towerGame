@@ -1,5 +1,7 @@
 import { UiConfig } from '../config/Index';
 import { ObstacleManager } from '../managers/ObstacleManager';
+import { WeaponManager } from '../managers/WeaponManager';
+import { UITransform } from 'cc';
 
 /**
  * PathFinder 工具方法
@@ -7,6 +9,7 @@ import { ObstacleManager } from '../managers/ObstacleManager';
  */
 export class PathFinderUtils {
     private obstacleManager: ObstacleManager | null = null;
+    private weaponManager: WeaponManager | null = null;
     private containerWidth: number = 0;
     private containerHeight: number = 0;
     private cellSize: number = UiConfig.CELL_SIZE;
@@ -14,10 +17,18 @@ export class PathFinderUtils {
     /**
      * 初始化工具
      */
-    init(obstacleManager: ObstacleManager, containerWidth: number, containerHeight: number) {
+    init(obstacleManager: ObstacleManager, containerWidth: number, containerHeight: number, weaponManager?: WeaponManager) {
         this.obstacleManager = obstacleManager;
+        this.weaponManager = weaponManager || null;
         this.containerWidth = containerWidth;
         this.containerHeight = containerHeight;
+    }
+    
+    /**
+     * 设置武器管理器
+     */
+    setWeaponManager(weaponManager: WeaponManager) {
+        this.weaponManager = weaponManager;
     }
 
     /**
@@ -66,18 +77,32 @@ export class PathFinderUtils {
     }
 
     /**
-     * 检查网格位置是否有障碍物
+     * 检查网格位置是否有障碍物（包括障碍物和武器）
      * @param gridX 网格X坐标
      * @param gridY 网格Y坐标
      * @returns 是否有障碍物
      */
     private hasObstacle(gridX: number, gridY: number): boolean {
-        if (!this.obstacleManager) return false;
-        
         // 使用格子左下角坐标检查障碍物
         const checkX = gridX * this.cellSize;
         const checkY = gridY * this.cellSize;
-        return this.obstacleManager.hasObstacleAt(checkX, checkY);
+        
+        // 检查是否有障碍物
+        if (this.obstacleManager && this.obstacleManager.hasObstacleAt(checkX, checkY)) {
+            return true;
+        }
+        
+        // 检查是否有武器（武器也是障碍物）
+        // 使用存储的网格坐标进行快速查找
+        if (this.weaponManager) {
+            const weaponGridPositions = this.weaponManager.getWeaponGridPositions();
+            const gridKey = `${gridX},${gridY}`;
+            if (weaponGridPositions.has(gridKey)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**

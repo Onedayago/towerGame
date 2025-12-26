@@ -1,4 +1,7 @@
-import { Node, UITransform } from 'cc';
+import { Node, UITransform, Graphics } from 'cc';
+import { HealthBarHelper } from '../utils/Index';
+import { HealthBarRenderer } from '../renderers/HealthBarRenderer';
+import { UiConfig } from '../config/Index';
 
 /**
  * 基地管理器
@@ -47,6 +50,9 @@ export class BaseManager {
         if (this.currentHealth < 0) {
             this.currentHealth = 0;
         }
+
+        // 更新血条显示
+        this.updateHealthBar();
 
         // 检查基地是否被摧毁
         if (this.currentHealth <= 0) {
@@ -112,6 +118,58 @@ export class BaseManager {
      */
     reset() {
         this.currentHealth = this.maxHealth;
+        this.updateHealthBar();
+    }
+    
+    /**
+     * 更新血条显示
+     * 基地锚点在左下角(0,0)，血条需要显示在基地顶部
+     */
+    updateHealthBar() {
+        if (!this.baseNode || !this.baseNode.isValid) return;
+        
+        // 查找血条节点
+        let healthBarNode = this.baseNode.getChildByName('HealthBar');
+        if (!healthBarNode) {
+            // 如果血条节点不存在，创建它
+            healthBarNode = new Node('HealthBar');
+            healthBarNode.setParent(this.baseNode);
+            healthBarNode.addComponent(Graphics);
+            healthBarNode.addComponent(UITransform);
+        }
+        
+        const graphics = healthBarNode.getComponent(Graphics);
+        const transform = healthBarNode.getComponent(UITransform);
+        const baseTransform = this.baseNode.getComponent(UITransform);
+        
+        if (!graphics || !transform || !baseTransform) return;
+        
+        // 计算血条宽度和高度
+        const cellSize = UiConfig.CELL_SIZE;
+        const healthBarWidth = cellSize * 1.8; // 基地是2x2格子，血条稍小一点
+        const healthBarHeight = HealthBarRenderer.getHeight();
+        
+        // 设置血条节点大小和位置
+        transform.setContentSize(healthBarWidth, healthBarHeight);
+        transform.setAnchorPoint(0.5, 0.5);
+        
+        // 基地锚点在左下角(0,0)，血条位置在基地顶部上方
+        // 基地顶部在 y = baseHeight，血条在顶部上方需要加上偏移
+        const baseHeight = baseTransform.height;
+        const offsetY = baseHeight + (cellSize * 0.25); // 在基地顶部上方
+        const baseWidth = baseTransform.width;
+        const centerX = baseWidth / 2; // 基地中心X位置
+        
+        healthBarNode.setPosition(centerX, offsetY, 0);
+        
+        // 确保血条不旋转（保持水平）
+        healthBarNode.setRotationFromEuler(0, 0, 0);
+        
+        // 计算血量百分比
+        const healthPercent = Math.max(0, Math.min(1, this.currentHealth / this.maxHealth));
+        
+        // 使用渲染器绘制美化的血条
+        HealthBarRenderer.render(graphics, healthBarWidth, healthBarHeight, healthPercent);
     }
 }
 

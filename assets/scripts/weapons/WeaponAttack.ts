@@ -79,6 +79,10 @@ export class WeaponAttack {
     update(deltaTime: number) {
         if (!this.config) return;
 
+        // 暂时禁用武器攻击敌人
+        // TODO: 恢复武器攻击敌人的功能
+        return;
+
         // 检测附近是否有敌人（用于旋转面向目标）
         const targetEnemy = this.findNearestEnemyInRange();
         if (targetEnemy) {

@@ -3,6 +3,7 @@ import { UiConfig } from '../config/Index';
 import { BulletManager } from '../managers/BulletManager';
 import { WeaponManager } from '../managers/WeaponManager';
 import { PathFinder } from '../utils/PathFinder';
+import { BaseManager } from '../managers/BaseManager';
 
 /**
  * 敌人更新处理器

@@ -57,8 +57,7 @@ export class BaseRenderer {
         // === 8. 能量核心和流动效果 ===
         this.drawEnergyEffects(graphics, drawWidth, drawHeight, padding);
         
-        // === 9. 顶部装饰结构 ===
-        this.drawTopStructures(graphics, drawWidth, drawHeight, padding);
+    
     }
     
     /**
@@ -480,40 +479,5 @@ export class BaseRenderer {
         }
     }
     
-    /**
-     * 绘制顶部装饰结构
-     */
-    private static drawTopStructures(graphics: Graphics, width: number, height: number, padding: number): void {
-        const topY = padding + height * 0.85;
-        const structureWidth = width * 0.3;
-        const structureHeight = height * 0.1;
-        const structureCount = 3;
-        
-        for (let i = 0; i < structureCount; i++) {
-            const structureX = padding + width * (0.15 + i * 0.35);
-            
-            // 结构主体（金属）
-            graphics.fillColor = new Color(55, 65, 81, 255); // #374151
-            graphics.rect(structureX, topY, structureWidth, structureHeight);
-            graphics.fill();
-            
-            // 结构边框（发光）
-            graphics.strokeColor = new Color(this.NEON_CYAN.r, this.NEON_CYAN.g, this.NEON_CYAN.b, 180);
-            graphics.lineWidth = 2;
-            graphics.rect(structureX, topY, structureWidth, structureHeight);
-            graphics.stroke();
-            
-            // 结构顶部天线（小圆点）
-            const antennaY = topY + structureHeight;
-            graphics.fillColor = new Color(this.NEON_CYAN.r, this.NEON_CYAN.g, this.NEON_CYAN.b, 255);
-            graphics.circle(structureX + structureWidth * 0.5, antennaY, 3);
-            graphics.fill();
-            
-            // 天线发光
-            graphics.strokeColor = new Color(this.NEON_CYAN.r, this.NEON_CYAN.g, this.NEON_CYAN.b, 150);
-            graphics.lineWidth = 1;
-            graphics.circle(structureX + structureWidth * 0.5, antennaY, 5);
-            graphics.stroke();
-        }
-    }
+   
 }
