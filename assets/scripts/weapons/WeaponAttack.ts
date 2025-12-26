@@ -79,10 +79,6 @@ export class WeaponAttack {
     update(deltaTime: number) {
         if (!this.config) return;
 
-        // 暂时禁用武器攻击敌人
-        // TODO: 恢复武器攻击敌人的功能
-        return;
-
         // 检测附近是否有敌人（用于旋转面向目标）
         const targetEnemy = this.findNearestEnemyInRange();
         if (targetEnemy) {
@@ -158,13 +154,27 @@ export class WeaponAttack {
             const endPos = new Vec3(enemyCenterX, enemyCenterY, 0);
             laserBulletComponent.initBeam(this.config.damage, startPos, endPos, targetEnemy);
         } else {
-            // 其他子弹类型使用标准的 init 方法
-            const bulletComponent = bulletNode.getComponent(BulletBase);
-            if (bulletComponent) {
-                // 最大飞行距离为攻击范围的倍数（从常量配置中获取）
+            // 检查是否是火箭子弹（需要特殊初始化）
+            const rocketBulletComponent = bulletNode.getComponent('WeaponRocketBullet' as any);
+            if (rocketBulletComponent && typeof (rocketBulletComponent as any).initHoming === 'function') {
+                // 火箭子弹使用 initHoming 方法
                 const maxDistance = this.config.range * WEAPON_COMMON_CONFIG.BULLET_MAX_DISTANCE_MULTIPLIER;
-                // 子弹速度由子弹类自己管理，这里只需要传入伤害和方向
-                bulletComponent.init(this.config.damage, direction, maxDistance);
+                // 归一化方向向量
+                const normalizedDirection = new Vec3();
+                Vec3.normalize(normalizedDirection, direction);
+                (rocketBulletComponent as any).initHoming(this.config.damage, normalizedDirection, maxDistance, targetEnemy, this.enemies);
+            } else {
+                // 其他子弹类型使用标准的 init 方法
+                const bulletComponent = bulletNode.getComponent(BulletBase);
+                if (bulletComponent) {
+                    // 最大飞行距离为攻击范围的倍数（从常量配置中获取）
+                    const maxDistance = this.config.range * WEAPON_COMMON_CONFIG.BULLET_MAX_DISTANCE_MULTIPLIER;
+                    // 归一化方向向量
+                    const normalizedDirection = new Vec3();
+                    Vec3.normalize(normalizedDirection, direction);
+                    // 子弹速度由子弹类自己管理，这里只需要传入伤害和方向
+                    bulletComponent.init(this.config.damage, normalizedDirection, maxDistance);
+                }
             }
         }
 

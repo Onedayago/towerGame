@@ -74,12 +74,13 @@ export class EnemyAttack {
     update(deltaTime: number): boolean {
         if (!this.config) return false;
 
-        // 暂时禁用敌人攻击武器
-        // TODO: 恢复敌人攻击武器的功能
-        let targetWeapon: Node | null = null;
+        // 优先检查是否有武器在攻击范围内
+        let targetWeapon = this.findNearestWeaponInRange();
         
-        // 只检查是否可以攻击基地
-        targetWeapon = this.findBaseInRange();
+        // 如果没有武器在范围内，检查是否可以攻击基地
+        if (!targetWeapon) {
+            targetWeapon = this.findBaseInRange();
+        }
 
         // 如果找到了目标，锁定目标并旋转面向目标
         if (targetWeapon) {

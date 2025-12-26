@@ -32,19 +32,19 @@ export class gameMain extends Component {
 
     update(deltaTime: number) {
         // 帧率统计
-        // this.frameCount++;
-        // this.frameTime += deltaTime;
-        // this.fpsUpdateTimer += deltaTime;
+        this.frameCount++;
+        this.frameTime += deltaTime;
+        this.fpsUpdateTimer += deltaTime;
 
-        // // 每秒更新一次帧率显示
-        // if (this.fpsUpdateTimer >= this.FPS_UPDATE_INTERVAL) {
-        //     this.currentFPS = Math.round(this.frameCount / this.fpsUpdateTimer);
-        //     console.log(`FPS: ${this.currentFPS}`);
+        // 每秒更新一次帧率显示
+        if (this.fpsUpdateTimer >= this.FPS_UPDATE_INTERVAL) {
+            this.currentFPS = Math.round(this.frameCount / this.fpsUpdateTimer);
+            console.log(`FPS: ${this.currentFPS}`);
             
-        //     // 重置计数器
-        //     this.frameCount = 0;
-        //     this.fpsUpdateTimer = 0;
-        // }
+            // 重置计数器
+            this.frameCount = 0;
+            this.fpsUpdateTimer = 0;
+        }
     }
 }
 

@@ -269,6 +269,44 @@ export class WeaponCardDragHandler {
             return true;
         }
 
+        // 检查是否在基地上
+        if (this.isOnBase(x, y)) {
+            return true;
+        }
+
+        return false;
+    }
+    
+    /**
+     * 检查位置是否在基地上
+     * @param x X坐标
+     * @param y Y坐标
+     * @returns 如果位置在基地上返回 true，否则返回 false
+     */
+    private isOnBase(x: number, y: number): boolean {
+        const warViewComponent = this.warViewNode!.getComponent(WarView);
+        if (!warViewComponent) return false;
+        
+        const baseNode = warViewComponent.getBaseNode();
+        if (!baseNode || !baseNode.isValid) return false;
+        
+        const baseTransform = baseNode.getComponent(UITransform);
+        if (!baseTransform) return false;
+        
+        // 基地锚点在左下角(0,0)
+        const basePos = baseNode.position;
+        const baseLeft = basePos.x;
+        const baseRight = basePos.x + baseTransform.width;
+        const baseBottom = basePos.y;
+        const baseTop = basePos.y + baseTransform.height;
+        
+        // 武器锚点在中心，检查武器中心是否在基地范围内
+        const epsilon = 0.1; // 允许的误差范围
+        if (x >= baseLeft - epsilon && x <= baseRight + epsilon &&
+            y >= baseBottom - epsilon && y <= baseTop + epsilon) {
+            return true;
+        }
+        
         return false;
     }
 
@@ -424,7 +462,7 @@ export class WeaponCardDragHandler {
             return false;
         }
         
-        // 检查位置是否已被占用
+        // 检查位置是否已被占用（包括武器、障碍物、敌人、基地）
         if (this.isPositionOccupied(x, y)) {
             return false;
         }
