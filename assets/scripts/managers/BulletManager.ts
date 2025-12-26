@@ -6,6 +6,7 @@ import { WeaponManager } from './WeaponManager';
 import { WeaponBase } from '../weapons/Index';
 import { BulletType } from '../constants/Index';
 import { GameManager } from './GameManager';
+import { BaseManager } from './BaseManager';
 
 /**
  * 子弹管理器
@@ -103,6 +104,12 @@ export class BulletManager {
                     const hitWeapon = this.checkCollisionWithWeapons(bullet, bulletComponent);
                     if (hitWeapon) {
                         hit = true;
+                    } else {
+                        // 如果没有击中武器，检测与基地的碰撞
+                        const hitBase = this.checkCollisionWithBase(bullet, bulletComponent);
+                        if (hitBase) {
+                            hit = true;
+                        }
                     }
                 }
                 
@@ -204,6 +211,52 @@ export class BulletManager {
         }
 
         return null;
+    }
+
+    /**
+     * 检测子弹与基地的碰撞
+     * @param bullet 子弹节点
+     * @param bulletComponent 子弹组件
+     * @returns 是否击中基地
+     */
+    private checkCollisionWithBase(bullet: Node, bulletComponent: BulletBase): boolean {
+        const baseManager = BaseManager.getInstance();
+        const baseNode = baseManager.getBaseNode();
+        
+        if (!baseNode || !baseNode.isValid || !baseManager.isAlive()) {
+            return false;
+        }
+
+        const bulletTransform = bullet.getComponent(UITransform);
+        if (!bulletTransform) return false;
+
+        const bulletPos = bullet.position;
+        const bulletRadius = Math.max(bulletTransform.width, bulletTransform.height) / 2;
+
+        const baseTransform = baseNode.getComponent(UITransform);
+        if (!baseTransform) return false;
+
+        const basePos = baseNode.position;
+        const baseWidth = baseTransform.width;
+        const baseHeight = baseTransform.height;
+
+        // 基地锚点在左下角 (0, 0)，所以中心点是 position + size / 2
+        const baseCenterX = basePos.x + baseWidth / 2;
+        const baseCenterY = basePos.y + baseHeight / 2;
+        const baseCenter = new Vec3(baseCenterX, baseCenterY, 0);
+
+        // 计算距离（使用圆形碰撞检测，以基地中心为圆心，对角线的一半为半径）
+        const baseRadius = Math.sqrt(baseWidth * baseWidth + baseHeight * baseHeight) / 2;
+        const distance = Vec3.distance(bulletPos, baseCenter);
+
+        // 检测碰撞
+        if (distance < bulletRadius + baseRadius) {
+            // 击中基地，造成伤害
+            baseManager.takeDamage(bulletComponent.getDamage());
+            return true;
+        }
+
+        return false;
     }
     
     /**

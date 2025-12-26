@@ -1,5 +1,5 @@
 import { Graphics, Color } from 'cc';
-import { EnemyType, getEnemyColor } from '../../constants/Index';
+import { EnemyType, getEnemyColor, CyberpunkColors } from '../../constants/Index';
 
 /**
  * 快速坦克敌人渲染器
@@ -60,18 +60,18 @@ export class EnemyFastTankRenderer {
      * 绘制流线型主体
      */
     private static drawStreamlinedBody(graphics: Graphics, size: number): void {
-        // 主体（蓝色渐变模拟）
-        graphics.fillColor = new Color(68, 136, 255, 242); // rgba(68, 136, 255, 0.95)
+        // 主体（霓虹绿色渐变模拟）- 赛博朋克风格
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_GREEN, 0.95);
         graphics.rect(-size / 2, -size / 2, size, size);
         graphics.fill();
         
-        // 边框（蓝色发光）
-        graphics.strokeColor = new Color(29, 61, 122, 255); // #1d3d7a
-        graphics.lineWidth = 2;
+        // 边框（霓虹绿色发光）
+        graphics.strokeColor = CyberpunkColors.NEON_GREEN;
+        graphics.lineWidth = 2.5;
         graphics.rect(-size / 2, -size / 2, size, size);
         graphics.stroke();
         
-        graphics.strokeColor = new Color(0, 212, 255, 153); // rgba(0, 212, 255, 0.6)
+        graphics.strokeColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.6);
         graphics.lineWidth = 1;
         graphics.rect(-size / 2, -size / 2, size, size);
         graphics.stroke();
@@ -81,30 +81,30 @@ export class EnemyFastTankRenderer {
      * 绘制侧边推进器引擎
      */
     private static drawSideEngines(graphics: Graphics, size: number): void {
-        // 上引擎
-        graphics.fillColor = new Color(29, 61, 122, 230); // rgba(29, 61, 122, 0.9)
+        // 上引擎（霓虹青色）- 赛博朋克风格
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.9);
         graphics.rect(-size / 2 + 3, -size / 2 + size * 0.25, size - 6, size * 0.12);
         graphics.fill();
         
-        graphics.strokeColor = new Color(0, 212, 255, 204); // rgba(0, 212, 255, 0.8)
+        graphics.strokeColor = CyberpunkColors.NEON_CYAN;
         graphics.lineWidth = 1.5;
         graphics.rect(-size / 2 + 3, -size / 2 + size * 0.25, size - 6, size * 0.12);
         graphics.stroke();
         
         // 下引擎（对称）
-        graphics.fillColor = new Color(29, 61, 122, 230); // rgba(29, 61, 122, 0.9)
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.9);
         graphics.rect(-size / 2 + 3, size / 2 - size * 0.37, size - 6, size * 0.12);
         graphics.fill();
         
-        graphics.strokeColor = new Color(0, 212, 255, 204); // rgba(0, 212, 255, 0.8)
+        graphics.strokeColor = CyberpunkColors.NEON_CYAN;
         graphics.lineWidth = 1.5;
         graphics.rect(-size / 2 + 3, size / 2 - size * 0.37, size - 6, size * 0.12);
         graphics.stroke();
         
-        // 引擎喷口细节
+        // 引擎喷口细节（霓虹青色发光）
         for (let i = 0; i < 3; i++) {
             const ex = size / 2 - size * 0.15 - i * size * 0.12;
-            graphics.fillColor = new Color(0, 212, 255, 153); // rgba(0, 212, 255, 0.6)
+            graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.6);
             graphics.rect(ex, -size / 2 + size * 0.27, size * 0.02, size * 0.08);
             graphics.fill();
             graphics.rect(ex, size / 2 - size * 0.35, size * 0.02, size * 0.08);
@@ -121,8 +121,8 @@ export class EnemyFastTankRenderer {
         graphics.rect(-size / 2 + 4, -size / 2 + 4, size - 8, size * 0.28);
         graphics.fill();
         
-        // 前部尖锐导流板
-        graphics.fillColor = new Color(0, 212, 255, 179); // rgba(0, 212, 255, 0.7)
+        // 前部尖锐导流板（霓虹青色）- 赛博朋克风格
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.7);
         graphics.moveTo(-size / 2 + 5, -size * 0.18);
         graphics.lineTo(-size / 2 + size * 0.25, -size * 0.08);
         graphics.lineTo(-size / 2 + size * 0.25, size * 0.08);
@@ -130,7 +130,7 @@ export class EnemyFastTankRenderer {
         graphics.close();
         graphics.fill();
         
-        graphics.strokeColor = new Color(0, 255, 255, 204); // rgba(0, 255, 255, 0.8)
+        graphics.strokeColor = CyberpunkColors.NEON_CYAN;
         graphics.lineWidth = 1;
         graphics.moveTo(-size / 2 + 5, -size * 0.18);
         graphics.lineTo(-size / 2 + size * 0.25, -size * 0.08);
@@ -144,12 +144,12 @@ export class EnemyFastTankRenderer {
      * 绘制速度线条装饰
      */
     private static drawSpeedLines(graphics: Graphics, size: number): void {
-        // 侧边动态速度线（5条）
+        // 侧边动态速度线（5条，霓虹青色）- 赛博朋克风格
         for (let i = 0; i < 5; i++) {
             const lineY = -size * 0.3 + i * size * 0.15;
             const lineLength = size * (0.3 + i * 0.08);
             
-            graphics.strokeColor = new Color(0, 212, 255, 128); // rgba(0, 212, 255, 0.5)
+            graphics.strokeColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.5);
             graphics.lineWidth = 1.5;
             graphics.moveTo(size / 2 - lineLength, lineY);
             graphics.lineTo(size / 2, lineY);
@@ -163,18 +163,18 @@ export class EnemyFastTankRenderer {
     private static drawEnergyCore(graphics: Graphics, size: number): void {
         const coreRadius = size * 0.14;
         
-        // 外层脉冲光晕
-        graphics.fillColor = new Color(0, 255, 255, 77); // rgba(0, 255, 255, 0.3)
+        // 外层脉冲光晕（霓虹青色）- 赛博朋克风格
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.3);
         graphics.circle(0, 0, coreRadius * 1.3);
         graphics.fill();
         
-        // 核心主体（径向渐变模拟）
-        graphics.fillColor = new Color(255, 255, 255, 255); // 白色
+        // 核心主体（白色）
+        graphics.fillColor = new Color(255, 255, 255, 255);
         graphics.circle(0, 0, coreRadius);
         graphics.fill();
         
-        // 核心边框（发光）
-        graphics.strokeColor = new Color(0, 255, 255, 255); // #00ffff
+        // 核心边框（霓虹青色发光）
+        graphics.strokeColor = CyberpunkColors.NEON_CYAN;
         graphics.lineWidth = 2;
         graphics.circle(0, 0, coreRadius);
         graphics.stroke();
@@ -197,13 +197,13 @@ export class EnemyFastTankRenderer {
             const sy = -size * 0.25 + i * size * 0.25;
             const sx = -size * 0.38;
             
-            // 传感器外圈
-            graphics.fillColor = new Color(0, 212, 255, 128); // rgba(0, 212, 255, 0.5)
+            // 传感器外圈（霓虹青色）- 赛博朋克风格
+            graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.5);
             graphics.circle(sx, sy, size * 0.045);
             graphics.fill();
             
-            // 传感器核心（发光）
-            graphics.fillColor = new Color(0, 255, 255, 230); // rgba(0, 255, 255, 0.9)
+            // 传感器核心（霓虹青色发光）
+            graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.9);
             graphics.circle(sx, sy, size * 0.025);
             graphics.fill();
         }
@@ -213,8 +213,8 @@ export class EnemyFastTankRenderer {
      * 绘制尾部推进光晕
      */
     private static drawThrusterGlow(graphics: Graphics, size: number): void {
-        // 尾部光晕效果（推进器喷射）
-        graphics.fillColor = new Color(0, 255, 255, 102); // rgba(0, 255, 255, 0.4)
+        // 尾部光晕效果（推进器喷射，霓虹青色）- 赛博朋克风格
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.4);
         graphics.circle(size / 2, 0, size * 0.25);
         graphics.fill();
     }

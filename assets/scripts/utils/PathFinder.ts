@@ -114,7 +114,6 @@ export class PathFinder {
      */
     findPath(startX: number, startY: number, endX: number, endY: number): Vec3[] {
         if (!this.utils || !this.utils.isInitialized()) {
-            console.warn('PathFinder: 寻路器未初始化');
             return [];
         }
 
@@ -124,7 +123,6 @@ export class PathFinder {
 
         // 检查起点和终点是否可通行
         if (!this.utils.isWalkablePublic(startGrid.x, startGrid.y)) {
-            console.warn(`PathFinder: 起点不可通行 (${startGrid.x}, ${startGrid.y})`);
             return [];
         }
 
@@ -135,7 +133,6 @@ export class PathFinder {
                 endGrid.x = nearestWalkable.x;
                 endGrid.y = nearestWalkable.y;
             } else {
-                console.warn(`PathFinder: 终点不可通行且找不到替代点 (${endGrid.x}, ${endGrid.y})`);
                 return [];
             }
         }
@@ -235,7 +232,6 @@ export class PathFinder {
         }
 
         // 没有找到路径
-        console.warn(`PathFinder: 无法找到从 (${startGrid.x}, ${startGrid.y}) 到 (${endGrid.x}, ${endGrid.y}) 的路径`);
         return [];
     }
 

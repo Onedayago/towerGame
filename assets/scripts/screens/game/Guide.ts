@@ -293,11 +293,11 @@ export class Guide extends Component {
     }
     
     onDestroy() {
-        // 移除按钮事件监听
-        if (this.nextButton) {
+        // 移除按钮事件监听（检查节点是否存在，避免场景切换时的销毁错误）
+        if (this.nextButton && this.nextButton.node && this.nextButton.node.isValid) {
             this.nextButton.node.off(Button.EventType.CLICK, this.onNextButtonClick, this);
         }
-        if (this.skipButton) {
+        if (this.skipButton && this.skipButton.node && this.skipButton.node.isValid) {
             this.skipButton.node.off(Button.EventType.CLICK, this.onSkipButtonClick, this);
         }
         

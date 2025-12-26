@@ -55,10 +55,10 @@ export class WeaponLaserBullet extends BulletBase {
 
     /**
      * 重写子弹颜色
-     * 激光武器子弹使用青色
+     * 激光武器子弹使用霓虹粉色（赛博朋克风格）
      */
     protected getBulletColor(): Color {
-        return Color.CYAN;
+        return CyberpunkColors.BULLET_LASER;
     }
     
     /**

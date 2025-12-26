@@ -133,6 +133,9 @@ export class AudioManager {
             this.initSfxPool();
         }
         
+        // 先清理无效的音频源
+        this.sfxPool = this.sfxPool.filter(source => source && source.isValid);
+        
         // 查找未在播放的音频源
         for (const source of this.sfxPool) {
             if (source && source.isValid && !source.playing) {
@@ -160,21 +163,22 @@ export class AudioManager {
     setBackgroundMusic(clip: AudioClip) {
         this.bgMusicClip = clip;
         
-        // 如果还没有创建背景音乐音频源，创建一个
-        if (!this.bgMusicSource) {
+        // 检查音频源是否有效，如果无效则重新创建
+        if (!this.bgMusicSource || !this.bgMusicSource.isValid) {
             const audioNode = this.ensureAudioManagerNode();
             if (!audioNode) return;
             
             // 直接在音频管理器节点上添加 AudioSource 组件
             this.bgMusicSource = audioNode.getComponent(AudioSource);
-            if (!this.bgMusicSource) {
+            if (!this.bgMusicSource || !this.bgMusicSource.isValid) {
                 this.bgMusicSource = audioNode.addComponent(AudioSource);
             }
             this.bgMusicSource.loop = true;
             this.bgMusicSource.volume = this.musicVolume;
         }
         
-        if (this.bgMusicSource) {
+        // 再次检查有效性，确保可以安全设置 clip
+        if (this.bgMusicSource && this.bgMusicSource.isValid) {
             this.bgMusicSource.clip = clip;
         }
     }
@@ -191,18 +195,21 @@ export class AudioManager {
      * 初始化背景音乐
      */
     initBackgroundMusic() {
-        if (!this.bgMusicSource && this.bgMusicClip) {
+        // 检查音频源是否有效，如果无效则重新创建
+        if ((!this.bgMusicSource || !this.bgMusicSource.isValid) && this.bgMusicClip) {
             const audioNode = this.ensureAudioManagerNode();
             if (!audioNode) return;
             
             // 直接在音频管理器节点上添加 AudioSource 组件
             this.bgMusicSource = audioNode.getComponent(AudioSource);
-            if (!this.bgMusicSource) {
+            if (!this.bgMusicSource || !this.bgMusicSource.isValid) {
                 this.bgMusicSource = audioNode.addComponent(AudioSource);
             }
-            this.bgMusicSource.clip = this.bgMusicClip;
-            this.bgMusicSource.loop = true;
-            this.bgMusicSource.volume = this.musicVolume;
+            if (this.bgMusicSource && this.bgMusicSource.isValid) {
+                this.bgMusicSource.clip = this.bgMusicClip;
+                this.bgMusicSource.loop = true;
+                this.bgMusicSource.volume = this.musicVolume;
+            }
         }
     }
     
@@ -210,11 +217,11 @@ export class AudioManager {
      * 播放背景音乐
      */
     playBackgroundMusic() {
-        if (!this.bgMusicSource || !this.bgMusicClip) {
+        if (!this.bgMusicSource || !this.bgMusicSource.isValid || !this.bgMusicClip) {
             this.initBackgroundMusic();
         }
         
-        if (this.bgMusicSource && !this.musicMuted) {
+        if (this.bgMusicSource && this.bgMusicSource.isValid && !this.musicMuted) {
             if (!this.bgMusicSource.playing) {
                 this.bgMusicSource.play();
             }
@@ -225,7 +232,7 @@ export class AudioManager {
      * 暂停背景音乐
      */
     pauseBackgroundMusic() {
-        if (this.bgMusicSource && this.bgMusicSource.playing) {
+        if (this.bgMusicSource && this.bgMusicSource.isValid && this.bgMusicSource.playing) {
             this.bgMusicSource.pause();
         }
     }
@@ -234,7 +241,7 @@ export class AudioManager {
      * 停止背景音乐
      */
     stopBackgroundMusic() {
-        if (this.bgMusicSource) {
+        if (this.bgMusicSource && this.bgMusicSource.isValid) {
             this.bgMusicSource.stop();
         }
     }
@@ -243,7 +250,7 @@ export class AudioManager {
      * 恢复背景音乐
      */
     resumeBackgroundMusic() {
-        if (this.bgMusicSource && !this.musicMuted) {
+        if (this.bgMusicSource && this.bgMusicSource.isValid && !this.musicMuted) {
             if (this.bgMusicSource.playing) {
                 // 如果正在播放，不需要操作
                 return;
@@ -274,7 +281,7 @@ export class AudioManager {
      */
     setMusicVolume(volume: number) {
         this.musicVolume = Math.max(0, Math.min(1, volume));
-        if (this.bgMusicSource) {
+        if (this.bgMusicSource && this.bgMusicSource.isValid) {
             this.bgMusicSource.volume = this.musicVolume;
         }
     }
@@ -285,9 +292,11 @@ export class AudioManager {
      */
     setSfxVolume(volume: number) {
         this.sfxVolume = Math.max(0, Math.min(1, volume));
-        // 更新所有音效池中的音频源音量
+        // 更新所有音效池中的音频源音量（只更新有效的）
         this.sfxPool.forEach(source => {
-            source.volume = this.sfxVolume;
+            if (source && source.isValid) {
+                source.volume = this.sfxVolume;
+            }
         });
     }
     
@@ -344,18 +353,41 @@ export class AudioManager {
      * 销毁音频管理器，释放资源
      */
     destroy() {
-        if (this.bgMusicSource) {
+        if (this.bgMusicSource && this.bgMusicSource.isValid) {
             this.bgMusicSource.stop();
-            this.bgMusicSource = null;
         }
+        this.bgMusicSource = null;
         
-        // 停止所有音效
+        // 停止所有音效（只停止有效的）
         this.sfxPool.forEach(source => {
-            source.stop();
+            if (source && source.isValid) {
+                source.stop();
+            }
         });
         this.sfxPool = [];
         
+        // 重置初始化标志，以便下次重新初始化
+        this.sfxPoolInitialized = false;
+        
         AudioManager.instance = null;
+    }
+    
+    /**
+     * 清理无效的音频源引用（场景切换后调用）
+     */
+    cleanupInvalidSources() {
+        // 清理无效的背景音乐源
+        if (this.bgMusicSource && !this.bgMusicSource.isValid) {
+            this.bgMusicSource = null;
+        }
+        
+        // 清理无效的音效源
+        this.sfxPool = this.sfxPool.filter(source => source && source.isValid);
+        
+        // 如果音效池被清空，重置初始化标志
+        if (this.sfxPool.length === 0) {
+            this.sfxPoolInitialized = false;
+        }
     }
 }
 

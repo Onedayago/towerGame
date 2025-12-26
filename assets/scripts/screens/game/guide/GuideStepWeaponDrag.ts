@@ -124,8 +124,8 @@ export class GuideStepWeaponDrag extends GuideStepBase {
     }
     
     cleanup(): void {
-        // 移除触摸监听
-        if (this.targetNode) {
+        // 移除触摸监听（检查节点有效性，避免场景切换时的销毁错误）
+        if (this.targetNode && this.targetNode.isValid) {
             this.targetNode.off(Node.EventType.TOUCH_START, this.onWeaponCardTouchStart, this);
         }
         this.hideText();

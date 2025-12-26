@@ -317,21 +317,21 @@ export class WeaponUpgrade {
      * 清理事件监听
      */
     cleanup() {
-        // 移除按钮事件监听
+        // 移除按钮事件监听（检查节点有效性，避免场景切换时的销毁错误）
         if (this.upgradeButtonNode && this.upgradeButtonNode.isValid) {
             const upgradeButton = this.upgradeButtonNode.getComponent(Button);
-            if (upgradeButton) {
+            if (upgradeButton && upgradeButton.node && upgradeButton.node.isValid) {
                 upgradeButton.node.off(Button.EventType.CLICK, this.onUpgradeButtonClick, this);
-            } else {
+            } else if (this.upgradeButtonNode.isValid) {
                 this.upgradeButtonNode.off(Node.EventType.TOUCH_END, this.onUpgradeButtonClick, this);
             }
         }
 
         if (this.removeButtonNode && this.removeButtonNode.isValid) {
             const removeButton = this.removeButtonNode.getComponent(Button);
-            if (removeButton) {
+            if (removeButton && removeButton.node && removeButton.node.isValid) {
                 removeButton.node.off(Button.EventType.CLICK, this.onRemoveButtonClick, this);
-            } else {
+            } else if (this.removeButtonNode.isValid) {
                 this.removeButtonNode.off(Node.EventType.TOUCH_END, this.onRemoveButtonClick, this);
             }
         }

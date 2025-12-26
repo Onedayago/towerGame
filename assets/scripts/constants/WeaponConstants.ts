@@ -1,4 +1,5 @@
 import { Color } from 'cc';
+import { CyberpunkColors } from './CyberpunkColors';
 
 /**
  * 武器常量配置
@@ -41,12 +42,12 @@ export const WEAPON_COMMON_CONFIG = {
 
 /**
  * 武器颜色配置
- * 定义各种武器的显示颜色
+ * 定义各种武器的显示颜色（赛博朋克风格）
  */
 export const WEAPON_COLORS: Record<WeaponType, Color> = {
-    [WeaponType.BASIC]: Color.RED,                    // 红色 - 基础武器
-    [WeaponType.LASER]: Color.CYAN,                   // 青色 - 激光武器
-    [WeaponType.ROCKET]: new Color(255, 165, 0, 255) // 橙色 - 火箭塔
+    [WeaponType.BASIC]: CyberpunkColors.WEAPON_BASIC,    // 霓虹蓝色 - 基础武器
+    [WeaponType.LASER]: CyberpunkColors.WEAPON_LASER,    // 霓虹粉色 - 激光武器
+    [WeaponType.ROCKET]: CyberpunkColors.WEAPON_ROCKET   // 霓虹橙色 - 火箭塔
 };
 
 /**

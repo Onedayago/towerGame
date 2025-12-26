@@ -41,8 +41,14 @@ export class EnemyManager {
         this.spawnHandler = new EnemySpawnHandler(containerNode, enemyPrefabs);
         this.updateHandler = new EnemyUpdateHandler(this.containerWidth, this.containerHeight);
         
-        // 初始化波次管理器并开始第一波
+        // 初始化波次管理器（不开始第一波，等待游戏开始）
         this.waveManager.init();
+    }
+
+    /**
+     * 开始第一波（游戏开始时调用）
+     */
+    startFirstWave() {
         this.waveManager.startNewWave();
     }
 
@@ -61,7 +67,6 @@ export class EnemyManager {
         // 更新生成逻辑（只有在波次未完成时才会生成）
         const newEnemy = this.spawnHandler.update(deltaTime);
         if (newEnemy) {
-            console.log('EnemyManager: 生成新敌人，添加到更新列表');
             this.updateHandler.addEnemy(newEnemy);
         }
 

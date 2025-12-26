@@ -79,10 +79,10 @@ export class WeaponRocketBullet extends BulletBase {
 
     /**
      * 重写子弹颜色
-     * 火箭塔子弹使用橙色
+     * 火箭塔子弹使用霓虹橙色（赛博朋克风格）
      */
     protected getBulletColor(): Color {
-        return new Color(255, 165, 0, 255); // 橙色
+        return CyberpunkColors.BULLET_ROCKET;
     }
     
     /**

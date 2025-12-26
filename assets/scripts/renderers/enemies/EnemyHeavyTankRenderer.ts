@@ -1,5 +1,5 @@
 import { Graphics, Color } from 'cc';
-import { EnemyType, getEnemyColor } from '../../constants/Index';
+import { EnemyType, getEnemyColor, CyberpunkColors } from '../../constants/Index';
 
 /**
  * 重型坦克敌人渲染器
@@ -69,18 +69,18 @@ export class EnemyHeavyTankRenderer {
      * 绘制主装甲车体（渐变）
      */
     private static drawMainBody(graphics: Graphics, size: number): void {
-        // 主车体（深红色）
-        graphics.fillColor = new Color(204, 34, 34, 255); // #cc2222
+        // 主车体（霓虹蓝色）- 赛博朋克风格
+        graphics.fillColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_BLUE, 0.95);
         graphics.rect(-size / 2, -size / 2, size, size);
         graphics.fill();
         
-        // 厚重边框（双层）
-        graphics.strokeColor = new Color(85, 0, 0, 255); // #550000
+        // 厚重边框（霓虹蓝色发光）
+        graphics.strokeColor = CyberpunkColors.NEON_BLUE;
         graphics.lineWidth = 3.5;
         graphics.rect(-size / 2, -size / 2, size, size);
         graphics.stroke();
         
-        graphics.strokeColor = new Color(51, 0, 0, 204); // rgba(51, 0, 0, 0.8)
+        graphics.strokeColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.8);
         graphics.lineWidth = 2;
         graphics.rect(-size / 2, -size / 2, size, size);
         graphics.stroke();

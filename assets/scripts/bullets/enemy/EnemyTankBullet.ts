@@ -1,6 +1,7 @@
 import { _decorator, Color, Graphics } from 'cc';
 import { BulletBase } from '../BulletBase';
 import { BulletType } from '../../constants/Index';
+import { CyberpunkColors } from '../../constants/Index';
 import { EnemyTankBulletRenderer } from '../../renderers/Index';
 const { ccclass } = _decorator;
 
@@ -29,10 +30,10 @@ export class EnemyTankBullet extends BulletBase {
 
     /**
      * 重写子弹颜色
-     * 坦克子弹使用红色
+     * 坦克子弹使用霓虹橙红色（赛博朋克风格）
      */
     protected getBulletColor(): Color {
-        return Color.RED;
+        return new Color(255, 100, 50, 255); // 霓虹橙红色
     }
     
     /**

@@ -1,11 +1,12 @@
 import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab, Vec3, AudioClip } from 'cc';
 import { UiConfig } from '../../../config/Index';
-import { EnemyManager, WeaponManager, BulletManager, ObstacleManager } from '../../../managers/Index';
+import { EnemyManager, WeaponManager, BulletManager, ObstacleManager, BaseManager, WaveManager } from '../../../managers/Index';
 import { MapDragHandler } from '../../../business/Index';
 import { WarGridRenderer, BaseRenderer } from '../../../renderers/Index';
 import { PathFinder } from '../../../utils/Index';
 import { WarViewManagers } from './WarViewManagers';
 import { WarViewObstacles } from './WarViewObstacles';
+import { GameOverView } from './GameOverView';
 const { ccclass, property } = _decorator;
 
 @ccclass('WarView')
@@ -20,6 +21,7 @@ export class WarView extends Component {
     private gameManager: any;
     private managersHelper: WarViewManagers | null = null;
     private obstaclesHelper: WarViewObstacles | null = null;
+    private hasStartedFirstWave: boolean = false;
     
     // 组件引用（通过编辑器绑定）
     @property({ type: Node, displayName: '基地节点' })
@@ -58,14 +60,19 @@ export class WarView extends Component {
     @property({ type: AudioClip, displayName: '爆炸音效', tooltip: '敌人爆炸音效音频剪辑' })
     public boomSoundClip: AudioClip | null = null;
 
+    @property({ type: GameOverView, displayName: '游戏结束界面', tooltip: '游戏结束界面组件' })
+    private gameOverView: GameOverView | null = null;
+
     onLoad() {
         this.initTransform();
         this.initManagers();
         this.initEventListeners();
         this.drawGrid();
         this.initBase();
+        
     }
     
+
     /**
      * 绘制战场格子
      */
@@ -130,8 +137,29 @@ export class WarView extends Component {
         // 绘制基地
         BaseRenderer.render(baseGraphics, baseWidth, baseHeight);
         
+        // 初始化基地管理器
+        const baseManager = BaseManager.getInstance();
+        baseManager.init(this.baseNode, 1000); // 基地初始生命值1000
+        baseManager.setOnDestroyedCallback(() => {
+            this.onBaseDestroyed();
+        });
+        
         // 基地创建后，生成障碍物（排除基地周围3个格子范围）
         this.generateRandomObstacles(undefined, 0.08);
+    }
+
+    /**
+     * 基地被摧毁时的处理
+     */
+    private onBaseDestroyed() {
+        // 获取当前波次
+        const waveManager = WaveManager.getInstance();
+        const finalWave = waveManager.getWaveLevel();
+        
+        // 显示游戏结束界面
+        if (this.gameOverView) {
+            this.gameOverView.show(finalWave);
+        }
     }
     
     /**
@@ -246,10 +274,13 @@ export class WarView extends Component {
     }
 
     onDestroy() {
-        this.node.off(Node.EventType.TOUCH_START, this.onTouchStart, this);
-        this.node.off(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
-        this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this);
-        this.node.off(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
+        // 检查节点有效性，避免场景切换时的销毁错误
+        if (this.node && this.node.isValid) {
+            this.node.off(Node.EventType.TOUCH_START, this.onTouchStart, this);
+            this.node.off(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
+            this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+            this.node.off(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
+        }
         
         if (this.dragHandler) {
             this.dragHandler.destroy();
@@ -290,11 +321,18 @@ export class WarView extends Component {
                 this.enemyManager.setPathfinding(pathFinder, baseCenter);
             }
         }
+        // this.gameOverView.show(1);
     }
 
     update(deltaTime: number) {
         // 只有游戏开始后才更新管理器
         if (!this.gameManager || !this.gameManager.canUpdate()) return;
+
+        // 游戏刚开始时，开始第一波
+        if (!this.hasStartedFirstWave && this.enemyManager) {
+            this.enemyManager.startFirstWave();
+            this.hasStartedFirstWave = true;
+        }
 
         // 更新敌人管理器
         if (this.enemyManager) {

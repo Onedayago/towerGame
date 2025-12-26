@@ -3,19 +3,23 @@ import { GameManager } from '../../../managers/Index';
 import { CyberpunkColors } from '../../../constants/Index';
 import { UiFontConfig, UiConfig } from '../../../config/Index';
 import { UIStyleHelper } from '../../../utils/Index';
+import { UiColors } from '../../../constants/Index';
 const { ccclass, property } = _decorator;
 
 /**
- * 暂停界面组件
- * 参考 GameOverView 实现：显示游戏暂停时的界面，带有继续和返回主菜单按钮
+ * 游戏结束界面组件
+ * 参考原游戏实现：显示游戏结束信息，带有重新开始和返回主菜单按钮
  */
-@ccclass('PauseView')
-export class PauseView extends Component {
-    @property({ type: Label, displayName: '暂停标题', tooltip: '显示"游戏暂停"的标题标签' })
+@ccclass('GameOverView')
+export class GameOverView extends Component {
+    @property({ type: Label, displayName: '游戏结束标题', tooltip: '显示"游戏结束"的标题标签' })
     private titleLabel: Label | null = null;
 
-    @property({ type: Button, displayName: '继续按钮', tooltip: '继续游戏的按钮' })
-    private resumeButton: Button | null = null;
+    @property({ type: Label, displayName: '波次信息标签', tooltip: '显示最终波次的标签（可选）' })
+    private waveLabel: Label | null = null;
+
+    @property({ type: Button, displayName: '重新开始按钮', tooltip: '重新开始游戏的按钮' })
+    private restartButton: Button | null = null;
 
     @property({ type: Button, displayName: '返回主菜单按钮', tooltip: '返回主菜单的按钮' })
     private menuButton: Button | null = null;
@@ -65,9 +69,13 @@ export class PauseView extends Component {
             this.initTitleLabel();
         }
 
+        if (this.waveLabel) {
+            this.initWaveLabel();
+        }
+
         // 初始化按钮
-        if (this.resumeButton) {
-            this.initResumeButton();
+        if (this.restartButton) {
+            this.initRestartButton();
         }
 
         if (this.menuButton) {
@@ -143,11 +151,11 @@ export class PauseView extends Component {
 
         const fontSize = UiFontConfig.LARGE_FONT_SIZE;
         
-        // 设置文本样式（赛博朋克风格，使用霓虹黄色，醒目且符合暂停提示）
+        // 设置文本样式（赛博朋克风格，使用霓虹红色，醒目且符合游戏风格）
         UIStyleHelper.styleLabel(
             this.titleLabel,
             fontSize,
-            CyberpunkColors.NEON_YELLOW, // 霓虹黄色，警告/暂停提示
+            CyberpunkColors.ENEMY_PRIMARY, // 霓虹红色，危险感
             6, // 更粗的描边
             new Color(0, 0, 0, 255), // 黑色描边，高对比度
             true
@@ -158,39 +166,72 @@ export class PauseView extends Component {
 
         // 添加多层发光阴影效果（赛博朋克风格）
         this.titleLabel.enableShadow = true;
-        // 主阴影：黄色发光（与文字颜色呼应）
-        this.titleLabel.shadowColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_YELLOW, 0.8);
+        // 主阴影：红色发光（与文字颜色呼应）
+        this.titleLabel.shadowColor = CyberpunkColors.ENEMY_GLOW; // 霓虹红色发光
         this.titleLabel.shadowOffset = new Vec2(0, 0); // 无偏移，创建发光效果
         this.titleLabel.shadowBlur = 18; // 更大的模糊半径，增强发光效果
 
         // 确保文字颜色完全不透明
-        this.titleLabel.color = CyberpunkColors.NEON_YELLOW;
+        this.titleLabel.color = CyberpunkColors.ENEMY_PRIMARY;
 
-        this.titleLabel.string = '游戏暂停';
+        this.titleLabel.string = '游戏结束';
     }
 
     /**
-     * 初始化继续按钮
+     * 初始化波次标签
      */
-    private initResumeButton() {
-        if (!this.resumeButton) return;
+    private initWaveLabel() {
+        if (!this.waveLabel) return;
 
-        // 设置按钮样式（使用霓虹绿色，代表继续/恢复）
-        UIStyleHelper.styleButton(this.resumeButton, CyberpunkColors.NEON_GREEN);
+        const fontSize = UiFontConfig.MEDIUM_FONT_SIZE;
+        
+        // 使用霓虹青色，科技感强，符合游戏风格
+        UIStyleHelper.styleLabel(
+            this.waveLabel,
+            fontSize,
+            CyberpunkColors.NEON_CYAN, // 霓虹青色，科技感
+            4, // 增加描边宽度，更醒目
+            new Color(0, 0, 0, 255), // 黑色描边
+            true
+        );
+
+        // 设置行高（与字体大小相同）
+        this.waveLabel.lineHeight = fontSize;
+
+        // 添加发光阴影效果
+        this.waveLabel.enableShadow = true;
+        this.waveLabel.shadowColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.8);
+        this.waveLabel.shadowOffset = new Vec2(0, 0);
+        this.waveLabel.shadowBlur = 10;
+
+        // 确保文字颜色完全不透明
+        this.waveLabel.color = CyberpunkColors.NEON_CYAN;
+
+        this.waveLabel.string = '波次: 0';
+    }
+
+    /**
+     * 初始化重新开始按钮
+     */
+    private initRestartButton() {
+        if (!this.restartButton) return;
+
+        // 设置按钮样式（使用霓虹绿色，代表重新开始/希望）
+        UIStyleHelper.styleButton(this.restartButton, CyberpunkColors.NEON_GREEN);
 
         // 设置按钮文字
-        const buttonLabel = this.resumeButton.node.getChildByName('Label')?.getComponent(Label);
+        const buttonLabel = this.restartButton.node.getChildByName('Label')?.getComponent(Label);
         if (buttonLabel) {
             const fontSize = UiFontConfig.MEDIUM_FONT_SIZE;
             // 使用白色文字，高对比度
             UIStyleHelper.styleLabel(buttonLabel, fontSize, Color.WHITE, 2);
             // 设置行高（与字体大小相同）
             buttonLabel.lineHeight = fontSize;
-            buttonLabel.string = '继续游戏';
+            buttonLabel.string = '重新开始';
         }
 
         // 绑定点击事件
-        this.resumeButton.node.on(Button.EventType.CLICK, this.onResumeClick, this);
+        this.restartButton.node.on(Button.EventType.CLICK, this.onRestartClick, this);
     }
 
     /**
@@ -218,13 +259,19 @@ export class PauseView extends Component {
     }
 
     /**
-     * 显示暂停界面
+     * 显示游戏结束界面
+     * @param finalWave 最终波次（可选）
      */
-    show() {
+    show(finalWave: number = 0) {
         if (this.isShowing) return;
 
         this.isShowing = true;
         this.node.active = true;
+
+        // 更新波次信息
+        if (this.waveLabel) {
+            this.waveLabel.string = `波次: ${finalWave}`;
+        }
 
         // 重置透明度
         if (this.uiOpacity) {
@@ -238,14 +285,12 @@ export class PauseView extends Component {
                 .start();
         }
 
-        // 暂停游戏
-        if (this.gameManager) {
-            this.gameManager.pauseGame();
-        }
+        // 停止游戏
+        // this.gameManager.stopGame();
     }
 
     /**
-     * 隐藏暂停界面
+     * 隐藏游戏结束界面
      */
     hide() {
         this.isShowing = false;
@@ -256,52 +301,21 @@ export class PauseView extends Component {
     }
 
     /**
-     * 继续按钮点击事件
+     * 重新开始按钮点击事件
      */
-    private onResumeClick(event?: EventTouch) {
+    private onRestartClick(event?: EventTouch) {
         if (event) {
             event.propagationStopped = true;
         }
 
-        if (this.gameManager && this.gameManager.isPaused()) {
-            this.gameManager.resumeGame();
-            this.hide();
-            // 更新暂停按钮的文字（使用时动态查找）
-            this.updatePauseButtonText();
+        // 防止重复加载场景
+        if (this.isLoadingScene) {
+            return;
         }
-    }
 
-    /**
-     * 更新暂停按钮的文字
-     */
-    private updatePauseButtonText() {
-        const scene = this.node.scene;
-        if (!scene) return;
-        
-        // 查找 PauseBtn 组件
-        const pauseBtnNode = this.findNodeWithComponent(scene, 'PauseBtn');
-        if (pauseBtnNode) {
-            const pauseBtn = pauseBtnNode.getComponent('PauseBtn' as any) as any;
-            if (pauseBtn && typeof pauseBtn.updateButtonText === 'function') {
-                pauseBtn.updateButtonText();
-            }
-        }
-    }
-
-    /**
-     * 递归查找包含指定组件的节点
-     */
-    private findNodeWithComponent(node: Node, componentName: string): Node | null {
-        if (node.getComponent(componentName as any)) {
-            return node;
-        }
-        for (let child of node.children) {
-            const result = this.findNodeWithComponent(child, componentName);
-            if (result) {
-                return result;
-            }
-        }
-        return null;
+        this.isLoadingScene = true;
+        // 重新加载游戏场景
+        director.loadScene('game');
     }
 
     /**

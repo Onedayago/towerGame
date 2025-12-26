@@ -45,10 +45,13 @@ export class ViewPoint extends Component {
     }
 
     onDestroy() {
-        this.node.off(Node.EventType.TOUCH_START, this.onTouchStart, this);
-        this.node.off(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
-        this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this);
-        this.node.off(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
+        // 检查节点有效性，避免场景切换时的销毁错误
+        if (this.node && this.node.isValid) {
+            this.node.off(Node.EventType.TOUCH_START, this.onTouchStart, this);
+            this.node.off(Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
+            this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+            this.node.off(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
+        }
     }
 
     update(deltaTime: number) {

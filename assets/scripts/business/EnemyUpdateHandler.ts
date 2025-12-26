@@ -46,7 +46,6 @@ export class EnemyUpdateHandler {
      * 添加敌人到更新列表
      */
     addEnemy(enemy: Node) {
-        console.log(`EnemyUpdateHandler: 添加敌人到更新列表，当前敌人数量: ${this.enemies.length}`);
         this.enemies.push(enemy);
     }
 
@@ -105,8 +104,6 @@ export class EnemyUpdateHandler {
             if (typeof (enemyComponent as any).setPathfinding === 'function') {
                 (enemyComponent as any).setPathfinding(this.pathFinder, this.baseTarget);
             }
-        } else {
-            console.warn(`EnemyUpdateHandler: 寻路器或基地目标未设置。pathFinder: ${!!this.pathFinder}, baseTarget: ${!!this.baseTarget}`);
         }
         
         // 更新出现动画（如果正在出现动画中）

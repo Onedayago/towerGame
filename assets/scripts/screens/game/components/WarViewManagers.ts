@@ -122,6 +122,9 @@ export class WarViewManagers {
     private initAudioManager() {
         const audioManager = AudioManager.getInstance();
         
+        // 清理无效的音频源引用（场景切换后可能存在的无效引用）
+        audioManager.cleanupInvalidSources();
+        
         // 设置音频管理器节点（使用当前 WarView 节点）
         audioManager.setAudioNode(this.warViewNode);
         

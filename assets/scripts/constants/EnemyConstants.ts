@@ -1,4 +1,5 @@
 import { Color } from 'cc';
+import { CyberpunkColors } from './CyberpunkColors';
 
 /**
  * 敌人常量配置
@@ -104,13 +105,13 @@ export const ENEMY_COMMON_CONFIG = {
 
 /**
  * 敌人颜色配置
- * 定义各种敌人的显示颜色
+ * 定义各种敌人的显示颜色（赛博朋克风格）
  */
 export const ENEMY_COLORS: Record<EnemyType, Color> = {
-    [EnemyType.TANK]: Color.YELLOW,
-    [EnemyType.FAST_TANK]: Color.GREEN,
-    [EnemyType.HEAVY_TANK]: Color.BLUE,
-    [EnemyType.BOSS]: Color.RED
+    [EnemyType.TANK]: new Color(255, 100, 50, 255),           // 霓虹橙红色 - 坦克
+    [EnemyType.FAST_TANK]: CyberpunkColors.NEON_GREEN,        // 霓虹绿色 - 快速坦克
+    [EnemyType.HEAVY_TANK]: CyberpunkColors.NEON_BLUE,        // 霓虹蓝色 - 重型坦克
+    [EnemyType.BOSS]: CyberpunkColors.ENEMY_PRIMARY           // 霓虹红色 - Boss（危险感）
 };
 
 /**

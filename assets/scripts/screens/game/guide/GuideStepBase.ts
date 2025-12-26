@@ -71,7 +71,7 @@ export abstract class GuideStepBase {
      * 显示提示文字
      */
     protected showText(text: string) {
-        if (this.guideLabel) {
+        if (this.guideLabel && this.guideLabel.node && this.guideLabel.node.isValid) {
             this.guideLabel.string = text;
             this.guideLabel.node.active = true;
         }
@@ -81,7 +81,7 @@ export abstract class GuideStepBase {
      * 隐藏提示文字
      */
     protected hideText() {
-        if (this.guideLabel) {
+        if (this.guideLabel && this.guideLabel.node && this.guideLabel.node.isValid) {
             this.guideLabel.node.active = false;
         }
     }

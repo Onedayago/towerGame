@@ -1,6 +1,7 @@
 import { _decorator, Color, Graphics } from 'cc';
 import { BulletBase } from '../BulletBase';
 import { BulletType } from '../../constants/Index';
+import { CyberpunkColors } from '../../constants/Index';
 import { WeaponBasicBulletRenderer } from '../../renderers/Index';
 const { ccclass } = _decorator;
 
@@ -29,10 +30,10 @@ export class WeaponBasicBullet extends BulletBase {
 
     /**
      * 重写子弹颜色
-     * 基础武器子弹使用黄色
+     * 基础武器子弹使用霓虹蓝色（赛博朋克风格）
      */
     protected getBulletColor(): Color {
-        return Color.YELLOW;
+        return CyberpunkColors.BULLET_BASIC;
     }
     
     /**

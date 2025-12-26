@@ -11,4 +11,5 @@ export { GoldManager } from './GoldManager';
 export { ObstacleManager } from './ObstacleManager';
 export { WaveManager } from './WaveManager';
 export { AudioManager } from './AudioManager';
+export { BaseManager } from './BaseManager';
 

@@ -1,10 +1,12 @@
 import { _decorator, Component, Label } from 'cc';
 import { WaveManager } from '../../../managers/Index';
+import { WaveToast } from './WaveToast';
 const { ccclass, property } = _decorator;
 
 /**
  * 波次显示组件
  * 显示当前波次和敌人进度，参考原游戏的设计
+ * 控制 WaveToast 的展示
  */
 @ccclass('WaveView')
 export class WaveView extends Component {
@@ -17,17 +19,24 @@ export class WaveView extends Component {
     
     @property({ type: Label, displayName: '进度标签' })
     private progressLabel: Label | null = null;
+
+    @property({ type: WaveToast, displayName: '波次 Toast', tooltip: '波次提示 Toast 组件' })
+    private waveToast: WaveToast | null = null;
     
     private lastWaveLevel: number = -1;
     private lastProgress: { current: number; max: number } | null = null;
     
     onLoad() {
-        // 初始化波次管理器
+        // 获取波次管理器（不初始化，由 EnemyManager 负责初始化）
         this.waveManager = WaveManager.getInstance();
-        this.waveManager.init();
     }
     
     start() {
+        // 初始化显示状态
+        if (this.waveManager) {
+            this.lastWaveLevel = this.waveManager.getWaveLevel();
+            this.lastProgress = this.waveManager.getWaveProgress();
+        }
         // 更新显示
         this.updateWaveDisplay();
     }
@@ -37,6 +46,11 @@ export class WaveView extends Component {
         if (this.waveManager) {
             const currentWave = this.waveManager.getWaveLevel();
             const currentProgress = this.waveManager.getWaveProgress();
+            
+            // 检查波次变化并显示 Toast
+            if (currentWave !== this.lastWaveLevel && currentWave > 0) {
+                this.showWaveToast(currentWave);
+            }
             
             if (currentWave !== this.lastWaveLevel || 
                 !this.lastProgress || 
@@ -82,6 +96,16 @@ export class WaveView extends Component {
      */
     public getCurrentProgress(): { current: number; max: number } {
         return this.waveManager?.getWaveProgress() || { current: 0, max: 0 };
+    }
+
+    /**
+     * 显示波次 Toast
+     * @param waveNumber 波次编号
+     */
+    private showWaveToast(waveNumber: number) {
+        if (this.waveToast) {
+            this.waveToast.showWave(waveNumber);
+        }
     }
 }
 

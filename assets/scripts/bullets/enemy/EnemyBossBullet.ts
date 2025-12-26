@@ -1,6 +1,7 @@
 import { _decorator, Color, Graphics } from 'cc';
 import { BulletBase } from '../BulletBase';
 import { BulletType } from '../../constants/Index';
+import { CyberpunkColors } from '../../constants/Index';
 import { EnemyBossBulletRenderer } from '../../renderers/Index';
 const { ccclass } = _decorator;
 
@@ -29,10 +30,10 @@ export class EnemyBossBullet extends BulletBase {
 
     /**
      * 重写子弹颜色
-     * Boss子弹使用紫色
+     * Boss子弹使用霓虹紫色（赛博朋克风格）
      */
     protected getBulletColor(): Color {
-        return new Color(128, 0, 128, 255); // 紫色
+        return CyberpunkColors.NEON_PURPLE;
     }
     
     /**
