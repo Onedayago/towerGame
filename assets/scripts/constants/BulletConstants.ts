@@ -37,19 +37,19 @@ export const BULLET_CONFIGS: Record<BulletType, BulletConfig> = {
     // 武器子弹配置
     [BulletType.WEAPON_BASIC]: {
         type: BulletType.WEAPON_BASIC,
-        speed: 100,          // 基础武器子弹速度：200像素/秒（基础速度，参考加农炮）
+        speed: 70,          // 基础武器子弹速度：70像素/秒（减小速度）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 2000    // 最大飞行距离：2000像素
     },
     [BulletType.WEAPON_LASER]: {
         type: BulletType.WEAPON_LASER,
-        speed: 90,          // 激光武器子弹速度：180像素/秒（减小速度）
+        speed: 60,          // 激光武器子弹速度：60像素/秒（减小速度）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 2500    // 最大飞行距离：2500像素
     },
     [BulletType.WEAPON_ROCKET]: {
         type: BulletType.WEAPON_ROCKET,
-        speed: 150,          // 火箭塔子弹速度：300像素/秒（基础速度 * 1.5，参考追踪火箭）
+        speed: 100,          // 火箭塔子弹速度：100像素/秒（减小速度）
         damage: 0,           // 0表示使用发射者的伤害
         maxDistance: 3000    // 最大飞行距离：3000像素
     },

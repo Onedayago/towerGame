@@ -61,7 +61,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 1,
                 health: 300,
                 damage: 15,
-                range: 450,
+                range: 315,           // 减小攻击范围：450 * 0.7 = 315
                 attackSpeed: 0.9,
                 upgradeCost: 0,      // 1级是初始等级，不需要升级成本
                 sellPrice: 25,        // 出售1级武器获得25金币（基础成本的50%）
@@ -70,7 +70,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 2,
                 health: 360,
                 damage: 18,
-                range: 540,
+                range: 378,           // 减小攻击范围：540 * 0.7 = 378
                 attackSpeed: 0.75,
                 upgradeCost: 75,      // 从1级升级到2级需要75金币
                 sellPrice: 50,        // 出售2级武器获得50金币
@@ -79,7 +79,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 3,
                 health: 432,
                 damage: 22,
-                range: 648,
+                range: 454,           // 减小攻击范围：648 * 0.7 = 454
                 attackSpeed: 0.625,
                 upgradeCost: 112,     // 从2级升级到3级需要112金币
                 sellPrice: 75,        // 出售3级武器获得75金币
@@ -88,7 +88,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 4,
                 health: 518,
                 damage: 26,
-                range: 778,
+                range: 545,           // 减小攻击范围：778 * 0.7 = 545
                 attackSpeed: 0.52,
                 upgradeCost: 168,     // 从3级升级到4级需要168金币
                 sellPrice: 100,       // 出售4级武器获得100金币
@@ -97,7 +97,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 5,
                 health: 622,
                 damage: 31,
-                range: 933,
+                range: 653,           // 减小攻击范围：933 * 0.7 = 653
                 attackSpeed: 0.433,
                 upgradeCost: 252,     // 从4级升级到5级需要252金币
                 sellPrice: 125,       // 出售5级武器获得125金币
@@ -113,7 +113,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 1,
                 health: 250,
                 damage: 12,
-                range: 500,
+                range: 350,           // 减小攻击范围：500 * 0.7 = 350
                 attackSpeed: 0.35,
                 upgradeCost: 0,
                 sellPrice: 40,
@@ -122,7 +122,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 2,
                 health: 300,
                 damage: 14,
-                range: 600,
+                range: 420,           // 减小攻击范围：600 * 0.7 = 420
                 attackSpeed: 0.29,
                 upgradeCost: 120,
                 sellPrice: 80,
@@ -131,7 +131,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 3,
                 health: 360,
                 damage: 17,
-                range: 720,
+                range: 504,           // 减小攻击范围：720 * 0.7 = 504
                 attackSpeed: 0.24,
                 upgradeCost: 180,
                 sellPrice: 120,
@@ -140,7 +140,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 4,
                 health: 432,
                 damage: 20,
-                range: 864,
+                range: 605,           // 减小攻击范围：864 * 0.7 = 605
                 attackSpeed: 0.20,
                 upgradeCost: 270,
                 sellPrice: 160,
@@ -149,7 +149,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 5,
                 health: 518,
                 damage: 24,
-                range: 1037,
+                range: 726,           // 减小攻击范围：1037 * 0.7 = 726
                 attackSpeed: 0.167,
                 upgradeCost: 405,
                 sellPrice: 200,
@@ -165,7 +165,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 1,
                 health: 400,
                 damage: 50,
-                range: 550,
+                range: 385,           // 减小攻击范围：550 * 0.7 = 385
                 attackSpeed: 0.7,
                 upgradeCost: 0,
                 sellPrice: 60,
@@ -174,7 +174,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 2,
                 health: 480,
                 damage: 60,
-                range: 660,
+                range: 462,           // 减小攻击范围：660 * 0.7 = 462
                 attackSpeed: 0.583,
                 upgradeCost: 180,
                 sellPrice: 120,
@@ -183,7 +183,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 3,
                 health: 576,
                 damage: 72,
-                range: 792,
+                range: 554,           // 减小攻击范围：792 * 0.7 = 554
                 attackSpeed: 0.486,
                 upgradeCost: 270,
                 sellPrice: 180,
@@ -192,7 +192,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 4,
                 health: 691,
                 damage: 86,
-                range: 950,
+                range: 665,           // 减小攻击范围：950 * 0.7 = 665
                 attackSpeed: 0.405,
                 upgradeCost: 405,
                 sellPrice: 240,
@@ -201,7 +201,7 @@ export const WEAPON_UPGRADE_CONFIGS: Record<WeaponType, WeaponUpgradeConfig> = {
                 level: 5,
                 health: 829,
                 damage: 103,
-                range: 1140,
+                range: 798,           // 减小攻击范围：1140 * 0.7 = 798
                 attackSpeed: 0.338,
                 upgradeCost: 607,
                 sellPrice: 300,
