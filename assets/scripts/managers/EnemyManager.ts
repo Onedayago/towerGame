@@ -1,10 +1,12 @@
-import { Node, Prefab, UITransform } from 'cc';
+import { Node, Prefab, UITransform, Vec3 } from 'cc';
 import { EnemyType } from '../constants/Index';
 import { EnemySpawnHandler } from '../business/EnemySpawnHandler';
 import { EnemyUpdateHandler } from '../business/EnemyUpdateHandler';
 import { BulletManager } from './BulletManager';
 import { WeaponManager } from './WeaponManager';
 import { WaveManager } from './WaveManager';
+import { PathFinder } from '../utils/PathFinder';
+import { ObstacleManager } from './ObstacleManager';
 
 /**
  * 敌人管理器
@@ -14,10 +16,12 @@ export class EnemyManager {
     private containerNode: Node;
     private enemyPrefabs: Map<EnemyType, Prefab> = new Map();
     private containerWidth: number = 0;
+    private containerHeight: number = 0;
     
     private spawnHandler: EnemySpawnHandler;
     private updateHandler: EnemyUpdateHandler;
     private waveManager: WaveManager;
+    private pathFinder: PathFinder | null = null;
 
     constructor(containerNode: Node, enemyPrefabs: Map<EnemyType, Prefab> | null = null) {
         this.containerNode = containerNode;
@@ -30,11 +34,12 @@ export class EnemyManager {
         const transform = containerNode.getComponent(UITransform);
         if (transform) {
             this.containerWidth = transform.width;
+            this.containerHeight = transform.height;
         }
 
         // 初始化生成和更新处理器
         this.spawnHandler = new EnemySpawnHandler(containerNode, enemyPrefabs);
-        this.updateHandler = new EnemyUpdateHandler(this.containerWidth);
+        this.updateHandler = new EnemyUpdateHandler(this.containerWidth, this.containerHeight);
         
         // 初始化波次管理器并开始第一波
         this.waveManager.init();
@@ -56,6 +61,7 @@ export class EnemyManager {
         // 更新生成逻辑（只有在波次未完成时才会生成）
         const newEnemy = this.spawnHandler.update(deltaTime);
         if (newEnemy) {
+            console.log('EnemyManager: 生成新敌人，添加到更新列表');
             this.updateHandler.addEnemy(newEnemy);
         }
 
@@ -122,6 +128,29 @@ export class EnemyManager {
      */
     setManagers(bulletManager: BulletManager, weaponManager: WeaponManager) {
         this.updateHandler.setManagers(bulletManager, weaponManager);
+    }
+
+    /**
+     * 设置寻路器和基地目标位置
+     * @param pathFinder 寻路器
+     * @param baseTarget 基地目标位置
+     */
+    setPathfinding(pathFinder: PathFinder, baseTarget: Vec3) {
+        this.pathFinder = pathFinder;
+        this.updateHandler.setPathfinding(pathFinder, baseTarget);
+    }
+
+    /**
+     * 初始化寻路器
+     * @param obstacleManager 障碍物管理器
+     * @returns 初始化后的寻路器实例
+     */
+    initPathfinder(obstacleManager: ObstacleManager): PathFinder {
+        if (!this.pathFinder) {
+            this.pathFinder = new PathFinder();
+        }
+        this.pathFinder.init(obstacleManager, this.containerWidth, this.containerHeight);
+        return this.pathFinder;
     }
     
     /**

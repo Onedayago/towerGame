@@ -8,4 +8,5 @@ export { TargetFinder } from './TargetFinder';
 export { HealthBarHelper } from './HealthBarHelper';
 export { DrawHelper } from './DrawHelper';
 export { UIStyleHelper } from './UIStyleHelper';
+export { PathFinder } from './PathFinder';
 

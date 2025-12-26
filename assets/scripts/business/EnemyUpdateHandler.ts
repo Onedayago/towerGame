@@ -1,7 +1,8 @@
-import { Node, UITransform } from 'cc';
+import { Node, UITransform, Vec3 } from 'cc';
 import { UiConfig } from '../config/Index';
 import { BulletManager } from '../managers/BulletManager';
 import { WeaponManager } from '../managers/WeaponManager';
+import { PathFinder } from '../utils/PathFinder';
 
 /**
  * 敌人更新处理器
@@ -10,11 +11,15 @@ import { WeaponManager } from '../managers/WeaponManager';
 export class EnemyUpdateHandler {
     private enemies: Node[] = [];
     private containerWidth: number = 0;
+    private containerHeight: number = 0;
     private bulletManager: BulletManager | null = null;
     private weaponManager: WeaponManager | null = null;
+    private pathFinder: PathFinder | null = null;
+    private baseTarget: Vec3 | null = null;
 
-    constructor(containerWidth: number) {
+    constructor(containerWidth: number, containerHeight: number = 0) {
         this.containerWidth = containerWidth;
+        this.containerHeight = containerHeight;
     }
     
     /**
@@ -28,9 +33,20 @@ export class EnemyUpdateHandler {
     }
 
     /**
+     * 设置寻路器和基地目标位置
+     * @param pathFinder 寻路器
+     * @param baseTarget 基地目标位置
+     */
+    setPathfinding(pathFinder: PathFinder, baseTarget: Vec3) {
+        this.pathFinder = pathFinder;
+        this.baseTarget = baseTarget;
+    }
+
+    /**
      * 添加敌人到更新列表
      */
     addEnemy(enemy: Node) {
+        console.log(`EnemyUpdateHandler: 添加敌人到更新列表，当前敌人数量: ${this.enemies.length}`);
         this.enemies.push(enemy);
     }
 
@@ -39,6 +55,10 @@ export class EnemyUpdateHandler {
      * @param deltaTime 帧时间
      */
     update(deltaTime: number) {
+        if (this.enemies.length === 0) {
+            return;
+        }
+        
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const enemy = this.enemies[i];
             if (!enemy || !enemy.isValid) {
@@ -68,26 +88,38 @@ export class EnemyUpdateHandler {
                                enemy.getComponent('EnemyHeavyTank') ||
                                enemy.getComponent('EnemyBoss');
         
-        if (enemyComponent) {
-            // 设置管理器的引用（如果还没有设置）
-            if (this.bulletManager && this.weaponManager) {
-                if (typeof (enemyComponent as any).setManagers === 'function') {
-                    (enemyComponent as any).setManagers(this.bulletManager, this.weaponManager);
-                }
+        if (!enemyComponent) {
+            console.warn('EnemyUpdateHandler: 找不到敌人组件');
+            return;
+        }
+        
+        // 设置管理器的引用（如果还没有设置）
+        if (this.bulletManager && this.weaponManager) {
+            if (typeof (enemyComponent as any).setManagers === 'function') {
+                (enemyComponent as any).setManagers(this.bulletManager, this.weaponManager);
             }
-            
-            // 更新出现动画（如果正在出现动画中）
-            if (typeof (enemyComponent as any).updateSpawnAnimation === 'function') {
-                (enemyComponent as any).updateSpawnAnimation(deltaTime);
+        }
+        
+        // 设置寻路器和基地目标（如果还没有设置）
+        if (this.pathFinder && this.baseTarget) {
+            if (typeof (enemyComponent as any).setPathfinding === 'function') {
+                (enemyComponent as any).setPathfinding(this.pathFinder, this.baseTarget);
             }
-            
-            // 更新位置（出现动画完成后才移动）
-            if (typeof (enemyComponent as any).updatePosition === 'function') {
-                (enemyComponent as any).updatePosition(deltaTime, this.containerWidth);
-            }
-            if (typeof (enemyComponent as any).updateAttack === 'function') {
-                (enemyComponent as any).updateAttack(deltaTime);
-            }
+        } else {
+            console.warn(`EnemyUpdateHandler: 寻路器或基地目标未设置。pathFinder: ${!!this.pathFinder}, baseTarget: ${!!this.baseTarget}`);
+        }
+        
+        // 更新出现动画（如果正在出现动画中）
+        if (typeof (enemyComponent as any).updateSpawnAnimation === 'function') {
+            (enemyComponent as any).updateSpawnAnimation(deltaTime);
+        }
+        
+        // 更新位置（出现动画完成后才移动）
+        if (typeof (enemyComponent as any).updatePosition === 'function') {
+            (enemyComponent as any).updatePosition(deltaTime, this.containerWidth);
+        }
+        if (typeof (enemyComponent as any).updateAttack === 'function') {
+            (enemyComponent as any).updateAttack(deltaTime);
         }
     }
 

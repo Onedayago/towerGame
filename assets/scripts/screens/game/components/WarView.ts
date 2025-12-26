@@ -1,9 +1,11 @@
 import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab, Vec3, AudioClip } from 'cc';
-import { UiConfig, GOLD_CONFIG } from '../../../config/Index';
-import { EnemyManager, GameManager, WeaponManager, BulletManager, GoldManager, ObstacleManager, AudioManager } from '../../../managers/Index';
+import { UiConfig } from '../../../config/Index';
+import { EnemyManager, WeaponManager, BulletManager, ObstacleManager } from '../../../managers/Index';
 import { MapDragHandler } from '../../../business/Index';
-import { EnemyType, ObstacleType } from '../../../constants/Index';
 import { WarGridRenderer, BaseRenderer } from '../../../renderers/Index';
+import { PathFinder } from '../../../utils/Index';
+import { WarViewManagers } from './WarViewManagers';
+import { WarViewObstacles } from './WarViewObstacles';
 const { ccclass, property } = _decorator;
 
 @ccclass('WarView')
@@ -15,7 +17,9 @@ export class WarView extends Component {
     private bulletManager: BulletManager | null = null;
     private obstacleManager: ObstacleManager | null = null;
     private dragHandler: MapDragHandler | null = null;
-    private gameManager: GameManager;
+    private gameManager: any;
+    private managersHelper: WarViewManagers | null = null;
+    private obstaclesHelper: WarViewObstacles | null = null;
     
     // 组件引用（通过编辑器绑定）
     @property({ type: Node, displayName: '基地节点' })
@@ -148,89 +152,32 @@ export class WarView extends Component {
      * 初始化管理器
      */
     private initManagers() {
-        this.gameManager = GameManager.getInstance();
+        this.managersHelper = new WarViewManagers(
+            this.node,
+            this.baseNode,
+            this.enemySpawnEffectPrefab,
+            this.enemyTankPrefab,
+            this.enemyFastTankPrefab,
+            this.enemyHeavyTankPrefab,
+            this.enemyBossPrefab,
+            this.rockObstaclePrefab,
+            this.wallObstaclePrefab,
+            this.treeObstaclePrefab,
+            this.boxObstaclePrefab,
+            this.backgroundMusicClip,
+            this.boomSoundClip
+        );
         
-        // 初始化金币管理器
-        const goldManager = GoldManager.getInstance();
-        goldManager.init(GOLD_CONFIG.INITIAL_GOLD);
+        const managers = this.managersHelper.initManagers();
+        this.gameManager = managers.gameManager;
+        this.dragHandler = managers.dragHandler;
+        this.enemyManager = managers.enemyManager;
+        this.weaponManager = managers.weaponManager;
+        this.bulletManager = managers.bulletManager;
+        this.obstacleManager = managers.obstacleManager;
         
-        // 初始化地图拖拽处理器
-        const parent = this.node.parent;
-        this.dragHandler = new MapDragHandler(this.node, parent);
-
-        // 初始化敌人管理器
-        const enemyPrefabs = this.buildEnemyPrefabMap();
-        this.enemyManager = new EnemyManager(this.node, enemyPrefabs);
-        
-        // 设置敌人生成特效预制体
-        if (this.enemySpawnEffectPrefab) {
-            this.enemyManager.setSpawnEffectPrefab(this.enemySpawnEffectPrefab);
-        }
-        
-        // 初始化武器管理器
-        this.weaponManager = new WeaponManager(this.node);
-        
-        // 初始化子弹管理器
-        this.bulletManager = new BulletManager(this.node);
-        
-        // 初始化障碍物管理器
-        const obstaclePrefabs = this.buildObstaclePrefabMap();
-        this.obstacleManager = new ObstacleManager(this.node, obstaclePrefabs);
-        
-        // 设置管理器的依赖
-        this.weaponManager.setBulletManager(this.bulletManager);
-        this.weaponManager.setEnemyManager(this.enemyManager);
-        this.bulletManager.setEnemyManager(this.enemyManager);
-        this.bulletManager.setWeaponManager(this.weaponManager);
-        this.enemyManager.setManagers(this.bulletManager, this.weaponManager);
-        
-        // 初始化音频管理器
-        this.initAudioManager();
-    }
-    
-    /**
-     * 初始化音频管理器
-     */
-    private initAudioManager() {
-        const audioManager = AudioManager.getInstance();
-        
-        // 设置音频管理器节点（使用当前 WarView 节点）
-        audioManager.setAudioNode(this.node);
-        
-        // 设置音频资源
-        if (this.backgroundMusicClip) {
-            audioManager.setBackgroundMusic(this.backgroundMusicClip);
-        }
-        if (this.boomSoundClip) {
-            audioManager.setBoomSound(this.boomSoundClip);
-        }
-        
-        // 初始化并播放背景音乐
-        audioManager.initBackgroundMusic();
-        audioManager.playBackgroundMusic();
-    }
-    
-    /**
-     * 构建障碍物预制体映射表
-     * @returns 障碍物类型到预制体的映射
-     */
-    private buildObstaclePrefabMap(): Map<ObstacleType, Prefab> {
-        const obstaclePrefabs = new Map<ObstacleType, Prefab>();
-        
-        if (this.rockObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.ROCK, this.rockObstaclePrefab);
-        }
-        if (this.wallObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.WALL, this.wallObstaclePrefab);
-        }
-        if (this.treeObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.TREE, this.treeObstaclePrefab);
-        }
-        if (this.boxObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.BOX, this.boxObstaclePrefab);
-        }
-        
-        return obstaclePrefabs;
+        // 初始化障碍物生成助手
+        this.obstaclesHelper = new WarViewObstacles(this.node, this.baseNode, this.obstacleManager);
     }
     
     /**
@@ -239,71 +186,9 @@ export class WarView extends Component {
      * @param density 生成密度（0-1，表示占用格子的比例，默认 0.15 即 15%）
      */
     private generateRandomObstacles(count?: number, density: number = 0.15) {
-        if (!this.obstacleManager) return;
-        
-        const transform = this.node.getComponent(UITransform);
-        if (!transform) return;
-        
-        const width = transform.width;
-        const height = transform.height;
-        
-        // 计算基地周围3个格子范围的排除位置
-        const excludePositions: { x: number; y: number }[] = [];
-        if (this.baseNode) {
-            const basePos = this.baseNode.position;
-            const baseTransform = this.baseNode.getComponent(UITransform);
-            if (baseTransform) {
-                const cellSize = UiConfig.CELL_SIZE;
-                const baseWidth = baseTransform.width;
-                const baseHeight = baseTransform.height;
-                
-                // 基地占据的格子范围
-                const baseStartCol = Math.floor(basePos.x / cellSize);
-                const baseEndCol = Math.floor((basePos.x + baseWidth) / cellSize);
-                const baseStartRow = Math.floor(basePos.y / cellSize);
-                const baseEndRow = Math.floor((basePos.y + baseHeight) / cellSize);
-                
-                // 基地周围3个格子的范围
-                const excludeStartCol = Math.max(0, baseStartCol - 3);
-                const excludeEndCol = Math.min(Math.floor(width / cellSize) - 1, baseEndCol + 3);
-                const excludeStartRow = Math.max(0, baseStartRow - 3);
-                const excludeEndRow = Math.min(Math.floor(height / cellSize) - 1, baseEndRow + 3);
-                
-                // 生成所有需要排除的格子位置
-                for (let row = excludeStartRow; row <= excludeEndRow; row++) {
-                    for (let col = excludeStartCol; col <= excludeEndCol; col++) {
-                        const gridX = col * cellSize;
-                        const gridY = row * cellSize;
-                        excludePositions.push({ x: gridX, y: gridY });
-                    }
-                }
-            }
+        if (this.obstaclesHelper) {
+            this.obstaclesHelper.generateRandomObstacles(count, density);
         }
-        
-        this.obstacleManager.generateRandomObstacles(count, density, width, height, excludePositions);
-    }
-
-    /**
-     * 构建敌人预制体映射表
-     * @returns 敌人类型到预制体的映射
-     */
-    private buildEnemyPrefabMap(): Map<EnemyType, Prefab> {
-        const enemyPrefabs = new Map<EnemyType, Prefab>();
-        
-        if (this.enemyTankPrefab) {
-            enemyPrefabs.set(EnemyType.TANK, this.enemyTankPrefab);
-        }
-        if (this.enemyFastTankPrefab) {
-            enemyPrefabs.set(EnemyType.FAST_TANK, this.enemyFastTankPrefab);
-        }
-        if (this.enemyHeavyTankPrefab) {
-            enemyPrefabs.set(EnemyType.HEAVY_TANK, this.enemyHeavyTankPrefab);
-        }
-        if (this.enemyBossPrefab) {
-            enemyPrefabs.set(EnemyType.BOSS, this.enemyBossPrefab);
-        }
-        
-        return enemyPrefabs;
     }
 
     /**
@@ -394,11 +279,22 @@ export class WarView extends Component {
         if (this.gameManager) {
             this.gameManager.stopGame(); // 确保游戏未开始
         }
+        
+        // 设置基地位置给敌人管理器（用于寻路）
+        // 注意：PathFinder已经在initManagers中通过initPathfinder初始化
+        if (this.enemyManager && this.baseNode) {
+            const baseCenter = this.getBaseCenterPosition();
+            if (baseCenter) {
+                // 获取EnemyManager内部的PathFinder实例（通过initPathfinder返回）
+                const pathFinder = this.enemyManager.initPathfinder(this.obstacleManager);
+                this.enemyManager.setPathfinding(pathFinder, baseCenter);
+            }
+        }
     }
 
     update(deltaTime: number) {
         // 只有游戏开始后才更新管理器
-        if (!this.gameManager.canUpdate()) return;
+        if (!this.gameManager || !this.gameManager.canUpdate()) return;
 
         // 更新敌人管理器
         if (this.enemyManager) {

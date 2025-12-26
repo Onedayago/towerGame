@@ -37,10 +37,10 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     [EnemyType.TANK]: {
         type: EnemyType.TANK,
         moveSpeed: 25,         // 25像素/秒（减小）
-        attackSpeed: 1.0,     // 每秒攻击1次
+        attackSpeed: 1.5,     // 每1.5秒攻击1次（减慢）
         health: 500,           // 生命值：500（增加）
         damage: 10,
-        attackRange: 300,      // 攻击范围：300像素
+        attackRange: 200,      // 攻击范围：200像素（减小）
         attackDuration: 0.3,  // 攻击持续时间：0.3秒
         spawnInterval: 2.0,   // 每2秒生成一个
         reward: 10            // 击败后奖励10金币
@@ -48,10 +48,10 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     [EnemyType.FAST_TANK]: {
         type: EnemyType.FAST_TANK,
         moveSpeed: 40,         // 40像素/秒（减小）
-        attackSpeed: 0.8,      // 每秒攻击1.25次
+        attackSpeed: 1.2,      // 每1.2秒攻击1次（减慢）
         health: 300,           // 生命值：300（增加）
         damage: 8,
-        attackRange: 250,      // 攻击范围：250像素
+        attackRange: 180,      // 攻击范围：180像素（减小）
         attackDuration: 0.25,  // 攻击持续时间：0.25秒
         spawnInterval: 1.5,    // 每1.5秒生成一个
         reward: 8              // 击败后奖励8金币
@@ -59,10 +59,10 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     [EnemyType.HEAVY_TANK]: {
         type: EnemyType.HEAVY_TANK,
         moveSpeed: 15,         // 15像素/秒（减小）
-        attackSpeed: 1.5,      // 每1.5秒攻击1次
+        attackSpeed: 2.0,      // 每2秒攻击1次（减慢）
         health: 1000,          // 生命值：1000（增加）
         damage: 20,
-        attackRange: 350,      // 攻击范围：350像素
+        attackRange: 250,      // 攻击范围：250像素（减小）
         attackDuration: 0.4,  // 攻击持续时间：0.4秒
         spawnInterval: 3.0,    // 每3秒生成一个
         reward: 20             // 击败后奖励20金币
@@ -70,10 +70,10 @@ export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     [EnemyType.BOSS]: {
         type: EnemyType.BOSS,
         moveSpeed: 20,         // 20像素/秒（减小）
-        attackSpeed: 0.5,      // 每秒攻击2次
+        attackSpeed: 0.8,      // 每0.8秒攻击1次（减慢）
         health: 2000,          // 生命值：2000（增加）
         damage: 30,
-        attackRange: 400,      // 攻击范围：400像素
+        attackRange: 300,      // 攻击范围：300像素（减小）
         attackDuration: 0.35, // 攻击持续时间：0.35秒
         spawnInterval: 10.0,      // 每10秒生成一个
         reward: 50             // 击败后奖励50金币

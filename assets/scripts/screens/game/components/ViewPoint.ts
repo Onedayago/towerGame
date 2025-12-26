@@ -201,7 +201,7 @@ export class ViewPoint extends Component {
             0,
             width,
             height,
-            new Color(255, 255, 0, 80),
+            new Color(255, 255, 0, 40),
             Color.YELLOW,
             2
         );
