@@ -49,6 +49,10 @@ export class BulletManager {
         if (bulletNode.parent !== this.containerNode) {
             bulletNode.setParent(this.containerNode);
         }
+        
+        // 设置子弹节点层级，确保子弹显示在基地上面（siblingIndex 越大，越后渲染，显示在顶层）
+        // 将子弹放在较高的层级，确保显示在基地、武器、敌人等之上
+        bulletNode.setSiblingIndex(999);
     
         this.bullets.push(bulletNode);
     }
@@ -256,17 +260,22 @@ export class BulletManager {
         const baseWidth = baseTransform.width;
         const baseHeight = baseTransform.height;
 
-        // 基地锚点在左下角 (0, 0)，所以中心点是 position + size / 2
-        const baseCenterX = basePos.x + baseWidth / 2;
-        const baseCenterY = basePos.y + baseHeight / 2;
-        const baseCenter = new Vec3(baseCenterX, baseCenterY, 0);
+        // 基地锚点在左下角 (0, 0)，使用矩形碰撞检测
+        // 基地的边界框
+        const baseLeft = basePos.x;
+        const baseRight = basePos.x + baseWidth;
+        const baseBottom = basePos.y;
+        const baseTop = basePos.y + baseHeight;
 
-        // 计算距离（使用圆形碰撞检测，以基地中心为圆心，对角线的一半为半径）
-        const baseRadius = Math.sqrt(baseWidth * baseWidth + baseHeight * baseHeight) / 2;
-        const distance = Vec3.distance(bulletPos, baseCenter);
+        // 子弹位置（考虑子弹半径，扩展碰撞范围）
+        const bulletLeft = bulletPos.x - bulletRadius;
+        const bulletRight = bulletPos.x + bulletRadius;
+        const bulletBottom = bulletPos.y - bulletRadius;
+        const bulletTop = bulletPos.y + bulletRadius;
 
-        // 检测碰撞
-        if (distance < bulletRadius + baseRadius) {
+        // 矩形碰撞检测
+        if (bulletRight >= baseLeft && bulletLeft <= baseRight &&
+            bulletTop >= baseBottom && bulletBottom <= baseTop) {
             // 击中基地，造成伤害
             baseManager.takeDamage(bulletComponent.getDamage());
             return true;

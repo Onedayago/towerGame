@@ -196,6 +196,11 @@ export class EnemyAttack {
         const baseCenterY = basePos.y + baseTransform.height / 2;
         const baseCenter = new Vec3(baseCenterX, baseCenterY, 0);
         
+        // 敌人只能攻击右侧的目标，检查基地是否在敌人右侧
+        if (baseCenterX <= enemyPos.x) {
+            return null;
+        }
+        
         // 计算敌人到基地中心的距离
         const distance = Vec3.distance(enemyPos, baseCenter);
         const attackRange = this.config.attackRange;

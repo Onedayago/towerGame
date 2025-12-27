@@ -150,6 +150,9 @@ export class WarView extends Component {
         // 绘制基地
         BaseRenderer.render(baseGraphics, baseWidth, baseHeight);
         
+        // 设置基地节点层级，确保基地在底层（子弹会显示在基地上面）
+        this.baseNode.setSiblingIndex(0);
+        
         // 初始化基地管理器
         const baseManager = BaseManager.getInstance();
         baseManager.init(this.baseNode, 1000); // 基地初始生命值1000
