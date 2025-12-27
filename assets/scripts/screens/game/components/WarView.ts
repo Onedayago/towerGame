@@ -122,30 +122,22 @@ export class WarView extends Component {
         baseTransform.setContentSize(baseWidth, baseHeight);
         
         // 计算位置（对齐到网格）
+        // 基地锚点在左下角 (0, 0)，所以位置应该是目标格子的左下角坐标
         let baseX: number;
         let baseY: number;
         
         // 检查最右边是否不足一列
         const fullColumns = Math.floor(battlefieldWidth / cellSize);
-        const remainingWidth = battlefieldWidth - fullColumns * cellSize;
-        const hasIncompleteColumn = remainingWidth > 0 && remainingWidth < cellSize;
-        
-        if (hasIncompleteColumn) {
-            // 如果最右边不足一列，基地移动到倒数第二列和倒数第三列（从右往左数）
-            // 基地宽度是2个格子，所以放在倒数第二列和倒数第三列
-            // 对齐到网格：倒数第三列的起始位置（从0开始计数）
-            const targetColumn = fullColumns - 3; // 倒数第三列（基地占据倒数第三列和倒数第二列）
-            baseX = targetColumn * cellSize; // 对齐到网格左下角
-        } else {
-            // 否则放在右边（倒数第一列和第二列）
-            // 对齐到网格：倒数第二列的起始位置（从0开始计数）
-            const targetColumn = fullColumns - 2; // 倒数第二列（基地占据倒数第二列和倒数第一列）
-            baseX = targetColumn * cellSize; // 对齐到网格左下角
-        }
+        const targetColumn = fullColumns - 2; // 倒数第二列（从0开始计数）
+        baseX = targetColumn * cellSize; // 对齐到网格左下角
         
         // Y 位置：对齐到网格，垂直居中
+        // 基地高度是2个格子，锚点在左下角
+        // 要垂直居中，需要计算让基地中心对齐到战场中心
         const fullRows = Math.floor(battlefieldHeight / cellSize);
-        const targetRow = Math.floor((fullRows - 2) / 2); // 垂直居中，考虑基地高度是2个格子
+        // 基地占据2行，要垂直居中，基地底部应该在 (fullRows - 2) / 2 行
+        // 使用 Math.max(0, ...) 确保不超出边界
+        const targetRow = Math.max(0, Math.floor((fullRows - 2) / 2)); // 垂直居中，确保不超出边界
         baseY = targetRow * cellSize; // 对齐到网格左下角
         this.baseNode.setPosition(baseX, baseY, 0);
         
