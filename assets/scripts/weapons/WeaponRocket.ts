@@ -79,6 +79,13 @@ export class WeaponRocket extends WeaponBase {
         // 火箭塔不需要旋转，保持原始方向
         return;
     }
+
+    /**
+     * 重写旋转检查，火箭塔攻击时不需要旋转
+     */
+    protected shouldRotateWhenAttacking(): boolean {
+        return false;
+    }
     
     /**
      * 绘制火箭塔外观

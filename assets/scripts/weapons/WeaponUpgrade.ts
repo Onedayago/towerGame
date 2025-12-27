@@ -1,5 +1,5 @@
 import { Node, Button, EventTouch } from 'cc';
-import { WeaponUpgradeConfig, WeaponLevelConfig, getWeaponLevelConfig } from '../config/Index';
+import { WeaponUpgradeConfig, WeaponLevelConfig, getWeaponLevelConfig } from '../constants/Index';
 import { UiConfig } from '../config/Index';
 import { WeaponManager, GoldManager } from '../managers/Index';
 import { WeaponButtonRenderer } from '../renderers/Index';

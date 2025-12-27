@@ -9,7 +9,7 @@ export class WaveManager {
     private static instance: WaveManager | null = null;
     private waveLevel: number = 0;
     private waveEnemyCount: number = 0;
-    private maxEnemiesPerWave: number = 15;
+    private maxEnemiesPerWave: number = 0; // 当前波次的最大敌人数（从配置中获取）
     private isWaveComplete: boolean = false;
     private hpBonus: number = 0; // 血量加成倍数
     private currentWaveEnemyTypes: EnemyType[] = []; // 当前波次的敌人类型池
@@ -42,9 +42,18 @@ export class WaveManager {
      * 开始新波次
      */
     startNewWave() {
+        // 检查是否达到总波次限制
+        if (WaveConfig.TOTAL_WAVES > 0 && this.waveLevel >= WaveConfig.TOTAL_WAVES) {
+            // 已达到总波次，不再开始新波次
+            return;
+        }
+        
         this.waveLevel++;
         this.waveEnemyCount = 0;
         this.isWaveComplete = false;
+        
+        // 从配置中获取当前波次的敌人数
+        this.maxEnemiesPerWave = WaveConfig.getEnemiesPerWave(this.waveLevel);
         
         // 计算血量加成：每波增加 HP_BONUS_PER_WAVE 倍
         this.hpBonus = (this.waveLevel - 1) * WaveConfig.HP_BONUS_PER_WAVE;
@@ -194,7 +203,8 @@ export class WaveManager {
     }
     
     /**
-     * 设置每波最大敌人数量
+     * 设置每波最大敌人数量（已废弃，请使用 WaveConfig 配置）
+     * @deprecated 使用 WaveConfig.BASE_ENEMIES_PER_WAVE 和 WaveConfig.ENEMIES_INCREASE_PER_WAVE 配置
      */
     setMaxEnemiesPerWave(max: number) {
         this.maxEnemiesPerWave = max;
@@ -205,6 +215,23 @@ export class WaveManager {
      */
     isCurrentWaveComplete(): boolean {
         return this.isWaveComplete;
+    }
+    
+    /**
+     * 获取总波次数
+     */
+    getTotalWaves(): number {
+        return WaveConfig.TOTAL_WAVES;
+    }
+    
+    /**
+     * 检查是否还有下一波
+     */
+    hasNextWave(): boolean {
+        if (WaveConfig.TOTAL_WAVES === 0) {
+            return true; // 无限波次
+        }
+        return this.waveLevel < WaveConfig.TOTAL_WAVES;
     }
 }
 

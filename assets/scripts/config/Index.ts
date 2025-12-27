@@ -13,4 +13,3 @@ export { UiLineConfig } from './UiLineConfig';
 export { UiBorderConfig } from './UiBorderConfig';
 export { WaveConfig } from './WaveConfig';
 export * from './EconomyConfig';
-export * from './WeaponUpgradeConfig';

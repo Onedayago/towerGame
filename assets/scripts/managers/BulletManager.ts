@@ -87,7 +87,19 @@ export class BulletManager {
             // 更新子弹位置
             const bulletComponent = bullet.getComponent(BulletBase);
             if (bulletComponent) {
+                // 检查子弹是否已经被销毁（例如 WeaponRocketBullet 自己处理碰撞后销毁）
+                if (!bullet.isValid) {
+                    this.bullets.splice(i, 1);
+                    continue;
+                }
+                
                 bulletComponent.update(deltaTime);
+                
+                // 再次检查子弹是否在 update 过程中被销毁（例如 WeaponRocketBullet 的 onHitTarget 会销毁子弹）
+                if (!bullet.isValid) {
+                    this.bullets.splice(i, 1);
+                    continue;
+                }
                 
                 // 根据子弹类型检测碰撞
                 const bulletType = this.getBulletType(bulletComponent);
@@ -95,9 +107,13 @@ export class BulletManager {
                 
                 if (this.isWeaponBullet(bulletType)) {
                     // 武器子弹：检测与敌人的碰撞
-                    const hitEnemy = this.checkCollisionWithEnemies(bullet, bulletComponent);
-                    if (hitEnemy) {
-                        hit = true;
+                    // 注意：WeaponRocketBullet 有自己的碰撞检测逻辑，会在 update 中自己处理碰撞
+                    // 所以这里只检测非火箭子弹，或者火箭子弹没有被自己处理的情况
+                    if (bulletType !== BulletType.WEAPON_ROCKET) {
+                        const hitEnemy = this.checkCollisionWithEnemies(bullet, bulletComponent);
+                        if (hitEnemy) {
+                            hit = true;
+                        }
                     }
                 } else if (this.isEnemyBullet(bulletType)) {
                     // 敌人子弹：检测与武器的碰撞

@@ -60,18 +60,61 @@ export class EnemyHealth {
      * 设置血量加成
      */
     setHpBonus(hpBonus: number) {
-        if (!this.config || hpBonus <= 0) return;
+        if (!this.config) return;
 
+        // 确保 baseHealth 和 maxHealth 已初始化
+        // 如果 baseHealth 为 0，说明还没有初始化，使用 config.health 作为基础血量
         if (this.baseHealth === 0) {
+            // 如果 config.health 也为 0 或无效，说明配置有问题，直接返回
+            if (this.config.health <= 0) {
+                console.warn('EnemyHealth: config.health is invalid when setting hpBonus');
+                return;
+            }
             this.baseHealth = this.config.health;
+            this.maxHealth = this.config.health;
         }
 
+        // 如果 hpBonus <= 0，不需要应用加成，但需要确保血条已更新
+        if (hpBonus <= 0) {
+            // 确保当前血量不超过最大血量
+            if (this.config.health > this.maxHealth) {
+                this.config.health = this.maxHealth;
+            }
+            // 如果当前血量为 0，设置为满血
+            if (this.config.health <= 0 && this.maxHealth > 0) {
+                this.config.health = this.maxHealth;
+            }
+            this.updateHealthBar();
+            return;
+        }
+
+        // 计算当前血量比例（在应用加成之前）
+        // 重要：如果这是第一次应用加成（maxHealth 等于 baseHealth），说明敌人是满血状态
+        // 否则，根据当前血量和最大血量计算比例
+        let healthRatio = 1.0;
+        if (this.maxHealth > 0 && this.maxHealth === this.baseHealth) {
+            // 第一次应用加成，敌人应该是满血状态
+            healthRatio = 1.0;
+        } else if (this.maxHealth > 0 && this.config.health > 0) {
+            // 已经应用过加成，保持当前血量比例
+            healthRatio = Math.max(0, Math.min(1, this.config.health / this.maxHealth));
+        } else {
+            // 其他情况，使用满血
+            healthRatio = 1.0;
+        }
+
+        // 计算新的最大血量
         const bonusMultiplier = 1 + hpBonus;
         const newMaxHealth = this.baseHealth * bonusMultiplier;
-        const healthRatio = this.maxHealth > 0 ? (this.config.health / this.maxHealth) : 1.0;
 
+        // 更新最大血量和当前血量（保持血量比例）
         this.maxHealth = newMaxHealth;
         this.config.health = newMaxHealth * healthRatio;
+        
+        // 确保血量有效（至少为1，避免显示问题）
+        if (this.config.health <= 0 && this.maxHealth > 0) {
+            this.config.health = this.maxHealth;
+        }
 
         this.updateHealthBar();
     }
@@ -100,10 +143,14 @@ export class EnemyHealth {
     updateHealthBar() {
         if (!this.config) return;
 
+        // 确保血量值有效
+        const currentHealth = Math.max(0, this.config.health);
+        const maxHealth = Math.max(1, this.maxHealth); // 确保最大血量至少为1，避免除零错误
+
         HealthBarHelper.createOrUpdateHealthBar(
             this.enemyNode,
-            this.config.health,
-            this.maxHealth
+            currentHealth,
+            maxHealth
         );
 
         // 确保血条节点不随父节点旋转

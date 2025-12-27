@@ -1,7 +1,7 @@
 import { _decorator, Component, Graphics, UITransform, Node, EventTouch, Prefab } from 'cc';
 import { UiConfig } from '../config/Index';
 import { WeaponType, WeaponConfig } from '../constants/Index';
-import { getWeaponUpgradeConfig, getWeaponLevelConfig, WeaponUpgradeConfig } from '../config/Index';
+import { getWeaponUpgradeConfig, getWeaponLevelConfig, WeaponUpgradeConfig } from '../constants/Index';
 import { BulletManager, WeaponManager } from '../managers/Index';
 import { WeaponAttack } from './WeaponAttack';
 import { WeaponUpgrade } from './WeaponUpgrade';
@@ -110,6 +110,15 @@ export class WeaponBase extends Component {
     }
 
     /**
+     * 是否应该在攻击时旋转
+     * 子类可以重写此方法禁用旋转（例如火箭塔）
+     * @returns 是否应该旋转，默认true
+     */
+    protected shouldRotateWhenAttacking(): boolean {
+        return true;
+    }
+
+    /**
      * 初始化功能模块
      */
     private initModules() {
@@ -119,13 +128,16 @@ export class WeaponBase extends Component {
         const rotationOffset = this.getRotationOffset();
 
         // 初始化攻击模块
+        // 检查是否需要旋转（火箭塔不需要旋转）
+        const shouldRotate = this.shouldRotateWhenAttacking();
         this.attack = new WeaponAttack(
             this.node,
             this.appearanceNode,
             this.healthBarNode,
             this.config,
             this.config.attackSpeed,
-            rotationOffset
+            rotationOffset,
+            shouldRotate
         );
         this.attack.setBulletPrefab(this.bulletPrefab);
 

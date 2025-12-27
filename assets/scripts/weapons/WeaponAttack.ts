@@ -20,6 +20,7 @@ export class WeaponAttack {
     private attackSpeed: number = 0;
     private attackTimer: number = 0;
     private rotationOffset: number = 0; // 旋转角度偏移（度）
+    private shouldRotate: boolean = true; // 是否应该旋转（火箭塔不需要旋转）
 
     constructor(
         weaponNode: Node,
@@ -27,7 +28,8 @@ export class WeaponAttack {
         healthBarNode: Node | null,
         config: WeaponConfig | null,
         attackSpeed: number,
-        rotationOffset: number = 0
+        rotationOffset: number = 0,
+        shouldRotate: boolean = true
     ) {
         this.weaponNode = weaponNode;
         this.appearanceNode = appearanceNode;
@@ -35,6 +37,7 @@ export class WeaponAttack {
         this.config = config;
         this.attackSpeed = attackSpeed;
         this.rotationOffset = rotationOffset;
+        this.shouldRotate = shouldRotate;
     }
 
     /**
@@ -79,21 +82,32 @@ export class WeaponAttack {
     update(deltaTime: number) {
         if (!this.config) return;
 
-        // 检测附近是否有敌人（用于旋转面向目标）
+        // 检测附近是否有敌人（用于旋转面向目标和攻击）
         const targetEnemy = this.findNearestEnemyInRange();
-        if (targetEnemy) {
-            // 旋转武器面向目标敌人
-            this.rotateTowardsTarget(targetEnemy);
-        } else {
-            // 没有目标时，重置旋转
-            this.resetRotation();
+        if (this.shouldRotate) {
+            if (targetEnemy) {
+                // 旋转武器面向目标敌人
+                this.rotateTowardsTarget(targetEnemy);
+            } else {
+                // 没有目标时，重置旋转
+                this.resetRotation();
+            }
         }
 
-        this.attackTimer += deltaTime;
-        if (this.attackTimer >= this.attackSpeed) {
-            this.attackTimer = 0;
+        // 限制 deltaTime 的最大值，避免在长时间暂停后瞬间攻击多次
+        // 如果 deltaTime 超过攻击速度的 2 倍，限制为攻击速度的 2 倍
+        const maxDeltaTime = this.attackSpeed * 2;
+        const clampedDeltaTime = Math.min(deltaTime, maxDeltaTime);
 
-            // 检测附近是否有敌人
+        // 更新攻击计时器
+        this.attackTimer += clampedDeltaTime;
+        
+        // 如果攻击计时器达到攻击速度，执行攻击
+        if (this.attackTimer >= this.attackSpeed) {
+            // 重置计时器，保留超出部分（避免攻击丢失）
+            this.attackTimer = this.attackTimer - this.attackSpeed;
+
+            // 如果有目标敌人，执行攻击
             if (targetEnemy) {
                 this.performAttack(targetEnemy);
             }

@@ -72,8 +72,19 @@ export class EnemyBase extends Component {
         // 初始化子节点引用
         this.initChildNodes();
 
-        // 加载敌人配置
-        this.config = getEnemyConfig(type);
+        // 加载敌人配置（创建副本，避免多个敌人共享同一个配置对象）
+        const originalConfig = getEnemyConfig(type);
+        this.config = {
+            type: originalConfig.type,
+            moveSpeed: originalConfig.moveSpeed,
+            attackSpeed: originalConfig.attackSpeed,
+            health: originalConfig.health,
+            damage: originalConfig.damage,
+            attackRange: originalConfig.attackRange,
+            attackDuration: originalConfig.attackDuration,
+            spawnInterval: originalConfig.spawnInterval,
+            reward: originalConfig.reward
+        };
         this.moveSpeed = this.config.moveSpeed;
 
         // 初始化功能模块

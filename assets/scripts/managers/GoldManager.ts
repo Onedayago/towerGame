@@ -1,3 +1,5 @@
+import { GOLD_CONFIG } from '../config/EconomyConfig';
+
 /**
  * 金币管理器
  * 管理游戏中的金币系统
@@ -20,9 +22,9 @@ export class GoldManager {
     
     /**
      * 初始化金币
-     * @param initialGold 初始金币数量
+     * @param initialGold 初始金币数量（默认使用配置中的值）
      */
-    init(initialGold: number = 1000) {
+    init(initialGold: number = GOLD_CONFIG.INITIAL_GOLD) {
         this.gold = initialGold;
     }
     

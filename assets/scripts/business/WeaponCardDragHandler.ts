@@ -4,7 +4,7 @@ import { UiConfig } from '../config/Index';
 import { WarView, WarScreen, WeaponCard } from '../screens/Index';
 import { GoldManager } from '../managers/Index';
 import { WeaponType } from '../constants/Index';
-import { getWeaponBuildCost } from '../config/Index';
+import { getWeaponBuildCost } from '../constants/Index';
 
 /**
  * 武器卡片拖拽处理器

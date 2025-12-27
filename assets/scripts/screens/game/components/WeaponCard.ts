@@ -1,7 +1,7 @@
 import { _decorator, Color, Component, Graphics, Node, UITransform, EventTouch, Prefab, instantiate, Label } from 'cc';
 import { WeaponCardDragHandler } from '../../../business/Index';
 import { WeaponType } from '../../../constants/Index';
-import { getWeaponBuildCost } from '../../../config/Index';
+import { getWeaponBuildCost } from '../../../constants/Index';
 import { UiConfig } from '../../../config/Index';
 const { ccclass, property } = _decorator;
 
