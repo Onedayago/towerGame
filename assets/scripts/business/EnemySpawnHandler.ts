@@ -103,11 +103,14 @@ export class EnemySpawnHandler {
         enemy.setParent(this.containerNode);
         enemy.setPosition(startX, startY, 0);
         
-        // 应用波次血量加成
+        // 应用波次加成（血量和移动速度）
         const enemyComponent = enemy.getComponent(EnemyBase);
         if (enemyComponent) {
             const hpBonus = this.waveManager.getHpBonus();
             enemyComponent.setHpBonus(hpBonus);
+            
+            const speedBonus = this.waveManager.getSpeedBonus();
+            enemyComponent.setMoveSpeedBonus(speedBonus);
         }
         
         // 更新波次管理器

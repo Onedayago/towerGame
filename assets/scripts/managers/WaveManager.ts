@@ -12,6 +12,7 @@ export class WaveManager {
     private maxEnemiesPerWave: number = 0; // 当前波次的最大敌人数（从配置中获取）
     private isWaveComplete: boolean = false;
     private hpBonus: number = 0; // 血量加成倍数
+    private speedBonus: number = 0; // 移动速度加成倍数
     private currentWaveEnemyTypes: EnemyType[] = []; // 当前波次的敌人类型池
     private baseSpawnInterval: number = 2.0; // 基础生成间隔
     
@@ -35,6 +36,7 @@ export class WaveManager {
         this.waveEnemyCount = 0;
         this.isWaveComplete = false;
         this.hpBonus = 0;
+        this.speedBonus = 0;
         this.currentWaveEnemyTypes = [];
     }
     
@@ -58,6 +60,9 @@ export class WaveManager {
         // 计算血量加成：每波增加 HP_BONUS_PER_WAVE 倍
         this.hpBonus = (this.waveLevel - 1) * WaveConfig.HP_BONUS_PER_WAVE;
         
+        // 计算移动速度加成：每波增加 SPEED_BONUS_PER_WAVE 倍
+        this.speedBonus = (this.waveLevel - 1) * WaveConfig.SPEED_BONUS_PER_WAVE;
+        
         // 生成当前波次的敌人类型池
         this.generateWaveEnemyTypes();
     }
@@ -67,16 +72,33 @@ export class WaveManager {
      * 参考原游戏实现：确保每种类型至少出现一次，然后根据权重随机生成
      */
     private generateWaveEnemyTypes() {
-        // 所有可用的敌人类型及其权重
+        // 所有可用的敌人类型及其权重（根据波次动态调整）
         const allEnemyTypes: Array<{ type: EnemyType; weight: number }> = [
-            { type: EnemyType.TANK, weight: 30 },      // 普通坦克：30% 权重
-            { type: EnemyType.FAST_TANK, weight: 25 },  // 快速坦克：25% 权重
-            { type: EnemyType.HEAVY_TANK, weight: 20 }, // 重型坦克：20% 权重
-            { type: EnemyType.BOSS, weight: 10 }         // Boss：10% 权重
+            { type: EnemyType.TANK, weight: 40 },      // 普通坦克：40% 权重（前期主要）
+            { type: EnemyType.FAST_TANK, weight: 30 },  // 快速坦克：30% 权重（中后期增加）
+            { type: EnemyType.HEAVY_TANK, weight: 20 }, // 重型坦克：20% 权重（后期出现）
+            { type: EnemyType.BOSS, weight: 5 }         // Boss：5% 权重（稀有，但后期增加）
         ];
         
-        // 根据波次调整权重（后期波次增加难度）
-        const waveMultiplier = Math.min(1 + (this.waveLevel - 1) * 0.1, 2); // 最多2倍权重
+        // 根据波次调整权重（后期增加困难敌人）
+        if (this.waveLevel >= 5) {
+            // 5波后，增加重型坦克和BOSS权重
+            allEnemyTypes[2].weight = 25;  // 重型坦克权重增加
+            allEnemyTypes[3].weight = 10;  // Boss权重增加
+            allEnemyTypes[0].weight = 30;  // 普通坦克权重降低
+            allEnemyTypes[1].weight = 35;  // 快速坦克权重增加
+        }
+        
+        if (this.waveLevel >= 10) {
+            // 10波后，进一步调整
+            allEnemyTypes[2].weight = 30;  // 重型坦克权重
+            allEnemyTypes[3].weight = 15;  // Boss权重
+            allEnemyTypes[0].weight = 25;  // 普通坦克权重
+            allEnemyTypes[1].weight = 30;  // 快速坦克权重
+        }
+        
+        // 根据波次调整权重（后期波次增加难度，但更平滑）
+        const waveMultiplier = Math.min(1 + (this.waveLevel - 1) * 0.05, 1.5); // 最多1.5倍权重，更平滑
         
         // 计算总权重
         let totalWeight = 0;
@@ -132,6 +154,13 @@ export class WaveManager {
      */
     getHpBonus(): number {
         return this.hpBonus;
+    }
+    
+    /**
+     * 获取当前波次的移动速度加成倍数
+     */
+    getSpeedBonus(): number {
+        return this.speedBonus;
     }
     
     /**

@@ -50,6 +50,26 @@ export class EnemyBase extends Component {
             this.health.setHpBonus(hpBonus);
         }
     }
+    
+    /**
+     * 设置移动速度加成（根据波次）
+     * @param speedBonus 移动速度加成倍数（例如：0.2 表示增加 20%，即最终为 1.2 倍）
+     */
+    setMoveSpeedBonus(speedBonus: number) {
+        if (!this.config) return;
+        
+        // 计算加成后的移动速度
+        const bonusMultiplier = 1 + speedBonus;
+        const newMoveSpeed = this.config.moveSpeed * bonusMultiplier;
+        
+        // 更新移动速度
+        this.moveSpeed = newMoveSpeed;
+        
+        // 更新寻路模块的移动速度
+        if (this.pathfinding) {
+            this.pathfinding.setMoveSpeed(newMoveSpeed);
+        }
+    }
 
     /**
      * 初始化敌人

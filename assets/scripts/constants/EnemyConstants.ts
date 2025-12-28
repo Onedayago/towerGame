@@ -37,47 +37,47 @@ export interface EnemyConfig {
 export const ENEMY_CONFIGS: Record<EnemyType, EnemyConfig> = {
     [EnemyType.TANK]: {
         type: EnemyType.TANK,
-        moveSpeed: 25,         // 25像素/秒（减小）
-        attackSpeed: 1.5,     // 每1.5秒攻击1次（减慢）
-        health: 500,           // 生命值：500（增加）
-        damage: 10,
-        attackRange: 200,      // 攻击范围：200像素（减小）
-        attackDuration: 0.3,  // 攻击持续时间：0.3秒
-        spawnInterval: 2.0,   // 每2秒生成一个
-        reward: 10            // 击败后奖励10金币
+        moveSpeed: 30,         // 30像素/秒（平衡调整）
+        attackSpeed: 1.5,      // 每1.5秒攻击1次
+        health: 400,           // 生命值：400（降低，更容易击杀）
+        damage: 12,            // 伤害：12（略微提高威胁）
+        attackRange: 200,      // 攻击范围：200像素
+        attackDuration: 0.3,   // 攻击持续时间：0.3秒
+        spawnInterval: 2.0,    // 每2秒生成一个
+        reward: 15             // 击败后奖励15金币（提高奖励，增加可玩性）
     },
     [EnemyType.FAST_TANK]: {
         type: EnemyType.FAST_TANK,
-        moveSpeed: 40,         // 40像素/秒（减小）
-        attackSpeed: 1.2,      // 每1.2秒攻击1次（减慢）
-        health: 300,           // 生命值：300（增加）
-        damage: 8,
-        attackRange: 180,      // 攻击范围：180像素（减小）
+        moveSpeed: 50,         // 50像素/秒（提高速度威胁）
+        attackSpeed: 1.0,      // 每1秒攻击1次（更快攻击）
+        health: 250,           // 生命值：250（脆皮高速）
+        damage: 10,            // 伤害：10（略微提高）
+        attackRange: 180,      // 攻击范围：180像素
         attackDuration: 0.25,  // 攻击持续时间：0.25秒
         spawnInterval: 1.5,    // 每1.5秒生成一个
-        reward: 8              // 击败后奖励8金币
+        reward: 12             // 击败后奖励12金币（性价比更高）
     },
     [EnemyType.HEAVY_TANK]: {
         type: EnemyType.HEAVY_TANK,
-        moveSpeed: 15,         // 15像素/秒（减小）
-        attackSpeed: 2.0,      // 每2秒攻击1次（减慢）
-        health: 1000,          // 生命值：1000（增加）
-        damage: 20,
-        attackRange: 250,      // 攻击范围：250像素（减小）
-        attackDuration: 0.4,  // 攻击持续时间：0.4秒
+        moveSpeed: 18,         // 18像素/秒（缓慢但坚韧）
+        attackSpeed: 2.0,      // 每2秒攻击1次（慢速攻击）
+        health: 800,           // 生命值：800（降低但仍是坦克）
+        damage: 25,            // 伤害：25（高伤害威胁）
+        attackRange: 250,      // 攻击范围：250像素
+        attackDuration: 0.4,   // 攻击持续时间：0.4秒
         spawnInterval: 3.0,    // 每3秒生成一个
-        reward: 20             // 击败后奖励20金币
+        reward: 35             // 击败后奖励35金币（高价值目标）
     },
     [EnemyType.BOSS]: {
         type: EnemyType.BOSS,
-        moveSpeed: 20,         // 20像素/秒（减小）
-        attackSpeed: 0.8,      // 每0.8秒攻击1次（减慢）
-        health: 2000,          // 生命值：2000（增加）
-        damage: 30,
-        attackRange: 300,      // 攻击范围：300像素（减小）
-        attackDuration: 0.35, // 攻击持续时间：0.35秒
-        spawnInterval: 10.0,      // 每10秒生成一个
-        reward: 50             // 击败后奖励50金币
+        moveSpeed: 22,         // 22像素/秒（中等速度）
+        attackSpeed: 1.0,      // 每1秒攻击1次（快速攻击）
+        health: 1500,          // 生命值：1500（降低但仍然强大）
+        damage: 35,            // 伤害：35（高威胁）
+        attackRange: 300,      // 攻击范围：300像素
+        attackDuration: 0.35,  // 攻击持续时间：0.35秒
+        spawnInterval: 10.0,   // 每10秒生成一个
+        reward: 100            // 击败后奖励100金币（高额奖励）
     }
 };
 
