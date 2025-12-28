@@ -1,6 +1,4 @@
-import { Component, Label, Node, UITransform, Graphics, Color, Vec3 } from 'cc';
-import { UiConfig, UiMarginConfig, UiBorderConfig } from '../../../config/Index';
-import { CyberpunkColors } from '../../../constants/Index';
+import { Component, Label, Node } from 'cc';
 import { WeaponManager, GameManager } from '../../../managers/Index';
 import { GuideStepBase } from './GuideStepBase';
 import { GuideStepMiniMap } from './GuideStepMiniMap';
@@ -8,6 +6,9 @@ import { GuideStepGold } from './GuideStepGold';
 import { GuideStepWave } from './GuideStepWave';
 import { GuideStepPause } from './GuideStepPause';
 import { GuideStepWeaponDrag } from './GuideStepWeaponDrag';
+import { GuideStepBaseView } from './GuideStepBaseView';
+import { GuideHighlightManager } from './GuideHighlightManager';
+import { GuideWarViewController } from './GuideWarViewController';
 
 /**
  * 引导步骤管理器
@@ -19,13 +20,11 @@ export class GuideStepManager {
     private weaponManager: WeaponManager | null = null;
     private steps: GuideStepBase[] = [];
     private currentStepIndex: number = 0;
-    private highlightNode: Node | null = null;
-    private highlightGraphics: Graphics | null = null;
+    private targetNodeMap: Map<string, Node | null> = new Map();
+    private highlightManager: GuideHighlightManager | null = null;
+    private warViewController: GuideWarViewController | null = null;
     private blinkTimer: number = 0;
     private blinkInterval: number = 0.6;
-    private targetNode: Node | null = null;
-    private isHighlighting: boolean = false;
-    private targetNodes: Map<string, Node | null> = new Map();
     
     constructor(
         guideComponent: Component,
@@ -36,6 +35,7 @@ export class GuideStepManager {
             goldViewNode?: Node | null;
             waveViewNode?: Node | null;
             pauseButtonNode?: Node | null;
+            warViewNode?: Node | null;
         }
     ) {
         this.guideComponent = guideComponent;
@@ -44,10 +44,10 @@ export class GuideStepManager {
         
         // 存储目标节点映射
         if (targetNodes) {
-            this.targetNodes.set('MiniMapView', targetNodes.miniMapNode || null);
-            this.targetNodes.set('GoldView', targetNodes.goldViewNode || null);
-            this.targetNodes.set('WaveView', targetNodes.waveViewNode || null);
-            this.targetNodes.set('PauseBtn', targetNodes.pauseButtonNode || null);
+            this.targetNodeMap.set('MiniMapView', targetNodes.miniMapNode || null);
+            this.targetNodeMap.set('GoldView', targetNodes.goldViewNode || null);
+            this.targetNodeMap.set('WaveView', targetNodes.waveViewNode || null);
+            this.targetNodeMap.set('PauseBtn', targetNodes.pauseButtonNode || null);
         }
         
         // 初始化步骤列表
@@ -56,32 +56,39 @@ export class GuideStepManager {
             new GuideStepGold(guideComponent, guideLabel),
             new GuideStepWave(guideComponent, guideLabel),
             new GuideStepPause(guideComponent, guideLabel),
+            new GuideStepBaseView(guideComponent, guideLabel),
             new GuideStepWeaponDrag(guideComponent, guideLabel, weaponManager)
         ];
         
-        this.initHighlight();
-    }
-    
-    /**
-     * 初始化高亮效果
-     */
-    private initHighlight() {
-        const guideNode = this.guideComponent.node;
-        this.highlightNode = new Node('GuideHighlight');
-        this.highlightNode.setParent(guideNode);
+        // 初始化高亮管理器
+        this.highlightManager = new GuideHighlightManager(
+            guideComponent,
+            this.targetNodeMap,
+            this.steps,
+            () => this.currentStepIndex
+        );
         
-        const transform = this.highlightNode.addComponent(UITransform);
-        transform.setAnchorPoint(0.5, 0.5);
-        transform.setContentSize(UiConfig.GAME_WIDTH, UiConfig.GAME_HEIGHT);
-        
-        this.highlightGraphics = this.highlightNode.addComponent(Graphics);
-        this.highlightNode.active = false;
+        // 初始化 WarView 控制器
+        const warViewNode = targetNodes?.warViewNode || null;
+        let dragHandler: any = null;
+        if (warViewNode) {
+            const warViewComponent = warViewNode.getComponent('WarView');
+            if (warViewComponent && (warViewComponent as any).dragHandler) {
+                dragHandler = (warViewComponent as any).dragHandler;
+            }
+        }
+        this.warViewController = new GuideWarViewController(warViewNode, dragHandler);
     }
     
     /**
      * 开始引导
      */
     start() {
+        // 保存 WarView 的初始位置（如果还没有保存）
+        if (this.warViewController) {
+            this.warViewController.saveInitialPosition();
+        }
+        
         this.currentStepIndex = 0;
         if (this.steps.length > 0) {
             this.startStep(0);
@@ -105,16 +112,35 @@ export class GuideStepManager {
         const step = this.steps[stepIndex];
         this.currentStepIndex = stepIndex;
         
+        // 检查是否需要启用拖拽（基地引导步骤）
+        const stepId = step.getStepId();
+        if (this.warViewController) {
+            this.warViewController.disableDrag();
+        }
+        
         // 开始步骤
         step.start();
         
         // 处理高亮
         if (step.shouldHighlightTarget()) {
             const targetNodeName = step.getTargetNodeName();
-            // 传递节点名称（可能为 null，用于 WeaponCard 的动态查找）
-            this.highlightTarget(targetNodeName);
+            if (this.highlightManager) {
+                this.highlightManager.highlightTarget(targetNodeName);
+            }
         } else {
-            this.hideHighlight();
+            if (this.highlightManager) {
+                this.highlightManager.hideHighlight();
+            }
+        }
+        
+        // 只有基地引导步骤需要移动 WarView
+        if (stepId === 'base_view' && this.warViewController) {
+            // 使用 scheduleOnce 延迟一小段时间，确保节点已准备好
+            if (this.guideComponent && this.guideComponent.node) {
+                this.guideComponent.scheduleOnce(() => {
+                    this.warViewController!.moveToTarget();
+                }, 0.1);
+            }
         }
     }
     
@@ -133,12 +159,12 @@ export class GuideStepManager {
         }
         
         // 更新高亮闪烁
-        if (this.isHighlighting && this.highlightNode && this.highlightNode.active && this.highlightGraphics) {
-            this.blinkTimer += deltaTime;
-            this.redrawHighlight();
+        if (this.highlightManager) {
+            this.highlightManager.update(deltaTime);
         }
         
         // 更新引导文字闪烁
+        this.blinkTimer += deltaTime;
         this.updateLabelBlink(deltaTime);
     }
     
@@ -163,8 +189,18 @@ export class GuideStepManager {
             // 强制完成当前步骤
             const currentStep = this.steps[this.currentStepIndex];
             currentStep.complete();
+            
+            // 如果当前步骤是基地引导，在进入下一步前禁用拖拽并恢复位置
+            const stepId = currentStep.getStepId();
+            if (stepId === 'base_view' && this.warViewController) {
+                this.warViewController.disableDrag();
+                this.warViewController.restorePosition();
+            }
         }
-        this.hideHighlight();
+        
+        if (this.highlightManager) {
+            this.highlightManager.hideHighlight();
+        }
         this.startStep(this.currentStepIndex + 1);
     }
     
@@ -172,19 +208,37 @@ export class GuideStepManager {
      * 完成引导
      */
     private complete() {
-        this.hideHighlight();
+        if (this.highlightManager) {
+            this.highlightManager.hideHighlight();
+        }
+        
         if (this.guideLabel) {
             this.guideLabel.node.active = false;
         }
+        
         // 清理所有步骤
         this.steps.forEach(step => step.cleanup());
-        // 隐藏引导组件（包括背景）
-        if (this.guideComponent && this.guideComponent.node) {
-            this.guideComponent.node.active = false;
+        
+        // 恢复 WarView 到初始位置并禁用拖拽
+        if (this.warViewController) {
+            this.warViewController.restorePosition();
+            this.warViewController.disableDrag();
         }
+        
+        // 隐藏引导组件（通过调用 hideGuide 方法隐藏子节点）
+        if (this.guideComponent && typeof (this.guideComponent as any).hideGuide === 'function') {
+            (this.guideComponent as any).hideGuide();
+        }
+        
+        // 启用交互
+        if (this.guideComponent && typeof (this.guideComponent as any).enableInteractions === 'function') {
+            (this.guideComponent as any).enableInteractions();
+        }
+        
         // 引导完成后，开始游戏
         const gameManager = GameManager.getInstance();
         gameManager.startGame();
+        
         // 通知引导组件启用交互
         if (this.guideComponent && typeof (this.guideComponent as any).enableInteractions === 'function') {
             (this.guideComponent as any).enableInteractions();
@@ -195,6 +249,12 @@ export class GuideStepManager {
      * 跳过引导
      */
     skip() {
+        // 恢复 WarView 到初始位置并禁用拖拽
+        if (this.warViewController) {
+            this.warViewController.restorePosition();
+            this.warViewController.disableDrag();
+        }
+        
         // 通知引导组件启用交互
         if (this.guideComponent && typeof (this.guideComponent as any).enableInteractions === 'function') {
             (this.guideComponent as any).enableInteractions();
@@ -202,155 +262,6 @@ export class GuideStepManager {
         this.complete();
     }
     
-    /**
-     * 高亮目标节点
-     */
-    private highlightTarget(targetNodeName: string | null) {
-        if (!this.highlightGraphics || !this.highlightNode) return;
-        
-        const scene = this.guideComponent.node.scene;
-        if (!scene) return;
-        
-        let targetNode: Node | null = null;
-        
-        // 如果当前步骤有 getTargetNode 方法，优先使用（用于动态查找，如 WeaponCard）
-        if (this.currentStepIndex < this.steps.length) {
-            const currentStep = this.steps[this.currentStepIndex];
-            const stepTargetNode = currentStep.getTargetNode();
-            if (stepTargetNode) {
-                targetNode = stepTargetNode;
-            }
-        }
-        
-        // 如果通过步骤获取不到，且提供了节点名称，则先尝试从映射中获取
-        if (!targetNode && targetNodeName) {
-            // 先从映射中查找（编辑器绑定的节点）
-            targetNode = this.targetNodes.get(targetNodeName) || null;
-            
-            // 如果映射中没有，则通过名称查找（向后兼容）
-            if (!targetNode) {
-                targetNode = this.findNodeByName(scene, targetNodeName);
-            }
-        }
-        
-        // 如果还是找不到，且节点名称为 null（表示需要通过组件查找），尝试通过组件查找
-        if (!targetNode && targetNodeName === null) {
-            // 查找 WeaponContainer
-            const weaponContainer = this.findNodeByName(scene, 'WeaponContainer');
-            if (weaponContainer) {
-                // 查找第一个 WeaponCard 组件（节点名称是 WeaponCard_${weaponType}）
-                for (let child of weaponContainer.children) {
-                    if (child.getComponent('WeaponCard')) {
-                        targetNode = child;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if (!targetNode) return;
-        
-        this.targetNode = targetNode;
-        this.isHighlighting = true;
-        this.highlightNode.active = true;
-        this.blinkTimer = 0;
-        
-        this.redrawHighlight();
-    }
-    
-    /**
-     * 隐藏高亮
-     */
-    private hideHighlight() {
-        this.isHighlighting = false;
-        this.targetNode = null;
-        if (this.highlightNode) {
-            this.highlightNode.active = false;
-        }
-        if (this.highlightGraphics) {
-            this.highlightGraphics.clear();
-        }
-        this.blinkTimer = 0;
-    }
-    
-    /**
-     * 重新绘制高亮框
-     */
-    private redrawHighlight() {
-        if (!this.highlightGraphics || !this.highlightNode || !this.highlightNode.active) {
-            return;
-        }
-        
-        if (!this.targetNode || !this.targetNode.isValid) return;
-        
-        this.highlightGraphics.clear();
-        
-        const worldPos = this.targetNode.worldPosition;
-        const targetTransform = this.targetNode.getComponent(UITransform);
-        if (!targetTransform) return;
-        
-        const width = targetTransform.width;
-        const height = targetTransform.height;
-        const anchorPoint = targetTransform.anchorPoint;
-        
-        const localPos = new Vec3();
-        this.guideComponent.node.inverseTransformPoint(localPos, worldPos);
-        
-        const rectX = localPos.x - anchorPoint.x * width;
-        const rectY = localPos.y - anchorPoint.y * height;
-        
-        const padding = UiMarginConfig.GUIDE_HIGHLIGHT_PADDING;
-        const glowPadding = UiMarginConfig.GUIDE_HIGHLIGHT_GLOW_PADDING;
-        const alpha = Math.floor(150 + 105 * Math.sin((this.blinkTimer / this.blinkInterval) * Math.PI * 2));
-        
-        // 绘制高亮框
-        this.highlightGraphics.strokeColor = new Color(
-            CyberpunkColors.NEON_CYAN.r,
-            CyberpunkColors.NEON_CYAN.g,
-            CyberpunkColors.NEON_CYAN.b,
-            alpha
-        );
-        this.highlightGraphics.lineWidth = UiBorderConfig.THICK_BORDER_WIDTH;
-        this.highlightGraphics.rect(
-            rectX - padding,
-            rectY - padding,
-            width + padding * 2,
-            height + padding * 2
-        );
-        this.highlightGraphics.stroke();
-        
-        // 绘制外发光效果
-        this.highlightGraphics.strokeColor = new Color(
-            CyberpunkColors.NEON_CYAN.r,
-            CyberpunkColors.NEON_CYAN.g,
-            CyberpunkColors.NEON_CYAN.b,
-            Math.floor(alpha * 0.5)
-        );
-        this.highlightGraphics.lineWidth = UiBorderConfig.DEFAULT_BORDER_WIDTH;
-        this.highlightGraphics.rect(
-            rectX - padding - glowPadding,
-            rectY - padding - glowPadding,
-            width + (padding + glowPadding) * 2,
-            height + (padding + glowPadding) * 2
-        );
-        this.highlightGraphics.stroke();
-    }
-    
-    /**
-     * 递归查找节点
-     */
-    private findNodeByName(node: Node, name: string): Node | null {
-        if (node.name === name) {
-            return node;
-        }
-        for (let child of node.children) {
-            const result = this.findNodeByName(child, name);
-            if (result) {
-                return result;
-            }
-        }
-        return null;
-    }
     
     /**
      * 获取当前步骤索引
@@ -377,7 +288,12 @@ export class GuideStepManager {
      * 清理资源
      */
     cleanup() {
-        this.hideHighlight();
+        if (this.highlightManager) {
+            this.highlightManager.cleanup();
+        }
+        if (this.warViewController) {
+            this.warViewController.cleanup();
+        }
         this.steps.forEach(step => step.cleanup());
     }
 }

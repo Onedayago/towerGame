@@ -44,13 +44,12 @@ export class Guide extends Component {
     private backgroundGraphics: Graphics | null = null;
     private backgroundNode: Node | null = null;
     
-    @property({ displayName: '是否自动开始引导', tooltip: '游戏开始后是否自动显示引导' })
-    public autoStart: boolean = true;
-    
     onLoad() {
         this.initTransform();
         this.initBackground();
         this.initComponents();
+        // 默认隐藏所有子节点
+        this.node.active = false;
     }
     
     /**
@@ -117,14 +116,6 @@ export class Guide extends Component {
         }
     }
     
-    start() {
-        // 延迟一小段时间后开始引导，确保场景完全加载
-        this.scheduleOnce(() => {
-            if (this.autoStart) {
-                this.startGuide();
-            }
-        }, 0.5);
-    }
     
     /**
      * 初始化组件
@@ -171,7 +162,8 @@ export class Guide extends Component {
                 miniMapNode: this.miniMapNode,
                 goldViewNode: this.goldViewNode,
                 waveViewNode: this.waveViewNode,
-                pauseButtonNode: this.pauseButtonNode
+                pauseButtonNode: this.pauseButtonNode,
+                warViewNode: this.warView ? this.warView.node : null
             }
         );
     }
@@ -181,16 +173,26 @@ export class Guide extends Component {
      */
     startGuide() {
         if (this.stepManager) {
-            this.node.active = true;
-            // 显示背景
-            if (this.backgroundNode) {
-                this.backgroundNode.active = true;
-            }
+            // 显示所有子节点
+            this.showGuide();
             // 禁用地图拖拽、小地图和暂停按钮
             this.disableInteractions();
             this.stepManager.start();
         }
     }
+
+    hideGuide() {
+        this.node.active = false;
+    }
+
+    /**
+     * 显示引导（显示所有子节点）
+     */
+    showGuide() {
+        this.node.active = true;
+    }
+
+
     
     /**
      * 跳过引导

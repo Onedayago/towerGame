@@ -5478,7 +5478,6 @@
     "pauseButtonNode": {
       "__id__": 173
     },
-    "autoStart": true,
     "_id": "f9H4dPIUhMfqCO/HGMZhL4"
   },
   {
@@ -7043,6 +7042,9 @@
     },
     "_enabled": true,
     "__prefab": null,
+    "guide": {
+      "__id__": 172
+    },
     "_id": "91ctXS3DBB2ZxCqKCsyLvU"
   },
   {

@@ -8,5 +8,8 @@ export { GuideStepMiniMap } from './GuideStepMiniMap';
 export { GuideStepGold } from './GuideStepGold';
 export { GuideStepWave } from './GuideStepWave';
 export { GuideStepPause } from './GuideStepPause';
+export { GuideStepBaseView } from './GuideStepBaseView';
 export { GuideStepWeaponDrag } from './GuideStepWeaponDrag';
+export { GuideHighlightManager } from './GuideHighlightManager';
+export { GuideWarViewController } from './GuideWarViewController';
 

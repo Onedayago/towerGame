@@ -41,6 +41,14 @@ export abstract class GuideStepBase {
     }
     
     /**
+     * 获取多个目标节点（如果需要高亮多个节点，可以重写此方法）
+     * 返回 null 表示使用单个节点高亮，返回数组表示高亮多个节点
+     */
+    getTargetNodes(): Node[] | null {
+        return null;
+    }
+    
+    /**
      * 开始步骤
      */
     abstract start(): void;

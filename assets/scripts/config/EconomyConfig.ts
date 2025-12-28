@@ -7,6 +7,6 @@
  */
 export const GOLD_CONFIG = {
     /** 初始金币数量 */
-    INITIAL_GOLD: 1000,
+    INITIAL_GOLD: 3000,
 } as const;
 

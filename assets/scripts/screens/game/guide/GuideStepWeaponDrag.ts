@@ -30,7 +30,7 @@ export class GuideStepWeaponDrag extends GuideStepBase {
     }
     
     getStepText(): string {
-        return '拖拽武器卡片到战场放置防御塔';
+        return '拖拽武器到战场放置，放置后会自动攻击敌人';
     }
     
     shouldHighlightTarget(): boolean {

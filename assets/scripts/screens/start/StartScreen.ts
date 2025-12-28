@@ -1,5 +1,5 @@
 import { _decorator, Component, Node, Label, Button, Graphics, UITransform, UIOpacity, Color, director, EventTouch, Vec2, tween } from 'cc';
-import { GameManager } from '../../managers/Index';
+import { GameManager, GuideStateManager } from '../../managers/Index';
 import { CyberpunkColors } from '../../constants/Index';
 import { UiFontConfig, UiConfig } from '../../config/Index';
 import { UIStyleHelper } from '../../utils/Index';
@@ -258,7 +258,7 @@ export class StartScreen extends Component {
             UIStyleHelper.styleLabel(buttonLabel, fontSize, Color.WHITE, 2);
             // 设置行高（与字体大小相同）
             buttonLabel.lineHeight = fontSize;
-            buttonLabel.string = '帮助';
+            buttonLabel.string = '游戏引导';
         }
 
         // 绑定点击事件
@@ -304,19 +304,35 @@ export class StartScreen extends Component {
         }
 
         this.isLoadingScene = true;
+        
+        // 设置不显示引导
+        const guideStateManager = GuideStateManager.getInstance();
+        guideStateManager.setShouldShowGuide(false);
+        
         // 跳转到游戏场景
         director.loadScene('game');
     }
 
     /**
-     * 帮助按钮点击事件
+     * 帮助按钮点击事件（游戏引导）
      */
     private onHelpButtonClick(event?: EventTouch) {
         if (event) {
             event.propagationStopped = true;
         }
 
-        // TODO: 实现帮助界面显示逻辑
-        console.log('Help button clicked');
+        // 防止重复加载场景
+        if (this.isLoadingScene) {
+            return;
+        }
+
+        this.isLoadingScene = true;
+        
+        // 设置显示引导
+        const guideStateManager = GuideStateManager.getInstance();
+        guideStateManager.setShouldShowGuide(true);
+        
+        // 跳转到游戏场景
+        director.loadScene('game');
     }
 }

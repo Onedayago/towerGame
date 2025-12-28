@@ -1,10 +1,11 @@
-import { Component, Label } from 'cc';
+import { Component, Label, Node } from 'cc';
 import { GuideStepBase } from './GuideStepBase';
+import { BaseManager } from '../../../managers/Index';
 
 /**
- * 金币引导步骤
+ * 基地引导步骤
  */
-export class GuideStepGold extends GuideStepBase {
+export class GuideStepBaseView extends GuideStepBase {
     private completed: boolean = false;
     
     constructor(guideComponent: Component, guideLabel: Label | null) {
@@ -12,11 +13,11 @@ export class GuideStepGold extends GuideStepBase {
     }
     
     getStepId(): string {
-        return 'gold';
+        return 'base_view';
     }
     
     getStepText(): string {
-        return '这里显示当前金币数量';
+        return '这是你的基地，敌人会攻击它。保护基地不被摧毁！';
     }
     
     shouldHighlightTarget(): boolean {
@@ -24,7 +25,15 @@ export class GuideStepGold extends GuideStepBase {
     }
     
     getTargetNodeName(): string | null {
-        return 'GoldView';
+        return null; // 通过 getTargetNode() 方法获取
+    }
+    
+    /**
+     * 获取目标节点（基地节点）
+     */
+    getTargetNode(): Node | null {
+        const baseManager = BaseManager.getInstance();
+        return baseManager.getBaseNode();
     }
     
     start(): void {
