@@ -13,6 +13,7 @@ export { GuideButtonRenderer } from './GuideButtonRenderer';
 export { GuideLabelRenderer } from './GuideLabelRenderer';
 export { WarGridRenderer } from './WarGridRenderer';
 export { WarScreenRenderer } from './WarScreenRenderer';
+export { WarViewBackgroundRenderer } from './WarViewBackgroundRenderer';
 export { BaseRenderer } from './BaseRenderer';
 export { PauseViewRenderer } from './PauseViewRenderer';
 export * from './weapons/Index';

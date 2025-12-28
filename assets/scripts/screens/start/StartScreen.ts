@@ -141,13 +141,6 @@ export class StartScreen extends Component {
             this.backgroundGraphics.rect(-width / 2, -height / 2 + i * stepHeight, width, stepHeight + 1);
             this.backgroundGraphics.fill();
         }
-
-        // 添加霓虹边框效果（增强赛博朋克感）
-        const borderColor = CyberpunkColors.createNeonGlow(CyberpunkColors.NEON_CYAN, 0.3);
-        this.backgroundGraphics.strokeColor = borderColor;
-        this.backgroundGraphics.lineWidth = 2;
-        this.backgroundGraphics.rect(-width / 2, -height / 2, width, height);
-        this.backgroundGraphics.stroke();
     }
 
     /**

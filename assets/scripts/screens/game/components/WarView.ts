@@ -2,7 +2,7 @@ import { _decorator, Component, Graphics, Node, UITransform, EventTouch, Prefab,
 import { UiConfig } from '../../../config/Index';
 import { EnemyManager, WeaponManager, BulletManager, ObstacleManager, BaseManager, WaveManager } from '../../../managers/Index';
 import { MapDragHandler } from '../../../business/Index';
-import { WarGridRenderer, BaseRenderer } from '../../../renderers/Index';
+import { WarGridRenderer, BaseRenderer, WarViewBackgroundRenderer } from '../../../renderers/Index';
 import { PathFinder } from '../../../utils/Index';
 import { WarViewManagers } from './WarViewManagers';
 import { WarViewObstacles } from './WarViewObstacles';
@@ -67,11 +67,24 @@ export class WarView extends Component {
         this.initTransform();
         this.initManagers();
         this.initEventListeners();
+        this.drawBackground();
         this.drawGrid();
         this.initBase();
         
     }
     
+    /**
+     * 绘制赛博朋克战场废墟背景
+     */
+    private drawBackground() {
+        if (!this.graphics) return;
+        
+        const transform = this.node.getComponent(UITransform);
+        if (!transform) return;
+        
+        // 绘制背景（在网格之前绘制，作为底层）
+        WarViewBackgroundRenderer.renderBackground(this.graphics, transform);
+    }
 
     /**
      * 绘制战场格子
@@ -85,7 +98,7 @@ export class WarView extends Component {
         const width = transform.width;
         const height = transform.height;
         
-        // 绘制格子
+        // 绘制格子（在背景之上）
         WarGridRenderer.renderGrid(this.graphics, width, height);
     }
     
