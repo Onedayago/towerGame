@@ -195,6 +195,12 @@ export class WeaponCardDragHandler {
             return; // 不在 WarView 范围内，不放置
         }
         
+        // 检查是否在前三列（前三列不能放置武器）
+        const gridX = Math.floor(snapped.x / UiConfig.CELL_SIZE);
+        if (gridX < 3) {
+            return; // 在前三列，不放置
+        }
+        
         // 检查位置是否已被占用
         if (this.isPositionOccupied(snapped.x, snapped.y)) {
             return; // 位置已被占用，不放置
@@ -459,6 +465,12 @@ export class WeaponCardDragHandler {
     private canPlaceWeapon(x: number, y: number, warViewTransform: UITransform): boolean {
         // 检查是否在 WarView 范围内
         if (!GridHelper.isInBounds(x, y, warViewTransform.width, warViewTransform.height)) {
+            return false;
+        }
+        
+        // 检查是否在前三列（前三列不能放置武器）
+        const gridX = Math.floor(x / UiConfig.CELL_SIZE);
+        if (gridX < 3) {
             return false;
         }
         

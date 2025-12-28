@@ -7,6 +7,7 @@ import { GuideStepWave } from './GuideStepWave';
 import { GuideStepPause } from './GuideStepPause';
 import { GuideStepWeaponDrag } from './GuideStepWeaponDrag';
 import { GuideStepBaseView } from './GuideStepBaseView';
+import { GuideStepEnemySpawn } from './GuideStepEnemySpawn';
 import { GuideHighlightManager } from './GuideHighlightManager';
 import { GuideWarViewController } from './GuideWarViewController';
 
@@ -56,6 +57,7 @@ export class GuideStepManager {
             new GuideStepGold(guideComponent, guideLabel),
             new GuideStepWave(guideComponent, guideLabel),
             new GuideStepPause(guideComponent, guideLabel),
+            new GuideStepEnemySpawn(guideComponent, guideLabel), // 敌人生成列引导
             new GuideStepBaseView(guideComponent, guideLabel),
             new GuideStepWeaponDrag(guideComponent, guideLabel, weaponManager)
         ];
