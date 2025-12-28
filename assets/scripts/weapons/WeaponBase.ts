@@ -5,7 +5,6 @@ import { getWeaponUpgradeConfig, getWeaponLevelConfig, WeaponUpgradeConfig } fro
 import { BulletManager, WeaponManager } from '../managers/Index';
 import { WeaponAttack } from './WeaponAttack';
 import { WeaponUpgrade } from './WeaponUpgrade';
-import { WeaponHealth } from './WeaponHealth';
 const { ccclass, property } = _decorator;
 
 /**
@@ -18,7 +17,6 @@ export class WeaponBase extends Component {
     
     protected config: WeaponConfig | null = null;
     protected weaponType: WeaponType;
-    protected maxHealth: number = 0; // 最大生命值（用于血条显示）
     protected upgradeConfig: WeaponUpgradeConfig | null = null; // 升级配置
     
     @property({ type: Prefab })
@@ -27,7 +25,6 @@ export class WeaponBase extends Component {
     protected weaponManager: WeaponManager | null = null; // 武器管理器
     
     // 子节点引用（从预制体中获取）
-    protected healthBarNode: Node | null = null; // 血条节点
     protected upgradeButtonNode: Node | null = null; // 升级按钮节点
     protected removeButtonNode: Node | null = null; // 移除按钮节点
     protected appearanceNode: Node | null = null; // 外观展示节点
@@ -35,7 +32,6 @@ export class WeaponBase extends Component {
     // 功能模块
     private attack: WeaponAttack | null = null;
     private upgrade: WeaponUpgrade | null = null;
-    private health: WeaponHealth | null = null;
 
     /**
      * 初始化武器
@@ -71,27 +67,17 @@ export class WeaponBase extends Component {
         // 创建配置对象并应用1级属性
         this.config = {
             type: type,
-            health: level1Config.health,
             damage: level1Config.damage,
             range: level1Config.range,
             attackSpeed: level1Config.attackSpeed,
             cost: this.upgradeConfig.buildCost
         };
-        
-        this.maxHealth = level1Config.health; // 保存最大生命值
 
         // 初始化功能模块
         this.initModules();
 
         // 绘制武器外观（在外观节点上绘制）
         this.drawAppearance(width, height);
-        
-        // 初始化血条（如果不在武器容器中）
-        if (!this.isInWeaponContainer()) {
-            if (this.health) {
-                this.health.updateHealthBar();
-            }
-        }
         
         // 初始隐藏按钮
         this.setSelected(false);
@@ -133,7 +119,7 @@ export class WeaponBase extends Component {
         this.attack = new WeaponAttack(
             this.node,
             this.appearanceNode,
-            this.healthBarNode,
+            null, // 不再需要血条节点
             this.config,
             this.config.attackSpeed,
             rotationOffset,
@@ -157,17 +143,6 @@ export class WeaponBase extends Component {
             this.handleRemove();
         });
         this.upgrade.initButtons();
-
-        // 初始化生命值模块
-        this.health = new WeaponHealth(
-            this.node,
-            this.healthBarNode,
-            this.config,
-            this.maxHealth
-        );
-        this.health.setOnDeathCallback(() => {
-            this.node.destroy();
-        });
     }
 
     /**
@@ -180,26 +155,17 @@ export class WeaponBase extends Component {
         if (!nextLevelConfig) return;
 
         // 应用下一级的属性
-        this.config.health = nextLevelConfig.health;
         this.config.damage = nextLevelConfig.damage;
         this.config.range = nextLevelConfig.range;
         this.config.attackSpeed = nextLevelConfig.attackSpeed;
-
-        // 更新最大生命值
-        this.maxHealth = nextLevelConfig.health;
 
         // 更新模块配置
         if (this.attack) {
             this.attack.setConfig(this.config);
             this.attack.setAttackSpeed(this.config.attackSpeed);
         }
-        if (this.health) {
-            this.health.setConfig(this.config);
-            this.health.setMaxHealth(this.maxHealth);
-            this.health.updateHealthBar();
-        }
 
-        console.log(`Weapon upgraded to level ${newLevel}. Damage: ${this.config.damage}, Speed: ${this.config.attackSpeed}, Range: ${this.config.range}, Health: ${this.config.health}`);
+        console.log(`Weapon upgraded to level ${newLevel}. Damage: ${this.config.damage}, Speed: ${this.config.attackSpeed}, Range: ${this.config.range}`);
     }
 
     /**
@@ -219,9 +185,6 @@ export class WeaponBase extends Component {
      * 初始化子节点引用
      */
     protected initChildNodes() {
-        // 查找血条节点
-        this.healthBarNode = this.node.getChildByName('HealthBar');
-        
         // 查找升级按钮节点
         this.upgradeButtonNode = this.node.getChildByName('UpgradeButton');
         
@@ -230,21 +193,6 @@ export class WeaponBase extends Component {
         
         // 查找外观展示节点
         this.appearanceNode = this.node.getChildByName('AppearanceNode');
-    }
-    
-    /**
-     * 判断是否在武器容器中
-     * @returns 是否在武器容器中
-     */
-    protected isInWeaponContainer(): boolean {
-        let parent = this.node.parent;
-        while (parent) {
-            if (parent.name === 'WeaponContainer' || parent.name.startsWith('WeaponCard_')) {
-                return true;
-            }
-            parent = parent.parent;
-        }
-        return false;
     }
     
     /**
@@ -364,16 +312,6 @@ export class WeaponBase extends Component {
      */
     getDamage(): number {
         return this.config?.damage || 0;
-    }
-    
-    /**
-     * 受到伤害
-     * @param damage 伤害值
-     */
-    takeDamage(damage: number) {
-        if (this.health) {
-            this.health.takeDamage(damage);
-        }
     }
     
     /**

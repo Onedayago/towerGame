@@ -12,7 +12,6 @@ import { TargetFinder } from '../utils/Index';
 export class WeaponAttack {
     private weaponNode: Node;
     private appearanceNode: Node | null;
-    private healthBarNode: Node | null;
     private config: WeaponConfig | null;
     private bulletPrefab: Prefab | null = null;
     private bulletManager: BulletManager | null = null;
@@ -25,7 +24,7 @@ export class WeaponAttack {
     constructor(
         weaponNode: Node,
         appearanceNode: Node | null,
-        healthBarNode: Node | null,
+        healthBarNode: Node | null, // 保留参数以兼容，但不再使用
         config: WeaponConfig | null,
         attackSpeed: number,
         rotationOffset: number = 0,
@@ -33,7 +32,7 @@ export class WeaponAttack {
     ) {
         this.weaponNode = weaponNode;
         this.appearanceNode = appearanceNode;
-        this.healthBarNode = healthBarNode;
+        // healthBarNode 不再使用
         this.config = config;
         this.attackSpeed = attackSpeed;
         this.rotationOffset = rotationOffset;
@@ -246,19 +245,6 @@ export class WeaponAttack {
         if (this.appearanceNode) {
             this.appearanceNode.setRotationFromEuler(0, 0, angleDeg);
         }
-
-        // 更新血条旋转，保持水平
-        this.updateHealthBarRotation();
-    }
-
-    /**
-     * 更新血条旋转，保持水平
-     */
-    private updateHealthBarRotation() {
-        if (!this.healthBarNode) return;
-
-        // 血条节点不旋转，保持水平
-        this.healthBarNode.setRotationFromEuler(0, 0, 0);
     }
 
     /**
@@ -269,9 +255,6 @@ export class WeaponAttack {
         if (this.appearanceNode) {
             this.appearanceNode.setRotationFromEuler(0, 0, 0);
         }
-
-        // 更新血条旋转，保持水平
-        this.updateHealthBarRotation();
     }
 }
 

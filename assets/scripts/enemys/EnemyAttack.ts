@@ -1,14 +1,12 @@
 import { Node, Prefab, instantiate, Vec3, UITransform } from 'cc';
 import { EnemyConfig, ENEMY_COMMON_CONFIG } from '../constants/Index';
 import { BulletManager } from '../managers/BulletManager';
-import { WeaponManager } from '../managers/WeaponManager';
 import { BulletBase } from '../bullets/Index';
-import { TargetFinder } from '../utils/Index';
 import { BaseManager } from '../managers/BaseManager';
 
 /**
  * 敌人攻击管理器
- * 负责处理敌人的攻击逻辑
+ * 负责处理敌人的攻击逻辑（只攻击基地）
  */
 export class EnemyAttack {
     private enemyNode: Node;
@@ -16,7 +14,6 @@ export class EnemyAttack {
     private healthBarNode: Node | null = null;
     private config: EnemyConfig | null = null;
     private bulletManager: BulletManager | null = null;
-    private weaponManager: WeaponManager | null = null;
     private bulletPrefab: Prefab | null = null;
 
     private attackSpeed: number = 0;
@@ -54,9 +51,9 @@ export class EnemyAttack {
     /**
      * 设置管理器
      */
-    setManagers(bulletManager: BulletManager, weaponManager: WeaponManager) {
+    setManagers(bulletManager: BulletManager, weaponManager: any) {
         this.bulletManager = bulletManager;
-        this.weaponManager = weaponManager;
+        // 不再需要武器管理器，但保留参数以兼容现有代码
     }
 
     /**
@@ -74,21 +71,16 @@ export class EnemyAttack {
     update(deltaTime: number): boolean {
         if (!this.config) return false;
 
-        // 优先检查是否有武器在攻击范围内
-        let targetWeapon = this.findNearestWeaponInRange();
-        
-        // 如果没有武器在范围内，检查是否可以攻击基地
-        if (!targetWeapon) {
-            targetWeapon = this.findBaseInRange();
-        }
+        // 只检查是否可以攻击基地
+        const targetBase = this.findBaseInRange();
 
-        // 如果找到了目标，锁定目标并旋转面向目标
-        if (targetWeapon) {
-            this.lockedTarget = targetWeapon;
-            this.rotateTowardsTarget(targetWeapon);
+        // 如果找到了目标，锁定目标
+        if (targetBase) {
+            this.lockedTarget = targetBase;
         } else {
             this.lockedTarget = null;
         }
+        // 注意：不再控制旋转，让移动逻辑根据移动方向控制旋转
 
         // 如果正在攻击，更新攻击持续时间
         if (this.isAttacking) {
@@ -96,10 +88,7 @@ export class EnemyAttack {
             if (this.attackDurationTimer >= this.attackDuration) {
                 this.isAttacking = false;
                 this.attackDurationTimer = 0;
-
-                if (!this.lockedTarget) {
-                    this.resetRotation();
-                }
+                // 攻击结束后，如果还锁定目标，会继续面向目标；如果没有目标，移动逻辑会控制旋转
             }
             return !!this.lockedTarget;
         }
@@ -113,7 +102,7 @@ export class EnemyAttack {
             }
         } else {
             this.attackTimer = 0;
-            this.resetRotation();
+            // 没有目标时，移动逻辑会控制旋转
         }
 
         return !!this.lockedTarget;
@@ -138,12 +127,10 @@ export class EnemyAttack {
         if (!this.config) return;
 
         if (this.lockedTarget && this.lockedTarget.isValid) {
-            // 检查目标是否仍然有效（武器或基地）
-            const currentWeaponTarget = this.findNearestWeaponInRange();
+            // 检查目标是否仍然有效（只检查基地）
             const currentBaseTarget = this.findBaseInRange();
-            const currentTarget = currentWeaponTarget || currentBaseTarget;
             
-            if (currentTarget === this.lockedTarget) {
+            if (currentBaseTarget === this.lockedTarget) {
                 this.fireBullet(this.lockedTarget);
             } else {
                 this.lockedTarget = null;
@@ -151,27 +138,6 @@ export class EnemyAttack {
         } else {
             this.lockedTarget = null;
         }
-    }
-
-    /**
-     * 查找攻击范围内的最近武器
-     */
-    private findNearestWeaponInRange(): Node | null {
-        if (!this.weaponManager || !this.config) return null;
-
-        const weapons = this.weaponManager.getAllWeapons();
-        if (weapons.length === 0) return null;
-
-        const enemyPos = this.enemyNode.position;
-        const attackRange = this.config.attackRange;
-        const rightFilter = TargetFinder.createDirectionFilter('right');
-
-        return TargetFinder.findNearestInRange(
-            enemyPos,
-            weapons,
-            attackRange,
-            rightFilter
-        );
     }
     
     /**
@@ -213,64 +179,12 @@ export class EnemyAttack {
         return null;
     }
 
-    /**
-     * 旋转敌人面向目标（武器或基地）
-     */
-    private rotateTowardsTarget(targetWeapon: Node) {
-        if (!targetWeapon || !targetWeapon.isValid) return;
 
-        const enemyPos = this.enemyNode.position;
-        let targetPos = targetWeapon.position;
-        
-        // 如果是基地，需要计算基地中心位置
-        const baseManager = BaseManager.getInstance();
-        if (baseManager.getBaseNode() === targetWeapon) {
-            const baseTransform = targetWeapon.getComponent(UITransform);
-            if (baseTransform) {
-                // 基地锚点在左下角，计算中心位置
-                targetPos = new Vec3(
-                    targetPos.x + baseTransform.width / 2,
-                    targetPos.y + baseTransform.height / 2,
-                    targetPos.z
-                );
-            }
-        }
-
-        const direction = new Vec3(
-            targetPos.x - enemyPos.x,
-            targetPos.y - enemyPos.y,
-            0
-        );
-
-        const angleRad = Math.atan2(direction.y, direction.x);
-        const angleDeg = angleRad * (180 / Math.PI);
-
-        if (this.appearanceNode) {
-            this.appearanceNode.setRotationFromEuler(0, 0, angleDeg);
-        }
-        // 更新血条旋转，保持水平
-        if (this.healthBarNode) {
-            this.healthBarNode.setRotationFromEuler(0, 0, 0);
-        }
-    }
 
     /**
-     * 恢复方向向右
+     * 发射子弹攻击目标（基地）
      */
-    private resetRotation() {
-        if (this.appearanceNode) {
-            this.appearanceNode.setRotationFromEuler(0, 0, 0);
-        }
-        // 更新血条旋转，保持水平
-        if (this.healthBarNode) {
-            this.healthBarNode.setRotationFromEuler(0, 0, 0);
-        }
-    }
-
-    /**
-     * 发射子弹攻击目标（武器或基地）
-     */
-    private fireBullet(targetWeapon: Node) {
+    private fireBullet(targetBase: Node) {
         if (!this.bulletManager || !this.config) return;
 
         const bulletPrefab = this.bulletPrefab;
@@ -280,20 +194,17 @@ export class EnemyAttack {
         if (!bulletNode) return;
 
         const enemyPos = this.enemyNode.position;
-        let targetPos = targetWeapon.position;
+        let targetPos = targetBase.position;
         
-        // 如果是基地，需要计算基地中心位置
-        const baseManager = BaseManager.getInstance();
-        if (baseManager.getBaseNode() === targetWeapon) {
-            const baseTransform = targetWeapon.getComponent(UITransform);
-            if (baseTransform) {
-                // 基地锚点在左下角，计算中心位置
-                targetPos = new Vec3(
-                    targetPos.x + baseTransform.width / 2,
-                    targetPos.y + baseTransform.height / 2,
-                    targetPos.z
-                );
-            }
+        // 计算基地中心位置
+        const baseTransform = targetBase.getComponent(UITransform);
+        if (baseTransform) {
+            // 基地锚点在左下角，计算中心位置
+            targetPos = new Vec3(
+                targetPos.x + baseTransform.width / 2,
+                targetPos.y + baseTransform.height / 2,
+                targetPos.z
+            );
         }
 
         const direction = new Vec3(

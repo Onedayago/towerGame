@@ -23,7 +23,6 @@ export interface WeaponConfig {
     attackSpeed: number;   // 攻击速度（攻击间隔，秒）
     damage: number;        // 攻击力
     range: number;         // 攻击范围（像素）
-    health: number;        // 生命值
     cost?: number;         // 建造成本（可选，从升级配置中获取）
 }
 

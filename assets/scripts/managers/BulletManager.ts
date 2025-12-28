@@ -120,16 +120,10 @@ export class BulletManager {
                         }
                     }
                 } else if (this.isEnemyBullet(bulletType)) {
-                    // 敌人子弹：检测与武器的碰撞
-                    const hitWeapon = this.checkCollisionWithWeapons(bullet, bulletComponent);
-                    if (hitWeapon) {
+                    // 敌人子弹：只检测与基地的碰撞
+                    const hitBase = this.checkCollisionWithBase(bullet, bulletComponent);
+                    if (hitBase) {
                         hit = true;
-                    } else {
-                        // 如果没有击中武器，检测与基地的碰撞
-                        const hitBase = this.checkCollisionWithBase(bullet, bulletComponent);
-                        if (hitBase) {
-                            hit = true;
-                        }
                     }
                 }
                 
@@ -188,50 +182,6 @@ export class BulletManager {
         return null;
     }
     
-    /**
-     * 检测子弹与武器的碰撞
-     * @param bullet 子弹节点
-     * @param bulletComponent 子弹组件
-     * @returns 被击中的武器节点，如果没有击中则返回 null
-     */
-    private checkCollisionWithWeapons(bullet: Node, bulletComponent: BulletBase): Node | null {
-        if (!this.weaponManager) return null;
-
-        const weapons = this.weaponManager.getAllWeapons();
-        if (weapons.length === 0) return null;
-
-        const bulletTransform = bullet.getComponent(UITransform);
-        if (!bulletTransform) return null;
-
-        const bulletPos = bullet.position;
-        const bulletRadius = Math.max(bulletTransform.width, bulletTransform.height) / 2;
-
-        // 遍历所有武器，检测碰撞
-        for (const weapon of weapons) {
-            if (!weapon || !weapon.isValid) continue;
-
-            const weaponTransform = weapon.getComponent(UITransform);
-            if (!weaponTransform) continue;
-
-            const weaponPos = weapon.position;
-            const weaponRadius = Math.max(weaponTransform.width, weaponTransform.height) / 2;
-
-            // 计算距离
-            const distance = Vec3.distance(bulletPos, weaponPos);
-
-            // 检测碰撞（使用圆形碰撞检测）
-            if (distance < bulletRadius + weaponRadius) {
-                // 击中武器，造成伤害
-                const weaponComponent = weapon.getComponent(WeaponBase);
-                if (weaponComponent) {
-                    weaponComponent.takeDamage(bulletComponent.getDamage());
-                }
-                return weapon;
-            }
-        }
-
-        return null;
-    }
 
     /**
      * 检测子弹与基地的碰撞

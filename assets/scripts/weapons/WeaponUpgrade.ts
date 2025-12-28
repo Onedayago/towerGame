@@ -3,7 +3,6 @@ import { WeaponUpgradeConfig, WeaponLevelConfig, getWeaponLevelConfig } from '..
 import { UiConfig } from '../config/Index';
 import { WeaponManager, GoldManager } from '../managers/Index';
 import { WeaponButtonRenderer } from '../renderers/Index';
-import { HealthBarRenderer } from '../renderers/HealthBarRenderer';
 
 /**
  * 武器升级管理器
@@ -61,11 +60,9 @@ export class WeaponUpgrade {
     initButtons() {
         const buttonSize = WeaponButtonRenderer.getRecommendedSize();
         const buttonWidth = WeaponButtonRenderer.getRecommendedWidth();
-        // 武器大小现在是 0.6，血条在武器上方（偏移0.25），按钮需要在血条上方
+        // 武器大小现在是 0.6，按钮在武器上方
         const weaponHeight = UiConfig.CELL_SIZE * 0.6;
-        const healthBarOffset = UiConfig.CELL_SIZE * 0.25; // 血条偏移（与 HealthBarHelper 保持一致）
-        const healthBarHeight = HealthBarRenderer.getHeight(); // 血条高度
-        const buttonOffsetY = (weaponHeight / 2) + healthBarOffset + (healthBarHeight / 2) + buttonSize / 2 + 10; // 按钮在血条上方
+        const buttonOffsetY = (weaponHeight / 2) + buttonSize / 2 + 10; // 按钮在武器上方
         const buttonSpacing = buttonWidth + 10; // 按钮之间的间距
 
         if (!this.upgradeConfig) {
