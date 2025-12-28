@@ -2,7 +2,7 @@ import { _decorator, Component, UITransform, Graphics } from 'cc';
 import { UiConfig } from '../../config/Index';
 import { WarScreenRenderer } from '../../renderers/Index';
 import { Guide } from './Guide';
-import { GuideStateManager } from '../../managers/Index';
+import { GuideStateManager, GameManager } from '../../managers/Index';
 const { ccclass, property } = _decorator;
 
 /**
@@ -38,13 +38,15 @@ export class WarScreen extends Component {
         
         // 只有明确设置了应该显示引导时，才显示引导
         if (shouldShowGuide === true && this.guide) {
-        
             this.guide.startGuide();
         } else {
             // 如果不显示引导，隐藏引导的所有子节点
             if (this.guide) {
                 this.guide.hideGuide();
             }
+            // 不显示引导时，直接开始游戏
+            const gameManager = GameManager.getInstance();
+            gameManager.startGame();
         }
         
         // 重置状态，以便下次使用
