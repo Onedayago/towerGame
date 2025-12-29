@@ -52,7 +52,7 @@ export class WarView extends Component {
         this.initTransform();
         this.initManagers();
         this.initEventListeners();
-        this.drawGrid();
+        // this.drawGrid();
         this.initBase();
         
     }
@@ -176,7 +176,7 @@ export class WarView extends Component {
         const transform = this.node.getComponent(UITransform);
         
         const width = UiConfig.GAME_WIDTH * 2;
-        const height = UiConfig.CELL_SIZE * 6;
+        const height = UiConfig.CELL_SIZE * 12;
         transform.setContentSize(width, height);
         transform.setAnchorPoint(0, 0);
         this.node.setPosition(0, 0, 0);
@@ -235,10 +235,21 @@ export class WarView extends Component {
      */
     onTouchEnd(event: EventTouch) {
         // 先处理地图拖拽
+        const wasDragging = this.dragHandler?.getIsDragging() || false;
         this.dragHandler?.onTouchEnd(event);
         
-        // 如果拖拽处理器没有消耗事件，检查是否点击了武器
-        if (!event.propagationStopped && this.weaponManager) {
+        // 如果发生了拖拽，不处理武器点击
+        if (wasDragging) {
+            return;
+        }
+        
+        // 如果事件已被武器节点消耗，不处理
+        if (event.propagationStopped) {
+            return;
+        }
+        
+        // 检查是否点击了武器
+        if (this.weaponManager) {
             // 获取触摸位置（转换为本地坐标）
             const touchLocation = event.getUILocation();
             const localPos = new Vec3();

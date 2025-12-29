@@ -8,8 +8,10 @@ export class MapDragHandler {
     private targetNode: Node;
     private containerTransform: UITransform | null = null;
     private lastTouchPos: Vec2 = new Vec2();
+    private startTouchPos: Vec2 = new Vec2(); // 触摸开始位置
     private isDragging: boolean = false;
     private enabled: boolean = true; // 是否启用拖拽
+    private readonly DRAG_THRESHOLD: number = 10; // 拖拽阈值（像素），移动超过这个距离才开始拖拽
 
     constructor(targetNode: Node, containerNode: Node | null = null) {
         this.targetNode = targetNode;
@@ -25,8 +27,10 @@ export class MapDragHandler {
      */
     onTouchStart(event: EventTouch) {
         if (!this.enabled) return;
-        this.isDragging = true;
+        // 重置拖拽状态，等待移动超过阈值
+        this.isDragging = false;
         const touchLocation = event.getUILocation();
+        this.startTouchPos = new Vec2(touchLocation.x, touchLocation.y);
         this.lastTouchPos = new Vec2(touchLocation.x, touchLocation.y);
     }
 
@@ -34,9 +38,26 @@ export class MapDragHandler {
      * 处理触摸移动事件
      */
     onTouchMove(event: EventTouch) {
-        if (!this.isDragging) return;
+        if (!this.enabled) return;
 
         const touchLocation = event.getUILocation();
+        
+        // 如果还没有开始拖拽，检查是否超过阈值
+        if (!this.isDragging) {
+            const deltaX = touchLocation.x - this.startTouchPos.x;
+            const deltaY = touchLocation.y - this.startTouchPos.y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            // 只有移动距离超过阈值才开始拖拽
+            if (distance > this.DRAG_THRESHOLD) {
+                this.isDragging = true;
+            } else {
+                // 还没超过阈值，不处理拖拽
+                return;
+            }
+        }
+
+        // 处理拖拽
         const deltaX = touchLocation.x - this.lastTouchPos.x;
         const deltaY = touchLocation.y - this.lastTouchPos.y;
 
@@ -104,6 +125,13 @@ export class MapDragHandler {
         if (!enabled) {
             this.isDragging = false;
         }
+    }
+
+    /**
+     * 获取是否正在拖拽
+     */
+    getIsDragging(): boolean {
+        return this.isDragging;
     }
 
     /**
