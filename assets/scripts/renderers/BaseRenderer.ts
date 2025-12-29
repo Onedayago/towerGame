@@ -33,10 +33,7 @@ export class BaseRenderer {
         const drawWidth = width - padding * 2;
         const drawHeight = height - padding * 2;
         
-        // === 1. 多层阴影（增强厚重感）===
-        this.drawShadowLayers(graphics, drawWidth, drawHeight, padding);
-        
-        // === 2. 基地主体（深色金属质感 + 装甲板）===
+        // === 1. 基地主体（深色金属质感 + 装甲板）===
         this.drawBaseBody(graphics, drawWidth, drawHeight, padding);
         
         // === 3. 装甲板结构（分段装甲）===
@@ -58,26 +55,6 @@ export class BaseRenderer {
         this.drawEnergyEffects(graphics, drawWidth, drawHeight, padding);
         
     
-    }
-    
-    /**
-     * 绘制多层阴影
-     */
-    private static drawShadowLayers(graphics: Graphics, width: number, height: number, padding: number): void {
-        // 第一层阴影（最深）
-        graphics.fillColor = new Color(0, 0, 0, 102); // rgba(0, 0, 0, 0.4)
-        graphics.rect(padding, padding + 5, width, height);
-        graphics.fill();
-        
-        // 第二层阴影（中等）
-        graphics.fillColor = new Color(0, 0, 0, 64); // rgba(0, 0, 0, 0.25)
-        graphics.rect(padding + 2, padding + 7, width - 4, height - 4);
-        graphics.fill();
-        
-        // 第三层阴影（浅）
-        graphics.fillColor = new Color(0, 0, 0, 26); // rgba(0, 0, 0, 0.1)
-        graphics.rect(padding + 4, padding + 9, width - 8, height - 8);
-        graphics.fill();
     }
     
     /**

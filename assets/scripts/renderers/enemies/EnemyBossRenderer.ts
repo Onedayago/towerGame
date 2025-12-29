@@ -20,10 +20,7 @@ export class EnemyBossRenderer {
         // === 1. 危险脉冲光晕（多层闪烁基础）===
         this.drawDangerPulse(graphics, width);
         
-        // === 2. 爆炸性阴影 ===
-        this.drawExplosiveShadow(graphics, width);
-        
-        // === 3. 主装甲外壳（渐变）===
+        // === 2. 主装甲外壳（渐变）===
         this.drawExplosiveShell(graphics, width);
         
         // === 4. 警告条纹系统（黑黄相间）===
@@ -54,21 +51,6 @@ export class EnemyBossRenderer {
         // 中层橙色辉光
         graphics.fillColor = new Color(255, 102, 34, 64); // rgba(255, 102, 34, 0.25)
         graphics.circle(0, 0, size * 0.58);
-        graphics.fill();
-    }
-    
-    /**
-     * 绘制爆炸性阴影
-     */
-    private static drawExplosiveShadow(graphics: Graphics, size: number): void {
-        // 第一层阴影（强烈）
-        graphics.fillColor = new Color(0, 0, 0, 89); // rgba(0, 0, 0, 0.35)
-        graphics.rect(-size / 2 + 4, -size / 2 + 5, size - 8, size - 5);
-        graphics.fill();
-        
-        // 第二层阴影
-        graphics.fillColor = new Color(0, 0, 0, 51); // rgba(0, 0, 0, 0.2)
-        graphics.rect(-size / 2 + 5, -size / 2 + 6, size - 10, size - 7);
         graphics.fill();
     }
     

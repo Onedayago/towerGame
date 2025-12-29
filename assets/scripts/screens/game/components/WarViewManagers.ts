@@ -1,8 +1,8 @@
 import { Node, Prefab, AudioClip } from 'cc';
 import { GOLD_CONFIG } from '../../../config/Index';
-import { EnemyManager, GameManager, WeaponManager, BulletManager, GoldManager, ObstacleManager, AudioManager } from '../../../managers/Index';
+import { EnemyManager, GameManager, WeaponManager, BulletManager, GoldManager, AudioManager } from '../../../managers/Index';
 import { MapDragHandler } from '../../../business/Index';
-import { EnemyType, ObstacleType } from '../../../constants/Index';
+import { EnemyType } from '../../../constants/Index';
 
 /**
  * WarView 管理器初始化助手
@@ -16,10 +16,6 @@ export class WarViewManagers {
     private enemyFastTankPrefab: Prefab | null;
     private enemyHeavyTankPrefab: Prefab | null;
     private enemyBossPrefab: Prefab | null;
-    private rockObstaclePrefab: Prefab | null;
-    private wallObstaclePrefab: Prefab | null;
-    private treeObstaclePrefab: Prefab | null;
-    private boxObstaclePrefab: Prefab | null;
     private backgroundMusicClip: AudioClip | null;
     private boomSoundClip: AudioClip | null;
 
@@ -31,10 +27,6 @@ export class WarViewManagers {
         enemyFastTankPrefab: Prefab | null,
         enemyHeavyTankPrefab: Prefab | null,
         enemyBossPrefab: Prefab | null,
-        rockObstaclePrefab: Prefab | null,
-        wallObstaclePrefab: Prefab | null,
-        treeObstaclePrefab: Prefab | null,
-        boxObstaclePrefab: Prefab | null,
         backgroundMusicClip: AudioClip | null,
         boomSoundClip: AudioClip | null
     ) {
@@ -45,10 +37,6 @@ export class WarViewManagers {
         this.enemyFastTankPrefab = enemyFastTankPrefab;
         this.enemyHeavyTankPrefab = enemyHeavyTankPrefab;
         this.enemyBossPrefab = enemyBossPrefab;
-        this.rockObstaclePrefab = rockObstaclePrefab;
-        this.wallObstaclePrefab = wallObstaclePrefab;
-        this.treeObstaclePrefab = treeObstaclePrefab;
-        this.boxObstaclePrefab = boxObstaclePrefab;
         this.backgroundMusicClip = backgroundMusicClip;
         this.boomSoundClip = boomSoundClip;
     }
@@ -62,7 +50,6 @@ export class WarViewManagers {
         enemyManager: EnemyManager;
         weaponManager: WeaponManager;
         bulletManager: BulletManager;
-        obstacleManager: ObstacleManager;
     } {
         const gameManager = GameManager.getInstance();
         
@@ -89,10 +76,6 @@ export class WarViewManagers {
         // 初始化子弹管理器
         const bulletManager = new BulletManager(this.warViewNode);
         
-        // 初始化障碍物管理器
-        const obstaclePrefabs = this.buildObstaclePrefabMap();
-        const obstacleManager = new ObstacleManager(this.warViewNode, obstaclePrefabs);
-        
         // 设置管理器的依赖
         weaponManager.setBulletManager(bulletManager);
         weaponManager.setEnemyManager(enemyManager);
@@ -101,7 +84,7 @@ export class WarViewManagers {
         enemyManager.setManagers(bulletManager, weaponManager);
         
         // 初始化寻路器（在start中设置基地位置）
-        enemyManager.initPathfinder(obstacleManager);
+        enemyManager.initPathfinder();
         
         // 初始化音频管理器
         this.initAudioManager();
@@ -111,8 +94,7 @@ export class WarViewManagers {
             dragHandler,
             enemyManager,
             weaponManager,
-            bulletManager,
-            obstacleManager
+            bulletManager
         };
     }
     
@@ -162,29 +144,6 @@ export class WarViewManagers {
         }
         
         return enemyPrefabs;
-    }
-    
-    /**
-     * 构建障碍物预制体映射表
-     * @returns 障碍物类型到预制体的映射
-     */
-    private buildObstaclePrefabMap(): Map<ObstacleType, Prefab> {
-        const obstaclePrefabs = new Map<ObstacleType, Prefab>();
-        
-        if (this.rockObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.ROCK, this.rockObstaclePrefab);
-        }
-        if (this.wallObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.WALL, this.wallObstaclePrefab);
-        }
-        if (this.treeObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.TREE, this.treeObstaclePrefab);
-        }
-        if (this.boxObstaclePrefab) {
-            obstaclePrefabs.set(ObstacleType.BOX, this.boxObstaclePrefab);
-        }
-        
-        return obstaclePrefabs;
     }
 }
 

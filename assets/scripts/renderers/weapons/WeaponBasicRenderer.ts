@@ -7,12 +7,13 @@ import { WeaponType, getWeaponColor, CyberpunkColors } from '../../constants/Ind
  */
 export class WeaponBasicRenderer {
     /**
-     * 绘制基础武器外观（美化版：多层阴影、装甲底座、铆钉、炮塔转台、炮管系统）
+     * 绘制基础武器外观（美化版：装甲底座、铆钉、炮塔转台、炮管系统）
      * @param graphics Graphics 组件
      * @param width 宽度
      * @param height 高度
+     * @param skipShadow 已废弃参数，保留以兼容旧代码
      */
-    static render(graphics: Graphics, width: number, height: number): void {
+    static render(graphics: Graphics, width: number, height: number, skipShadow: boolean = false): void {
         if (!graphics) return;
 
         graphics.clear();
@@ -23,10 +24,7 @@ export class WeaponBasicRenderer {
         const barrelWidth = width * 0.18;
         const baseY = 0;
         
-        // === 1. 多层阴影（增强厚重感）===
-        this.drawShadowLayers(graphics, baseRadius, baseY);
-        
-        // === 2. 装甲底座（径向渐变）===
+        // === 1. 装甲底座（径向渐变）===
         this.drawArmoredBase(graphics, baseRadius, baseY);
         
         // === 3. 底座铆钉（12个外圈 + 8个内圈）===
@@ -40,26 +38,6 @@ export class WeaponBasicRenderer {
         
         // === 6. 瞄准系统（瞄准镜）===
         this.drawTargetingSystem(graphics, width, baseY);
-    }
-    
-    /**
-     * 绘制多层阴影
-     */
-    private static drawShadowLayers(graphics: Graphics, baseRadius: number, baseY: number): void {
-        // 第一层阴影（最深）
-        graphics.fillColor = new Color(0, 0, 0, 102); // rgba(0, 0, 0, 0.4)
-        graphics.circle(0, baseY + 5, baseRadius + 3);
-        graphics.fill();
-        
-        // 第二层阴影（中等）
-        graphics.fillColor = new Color(0, 0, 0, 64); // rgba(0, 0, 0, 0.25)
-        graphics.circle(0, baseY + 7, baseRadius + 1);
-        graphics.fill();
-        
-        // 第三层阴影（浅）
-        graphics.fillColor = new Color(0, 0, 0, 26); // rgba(0, 0, 0, 0.1)
-        graphics.circle(0, baseY + 9, baseRadius - 1);
-        graphics.fill();
     }
     
     /**
@@ -109,11 +87,6 @@ export class WeaponBasicRenderer {
             const angle = (Math.PI * 2 / 12) * i;
             const rx = Math.cos(angle) * rivetDist;
             const ry = baseY + Math.sin(angle) * rivetDist;
-            
-            // 铆钉阴影
-            graphics.fillColor = new Color(0, 0, 0, 102); // rgba(0, 0, 0, 0.4)
-            graphics.circle(rx + 1, ry + 1, rivetRadius);
-            graphics.fill();
             
             // 铆钉主体（金属渐变模拟）
             graphics.fillColor = new Color(148, 163, 184, 255); // #94a3b8

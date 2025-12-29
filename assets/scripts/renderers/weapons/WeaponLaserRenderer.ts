@@ -11,8 +11,9 @@ export class WeaponLaserRenderer {
      * @param graphics Graphics 组件
      * @param width 宽度
      * @param height 高度
+     * @param skipShadow 已废弃参数，保留以兼容旧代码
      */
-    static render(graphics: Graphics, width: number, height: number): void {
+    static render(graphics: Graphics, width: number, height: number, skipShadow: boolean = false): void {
         if (!graphics) return;
 
         graphics.clear();
@@ -21,10 +22,7 @@ export class WeaponLaserRenderer {
         const towerRadius = width * 0.20;
         const coreRadius = width * 0.12;
         
-        // === 1. 激光塔阴影 ===
-        this.drawLaserShadow(graphics, width, towerRadius);
-        
-        // === 2. 六边形基座（双层）===
+        // === 1. 六边形基座（双层）===
         this.drawHexagonBase(graphics, baseSize);
         
         // === 3. 能量导管（从六个角向中心）===
@@ -41,24 +39,6 @@ export class WeaponLaserRenderer {
         
         // === 7. 全息投影环（三层全息环）===
         this.drawHolographicRing(graphics, baseSize);
-    }
-    
-    /**
-     * 绘制激光塔阴影
-     */
-    private static drawLaserShadow(graphics: Graphics, size: number, towerRadius: number): void {
-        // 多层阴影增强科技感
-        graphics.fillColor = new Color(0, 0, 0, 102); // rgba(0, 0, 0, 0.4)
-        graphics.circle(0, 4, size * 0.45);
-        graphics.fill();
-        
-        graphics.fillColor = new Color(0, 0, 0, 64); // rgba(0, 0, 0, 0.25)
-        graphics.circle(0, 6, size * 0.4);
-        graphics.fill();
-        
-        graphics.fillColor = new Color(0, 0, 0, 26); // rgba(0, 0, 0, 0.1)
-        graphics.circle(0, 8, size * 0.35);
-        graphics.fill();
     }
     
     /**

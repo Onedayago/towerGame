@@ -25,7 +25,9 @@ export class WeaponBasic extends WeaponBase {
         const graphics = this.appearanceNode.getComponent(Graphics);
         if (!graphics) return;
         
-        WeaponBasicRenderer.render(graphics, width, height);
+        // 如果在卡片容器中，跳过阴影绘制
+        const skipShadow = this.isInCardContainer();
+        WeaponBasicRenderer.render(graphics, width, height, skipShadow);
     }
     
     /**

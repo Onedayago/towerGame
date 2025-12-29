@@ -1,5 +1,4 @@
 import { UiConfig } from '../config/Index';
-import { ObstacleManager } from '../managers/ObstacleManager';
 import { WeaponManager } from '../managers/WeaponManager';
 import { UITransform } from 'cc';
 
@@ -8,7 +7,6 @@ import { UITransform } from 'cc';
  * 提供坐标转换和可通行性检查
  */
 export class PathFinderUtils {
-    private obstacleManager: ObstacleManager | null = null;
     private weaponManager: WeaponManager | null = null;
     private containerWidth: number = 0;
     private containerHeight: number = 0;
@@ -17,8 +15,7 @@ export class PathFinderUtils {
     /**
      * 初始化工具
      */
-    init(obstacleManager: ObstacleManager, containerWidth: number, containerHeight: number, weaponManager?: WeaponManager) {
-        this.obstacleManager = obstacleManager;
+    init(containerWidth: number, containerHeight: number, weaponManager?: WeaponManager) {
         this.weaponManager = weaponManager || null;
         this.containerWidth = containerWidth;
         this.containerHeight = containerHeight;
@@ -73,27 +70,17 @@ export class PathFinderUtils {
      * 检查是否已初始化
      */
     isInitialized(): boolean {
-        return this.obstacleManager !== null;
+        return this.containerWidth > 0 && this.containerHeight > 0;
     }
 
     /**
-     * 检查网格位置是否有障碍物（包括障碍物和武器）
+     * 检查网格位置是否有障碍物（武器作为障碍物）
      * @param gridX 网格X坐标
      * @param gridY 网格Y坐标
      * @returns 是否有障碍物
      */
     private hasObstacle(gridX: number, gridY: number): boolean {
-        // 使用格子左下角坐标检查障碍物
-        const checkX = gridX * this.cellSize;
-        const checkY = gridY * this.cellSize;
-        
-        // 检查是否有障碍物
-        if (this.obstacleManager && this.obstacleManager.hasObstacleAt(checkX, checkY)) {
-            return true;
-        }
-        
-        // 检查是否有武器（武器也是障碍物）
-        // 使用存储的网格坐标进行快速查找
+        // 检查是否有武器（武器是障碍物）
         if (this.weaponManager) {
             const weaponGridPositions = this.weaponManager.getWeaponGridPositions();
             const gridKey = `${gridX},${gridY}`;
@@ -122,10 +109,23 @@ export class PathFinderUtils {
      * 公开方法：检查网格位置是否可通行（供外部调用）
      * @param gridX 网格X坐标
      * @param gridY 网格Y坐标
+     * @param tempObstacle 临时的障碍物位置（可选，格式为 "gridX,gridY"）
      * @returns 是否可通行
      */
-    isWalkablePublic(gridX: number, gridY: number): boolean {
-        return this.isWalkable(gridX, gridY);
+    isWalkablePublic(gridX: number, gridY: number, tempObstacle?: string): boolean {
+        if (!this.isValidGrid(gridX, gridY)) {
+            return false;
+        }
+        
+        // 检查临时障碍物
+        if (tempObstacle) {
+            const gridKey = `${gridX},${gridY}`;
+            if (gridKey === tempObstacle) {
+                return false;
+            }
+        }
+        
+        return !this.hasObstacle(gridX, gridY);
     }
 }
 

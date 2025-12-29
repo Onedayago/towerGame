@@ -4,7 +4,8 @@ import { UiConfig } from '../config/Index';
 import { WarView, WarScreen, WeaponCard } from '../screens/Index';
 import { GoldManager } from '../managers/Index';
 import { WeaponType } from '../constants/Index';
-import { getWeaponBuildCost } from '../constants/Index';
+import { getWeaponBuildCost, getWeaponUpgradeConfig, getWeaponLevelConfig } from '../constants/Index';
+import { PathFinder } from '../utils/PathFinder';
 
 /**
  * 武器卡片拖拽处理器
@@ -190,20 +191,9 @@ export class WeaponCardDragHandler {
         // 对齐到网格中心（武器锚点在中心）
         const snapped = GridHelper.snapToGrid(touchLocalPos.x, touchLocalPos.y, UiConfig.CELL_SIZE, true);
         
-        // 检查对齐后的位置是否在 WarView 范围内（武器只能放在 WarView 范围内）
-        if (!GridHelper.isInBounds(snapped.x, snapped.y, warViewTransform.width, warViewTransform.height)) {
-            return; // 不在 WarView 范围内，不放置
-        }
-        
-        // 检查是否在前三列（前三列不能放置武器）
-        const gridX = Math.floor(snapped.x / UiConfig.CELL_SIZE);
-        if (gridX < 3) {
-            return; // 在前三列，不放置
-        }
-        
-        // 检查位置是否已被占用
-        if (this.isPositionOccupied(snapped.x, snapped.y)) {
-            return; // 位置已被占用，不放置
+        // 使用 canPlaceWeapon 统一检查所有条件（包括路径检查）
+        if (!this.canPlaceWeapon(snapped.x, snapped.y, warViewTransform)) {
+            return; // 不能放置，退出
         }
 
         // 放置武器
@@ -260,12 +250,6 @@ export class WeaponCardDragHandler {
         // 检查是否有武器
         const weaponManager = warViewComponent.getWeaponManager();
         if (weaponManager && weaponManager.getWeaponAtPosition(x, y) !== null) {
-            return true;
-        }
-
-        // 检查是否有障碍物
-        const obstacleManager = warViewComponent.getObstacleManager();
-        if (obstacleManager && obstacleManager.hasObstacleAt(x, y)) {
             return true;
         }
 
@@ -387,12 +371,26 @@ export class WeaponCardDragHandler {
             
             // 添加 UITransform
             const transform = backgroundNode.addComponent(UITransform);
+            
+            // 获取武器的1级攻击范围
+            const weaponCardComponent = this.cardNode.getComponent(WeaponCard);
+            let range = 60; // 默认1个格子的范围（60像素）
+            if (weaponCardComponent) {
+                const weaponType = weaponCardComponent.weaponType;
+                const upgradeConfig = getWeaponUpgradeConfig(weaponType);
+                const level1Config = getWeaponLevelConfig(upgradeConfig, 1);
+                if (level1Config) {
+                    range = level1Config.range;
+                }
+            }
+            
+            // 圆圈大小 = 攻击范围 * 2（因为range是半径，直径需要乘以2）
+            const size = range * 2;
+            transform.setContentSize(size, size);
+            transform.setAnchorPoint(0.5, 0.5); // 中心锚点
+            
             const cardTransform = dragNode.getComponent(UITransform);
             if (cardTransform) {
-                // 背景圆圈大小略大于武器图标
-                const size = Math.max(cardTransform.width, cardTransform.height) * 1.2;
-                transform.setContentSize(size, size);
-                transform.setAnchorPoint(0.5, 0.5); // 中心锚点
                 
                 // 查找武器节点，获取其位置
                 // 武器节点通常是第一个子节点（除了 CostDisplay 和 BackgroundCircle）
@@ -490,7 +488,51 @@ export class WeaponCardDragHandler {
             return false;
         }
         
+        // 检查放置武器后是否还有路径从敌人生成点到基地
+        if (!this.checkPathAvailable(x, y)) {
+            return false;
+        }
+        
         return true;
+    }
+    
+    /**
+     * 检查放置武器后是否还有路径从敌人生成点到基地
+     * @param weaponX 武器X坐标（世界坐标）
+     * @param weaponY 武器Y坐标（世界坐标）
+     * @returns 如果还有路径则返回 true，否则返回 false
+     */
+    private checkPathAvailable(weaponX: number, weaponY: number): boolean {
+        if (!this.warViewNode) return false;
+        
+        const warViewComponent = this.warViewNode.getComponent(WarView);
+        if (!warViewComponent) return false;
+        
+        // 获取敌人管理器和PathFinder
+        const enemyManager = warViewComponent.getEnemyManager();
+        if (!enemyManager) return false;
+        
+        const pathFinder = enemyManager.getPathFinder();
+        if (!pathFinder) return false;
+        
+        // 获取基地中心位置
+        const baseCenter = warViewComponent.getBaseCenterPosition();
+        if (!baseCenter) return false;
+        
+        // 计算敌人生成点位置（第5行，最左边，从下往上数，索引为4）
+        const cellSize = UiConfig.CELL_SIZE;
+        const spawnX = cellSize / 2; // 第一个格子的中心X
+        const spawnY = 4 * cellSize + cellSize / 2; // 第5行的中心Y
+        
+        // 将武器位置转换为网格坐标
+        const weaponGridX = Math.floor(weaponX / cellSize);
+        const weaponGridY = Math.floor(weaponY / cellSize);
+        
+        // 检查路径（将武器位置作为临时障碍物）
+        const path = pathFinder.findPath(spawnX, spawnY, baseCenter.x, baseCenter.y, weaponGridX, weaponGridY);
+        
+        // 如果找到路径（路径长度 > 0），说明可以放置
+        return path.length > 0;
     }
     
     /**

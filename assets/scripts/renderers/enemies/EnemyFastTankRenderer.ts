@@ -17,10 +17,7 @@ export class EnemyFastTankRenderer {
 
         graphics.clear();
         
-        // === 1. 动态阴影（运动模糊效果）===
-        this.drawMotionShadow(graphics, width);
-        
-        // === 2. 流线型主体（渐变设计）===
+        // === 1. 流线型主体（渐变设计）===
         this.drawStreamlinedBody(graphics, width);
         
         // === 3. 侧边推进器引擎 ===
@@ -40,20 +37,6 @@ export class EnemyFastTankRenderer {
         
         // === 8. 尾部推进光晕 ===
         this.drawThrusterGlow(graphics, width);
-    }
-    
-    /**
-     * 绘制动态阴影（运动模糊）
-     */
-    private static drawMotionShadow(graphics: Graphics, size: number): void {
-        // 拖尾阴影（速度感）
-        for (let i = 0; i < 3; i++) {
-            const offset = 3 + i * 1.5;
-            const alpha = Math.floor(64 - i * 20); // 递减透明度
-            graphics.fillColor = new Color(0, 0, 0, alpha);
-            graphics.rect(-size / 2 + offset, -size / 2 + offset + 2, size - offset * 2, size - offset * 2 - 2);
-            graphics.fill();
-        }
     }
     
     /**

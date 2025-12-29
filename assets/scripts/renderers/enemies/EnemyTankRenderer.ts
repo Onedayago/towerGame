@@ -23,10 +23,7 @@ export class EnemyTankRenderer {
         const barrelLength = width * 0.78;
         const barrelHalfHeight = width * 0.08;
         
-        // === 1. 多层阴影（增强厚重感）===
-        this.drawShadowLayers(graphics, width, hullRadius);
-        
-        // === 2. 履带系统（上下履带 + 装甲板 + 滚轮）===
+        // === 1. 履带系统（上下履带 + 装甲板 + 滚轮）===
         this.drawTrackSystem(graphics, width, trackHeight);
         
         // === 3. 主车体（重装甲多边形车体）===
@@ -43,26 +40,6 @@ export class EnemyTankRenderer {
         
         // === 7. 威胁标记（红色警示灯）===
         this.drawThreatMarkers(graphics, width);
-    }
-    
-    /**
-     * 绘制多层阴影
-     */
-    private static drawShadowLayers(graphics: Graphics, size: number, hullRadius: number): void {
-        // 第一层阴影（最深）
-        graphics.fillColor = new Color(0, 0, 0, 102); // rgba(0, 0, 0, 0.4)
-        graphics.rect(-size / 2 + 3, -size / 2 + 5, size - 6, size - 5);
-        graphics.fill();
-        
-        // 第二层阴影（中等）
-        graphics.fillColor = new Color(0, 0, 0, 64); // rgba(0, 0, 0, 0.25)
-        graphics.rect(-size / 2 + 4, -size / 2 + 6, size - 8, size - 7);
-        graphics.fill();
-        
-        // 第三层阴影（浅）
-        graphics.fillColor = new Color(0, 0, 0, 31); // rgba(0, 0, 0, 0.12)
-        graphics.rect(-size / 2 + 5, -size / 2 + 7, size - 10, size - 9);
-        graphics.fill();
     }
     
     /**

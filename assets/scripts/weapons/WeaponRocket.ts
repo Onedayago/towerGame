@@ -97,7 +97,9 @@ export class WeaponRocket extends WeaponBase {
         const graphics = this.appearanceNode.getComponent(Graphics);
         if (!graphics) return;
         
-        WeaponRocketRenderer.render(graphics, width, height);
+        // 如果在卡片容器中，跳过阴影绘制
+        const skipShadow = this.isInCardContainer();
+        WeaponRocketRenderer.render(graphics, width, height, skipShadow);
     }
 }
 

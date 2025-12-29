@@ -6,7 +6,6 @@ import { BulletManager } from './BulletManager';
 import { WeaponManager } from './WeaponManager';
 import { WaveManager } from './WaveManager';
 import { PathFinder } from '../utils/PathFinder';
-import { ObstacleManager } from './ObstacleManager';
 
 /**
  * 敌人管理器
@@ -181,15 +180,14 @@ export class EnemyManager {
 
     /**
      * 初始化寻路器
-     * @param obstacleManager 障碍物管理器
      * @param weaponManager 武器管理器（可选，用于将武器作为障碍物）
      * @returns 初始化后的寻路器实例
      */
-    initPathfinder(obstacleManager: ObstacleManager, weaponManager?: WeaponManager): PathFinder {
+    initPathfinder(weaponManager?: WeaponManager): PathFinder {
         if (!this.pathFinder) {
             this.pathFinder = new PathFinder();
         }
-        this.pathFinder.init(obstacleManager, this.containerWidth, this.containerHeight, weaponManager);
+        this.pathFinder.init(this.containerWidth, this.containerHeight, weaponManager);
         if (weaponManager) {
             this.pathFinder.setWeaponManager(weaponManager);
         }
@@ -202,6 +200,14 @@ export class EnemyManager {
      */
     setSpawnEffectPrefab(prefab: Prefab) {
         this.spawnHandler.setSpawnEffectPrefab(prefab);
+    }
+    
+    /**
+     * 获取寻路器实例（供外部调用）
+     * @returns 寻路器实例，如果未初始化则返回 null
+     */
+    getPathFinder(): PathFinder | null {
+        return this.pathFinder;
     }
 }
 

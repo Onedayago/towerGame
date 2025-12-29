@@ -1,4 +1,4 @@
-import { _decorator, Component, Graphics, UITransform, Node, EventTouch, Prefab } from 'cc';
+import { _decorator, Component, Graphics, UITransform, Node, EventTouch, Prefab, Color } from 'cc';
 import { UiConfig } from '../config/Index';
 import { WeaponType, WeaponConfig } from '../constants/Index';
 import { getWeaponUpgradeConfig, getWeaponLevelConfig, WeaponUpgradeConfig } from '../constants/Index';
@@ -32,6 +32,10 @@ export class WeaponBase extends Component {
     // 功能模块
     private attack: WeaponAttack | null = null;
     private upgrade: WeaponUpgrade | null = null;
+    
+    // 范围指示器节点
+    private rangeIndicatorNode: Node | null = null; // 升级时的临时指示器
+    private selectedRangeIndicatorNode: Node | null = null; // 选中时的持续指示器
 
     /**
      * 初始化武器
@@ -165,7 +169,69 @@ export class WeaponBase extends Component {
             this.attack.setAttackSpeed(this.config.attackSpeed);
         }
 
+        // 显示升级后的攻击范围（临时显示，如果武器是选中的会在临时指示器消失后自动恢复显示选中范围）
+        this.showUpgradeRange(nextLevelConfig.range);
+
         console.log(`Weapon upgraded to level ${newLevel}. Damage: ${this.config.damage}, Speed: ${this.config.attackSpeed}, Range: ${this.config.range}`);
+    }
+    
+    /**
+     * 短暂显示升级后的攻击范围
+     * @param range 攻击范围（半径，像素）
+     */
+    private showUpgradeRange(range: number) {
+        // 如果已有范围指示器，先销毁
+        if (this.rangeIndicatorNode && this.rangeIndicatorNode.isValid) {
+            this.rangeIndicatorNode.destroy();
+            this.rangeIndicatorNode = null;
+        }
+        
+        // 临时隐藏选中范围指示器（如果存在）
+        const wasSelected = this.selectedRangeIndicatorNode && this.selectedRangeIndicatorNode.isValid;
+        if (wasSelected && this.selectedRangeIndicatorNode) {
+            this.selectedRangeIndicatorNode.active = false;
+        }
+        
+        // 创建范围指示器节点
+        this.rangeIndicatorNode = new Node('UpgradeRangeIndicator');
+        this.rangeIndicatorNode.setParent(this.node);
+        
+        // 设置为最下层（在武器外观之后）
+        this.rangeIndicatorNode.setSiblingIndex(0);
+        
+        // 添加 UITransform
+        const transform = this.rangeIndicatorNode.addComponent(UITransform);
+        const size = range * 2; // 直径 = 半径 * 2
+        transform.setContentSize(size, size);
+        transform.setAnchorPoint(0.5, 0.5);
+        this.rangeIndicatorNode.setPosition(0, 0, 0);
+        
+        // 添加 Graphics 组件并绘制圆圈
+        const graphics = this.rangeIndicatorNode.addComponent(Graphics);
+        graphics.clear();
+        
+        // 使用半透明的蓝色显示升级后的范围
+        graphics.fillColor = new Color(100, 150, 255, 120); // 半透明蓝色
+        graphics.strokeColor = new Color(100, 150, 255, 200); // 稍微更深的蓝色边框
+        graphics.lineWidth = 2;
+        
+        const radius = size / 2;
+        graphics.circle(0, 0, radius);
+        graphics.fill();
+        graphics.stroke();
+        
+        // 1.5秒后自动销毁，如果武器是选中的则恢复显示选中范围指示器
+        this.scheduleOnce(() => {
+            if (this.rangeIndicatorNode && this.rangeIndicatorNode.isValid) {
+                this.rangeIndicatorNode.destroy();
+                this.rangeIndicatorNode = null;
+            }
+            
+            // 如果武器是选中的，恢复显示选中范围指示器（并更新范围）
+            if (wasSelected && this.selectedRangeIndicatorNode && this.selectedRangeIndicatorNode.isValid) {
+                this.showSelectedRange();
+            }
+        }, 1.5);
     }
 
     /**
@@ -193,6 +259,22 @@ export class WeaponBase extends Component {
         
         // 查找外观展示节点
         this.appearanceNode = this.node.getChildByName('AppearanceNode');
+    }
+    
+    /**
+     * 检查是否在武器卡片容器中（用于跳过阴影等效果）
+     * @returns 是否在卡片容器中
+     */
+    protected isInCardContainer(): boolean {
+        let parent = this.node.parent;
+        while (parent) {
+            // 检查父节点是否有WeaponCard组件
+            if (parent.getComponent('WeaponCard')) {
+                return true;
+            }
+            parent = parent.parent;
+        }
+        return false;
     }
     
     /**
@@ -242,6 +324,66 @@ export class WeaponBase extends Component {
     setSelected(selected: boolean) {
         if (this.upgrade) {
             this.upgrade.setSelected(selected);
+        }
+        
+        // 显示或隐藏攻击范围
+        if (selected) {
+            this.showSelectedRange();
+        } else {
+            this.hideSelectedRange();
+        }
+    }
+    
+    /**
+     * 显示选中时的攻击范围
+     */
+    private showSelectedRange() {
+        // 如果已有选中范围指示器，先销毁
+        if (this.selectedRangeIndicatorNode && this.selectedRangeIndicatorNode.isValid) {
+            this.selectedRangeIndicatorNode.destroy();
+            this.selectedRangeIndicatorNode = null;
+        }
+        
+        if (!this.config) return;
+        
+        const currentRange = this.config.range;
+        
+        // 创建选中范围指示器节点
+        this.selectedRangeIndicatorNode = new Node('SelectedRangeIndicator');
+        this.selectedRangeIndicatorNode.setParent(this.node);
+        
+        // 设置为最下层（在武器外观之后）
+        this.selectedRangeIndicatorNode.setSiblingIndex(0);
+        
+        // 添加 UITransform
+        const transform = this.selectedRangeIndicatorNode.addComponent(UITransform);
+        const size = currentRange * 2; // 直径 = 半径 * 2
+        transform.setContentSize(size, size);
+        transform.setAnchorPoint(0.5, 0.5);
+        this.selectedRangeIndicatorNode.setPosition(0, 0, 0);
+        
+        // 添加 Graphics 组件并绘制圆圈
+        const graphics = this.selectedRangeIndicatorNode.addComponent(Graphics);
+        graphics.clear();
+        
+        // 使用半透明的绿色显示选中时的范围
+        graphics.fillColor = new Color(0, 255, 0, 100); // 半透明绿色
+        graphics.strokeColor = new Color(0, 255, 0, 180); // 稍微更深的绿色边框
+        graphics.lineWidth = 2;
+        
+        const radius = size / 2;
+        graphics.circle(0, 0, radius);
+        graphics.fill();
+        graphics.stroke();
+    }
+    
+    /**
+     * 隐藏选中时的攻击范围
+     */
+    private hideSelectedRange() {
+        if (this.selectedRangeIndicatorNode && this.selectedRangeIndicatorNode.isValid) {
+            this.selectedRangeIndicatorNode.destroy();
+            this.selectedRangeIndicatorNode = null;
         }
     }
     
@@ -318,6 +460,18 @@ export class WeaponBase extends Component {
      * 组件销毁时清理事件监听
      */
     onDestroy() {
+        // 清理范围指示器
+        if (this.rangeIndicatorNode && this.rangeIndicatorNode.isValid) {
+            this.rangeIndicatorNode.destroy();
+            this.rangeIndicatorNode = null;
+        }
+        
+        // 清理选中范围指示器
+        if (this.selectedRangeIndicatorNode && this.selectedRangeIndicatorNode.isValid) {
+            this.selectedRangeIndicatorNode.destroy();
+            this.selectedRangeIndicatorNode = null;
+        }
+        
         // 清理升级模块
         if (this.upgrade) {
             this.upgrade.cleanup();

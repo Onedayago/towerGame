@@ -1,5 +1,4 @@
 import { Vec3 } from 'cc';
-import { ObstacleManager } from '../managers/ObstacleManager';
 import { PathFinderUtils } from './PathFinderUtils';
 
 /**
@@ -16,20 +15,20 @@ interface GridNode {
 
 /**
  * A*寻路算法
- * 用于计算敌人从起点到终点的路径，避开障碍物
+ * 用于计算敌人从起点到终点的路径，避开武器
  */
 export class PathFinder {
     private utils: PathFinderUtils = new PathFinderUtils();
+    private tempObstacle: string | null = null; // 临时障碍物位置（格式："gridX,gridY"）
 
     /**
      * 初始化寻路器
-     * @param obstacleManager 障碍物管理器
      * @param containerWidth 容器宽度
      * @param containerHeight 容器高度
      * @param weaponManager 武器管理器（可选，用于将武器作为障碍物）
      */
-    init(obstacleManager: ObstacleManager, containerWidth: number, containerHeight: number, weaponManager?: any) {
-        this.utils.init(obstacleManager, containerWidth, containerHeight, weaponManager);
+    init(containerWidth: number, containerHeight: number, weaponManager?: any) {
+        this.utils.init(containerWidth, containerHeight, weaponManager);
     }
     
     /**
@@ -67,7 +66,7 @@ export class PathFinder {
      * @returns 是否可通行
      */
     public isWalkablePublic(gridX: number, gridY: number): boolean {
-        return this.utils.isWalkablePublic(gridX, gridY);
+        return this.utils.isWalkablePublic(gridX, gridY, this.tempObstacle || undefined);
     }
 
     /**
@@ -98,7 +97,8 @@ export class PathFinder {
             const newX = node.x + dir.x;
             const newY = node.y + dir.y;
 
-            if (this.utils.isWalkablePublic(newX, newY)) {
+            // 使用 this.isWalkablePublic 而不是 this.utils.isWalkablePublic，以便使用临时障碍物
+            if (this.isWalkablePublic(newX, newY)) {
                 neighbors.push({
                     x: newX,
                     y: newY,
@@ -119,38 +119,49 @@ export class PathFinder {
      * @param startY 起点世界Y坐标
      * @param endX 终点世界X坐标
      * @param endY 终点世界Y坐标
+     * @param tempObstacleGridX 临时障碍物的网格X坐标（可选）
+     * @param tempObstacleGridY 临时障碍物的网格Y坐标（可选）
      * @returns 路径点数组（世界坐标，格子中心），如果找不到路径则返回空数组
      */
-    findPath(startX: number, startY: number, endX: number, endY: number): Vec3[] {
+    findPath(startX: number, startY: number, endX: number, endY: number, tempObstacleGridX?: number, tempObstacleGridY?: number): Vec3[] {
         if (!this.utils || !this.utils.isInitialized()) {
             return [];
         }
 
-        // 转换为网格坐标
-        const startGrid = this.worldToGrid(startX, startY);
-        const endGrid = this.worldToGrid(endX, endY);
-
-        // 检查起点和终点是否可通行
-        if (!this.utils.isWalkablePublic(startGrid.x, startGrid.y)) {
-            return [];
+        // 设置临时障碍物（如果提供）
+        const originalTempObstacle = this.tempObstacle;
+        if (tempObstacleGridX !== undefined && tempObstacleGridY !== undefined) {
+            this.tempObstacle = `${tempObstacleGridX},${tempObstacleGridY}`;
+        } else {
+            this.tempObstacle = null;
         }
 
-        if (!this.utils.isWalkablePublic(endGrid.x, endGrid.y)) {
-            // 如果终点不可通行，尝试找到最近的可通行点
-            const nearestWalkable = this.findNearestWalkable(endGrid.x, endGrid.y);
-            if (nearestWalkable) {
-                endGrid.x = nearestWalkable.x;
-                endGrid.y = nearestWalkable.y;
-            } else {
+        try {
+            // 转换为网格坐标
+            const startGrid = this.worldToGrid(startX, startY);
+            const endGrid = this.worldToGrid(endX, endY);
+
+            // 检查起点和终点是否可通行（使用 this.isWalkablePublic 以便考虑临时障碍物）
+            if (!this.isWalkablePublic(startGrid.x, startGrid.y)) {
                 return [];
             }
-        }
 
-        // 如果起点和终点相同，返回包含起点的路径
-        if (startGrid.x === endGrid.x && startGrid.y === endGrid.y) {
-            const worldPos = this.gridToWorld(startGrid.x, startGrid.y);
-            return [new Vec3(worldPos.x, worldPos.y, 0)];
-        }
+            if (!this.isWalkablePublic(endGrid.x, endGrid.y)) {
+                // 如果终点不可通行，尝试找到最近的可通行点
+                const nearestWalkable = this.findNearestWalkable(endGrid.x, endGrid.y);
+                if (nearestWalkable) {
+                    endGrid.x = nearestWalkable.x;
+                    endGrid.y = nearestWalkable.y;
+                } else {
+                    return [];
+                }
+            }
+
+            // 如果起点和终点相同，返回包含起点的路径
+            if (startGrid.x === endGrid.x && startGrid.y === endGrid.y) {
+                const worldPos = this.gridToWorld(startGrid.x, startGrid.y);
+                return [new Vec3(worldPos.x, worldPos.y, 0)];
+            }
 
         // A*算法
         const openSet: GridNode[] = [];
@@ -240,8 +251,12 @@ export class PathFinder {
             }
         }
 
-        // 没有找到路径
-        return [];
+            // 没有找到路径
+            return [];
+        } finally {
+            // 清除临时障碍物
+            this.tempObstacle = originalTempObstacle;
+        }
     }
 
     /**
@@ -259,7 +274,8 @@ export class PathFinder {
                     if (Math.abs(dx) === radius || Math.abs(dy) === radius) {
                         const checkX = gridX + dx;
                         const checkY = gridY + dy;
-                        if (this.utils.isWalkablePublic(checkX, checkY)) {
+                        // 使用 this.isWalkablePublic 而不是 this.utils.isWalkablePublic，以便使用临时障碍物
+                        if (this.isWalkablePublic(checkX, checkY)) {
                             return { x: checkX, y: checkY };
                         }
                     }

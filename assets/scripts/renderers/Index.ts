@@ -20,5 +20,4 @@ export * from './weapons/Index';
 export * from './enemies/Index';
 export * from './bullets/Index';
 export * from './effects/Index';
-export * from './obstacles/Index';
 

@@ -17,10 +17,7 @@ export class EnemyHeavyTankRenderer {
 
         graphics.clear();
         
-        // === 1. 多层阴影（厚重感）===
-        this.drawShadowLayers(graphics, width);
-        
-        // === 2. 主装甲车体（渐变增强金属质感）===
+        // === 1. 主装甲车体（渐变增强金属质感）===
         this.drawMainBody(graphics, width);
         
         // === 3. 多层装甲板系统 ===
@@ -43,26 +40,6 @@ export class EnemyHeavyTankRenderer {
         
         // === 9. 顶部金属高光（增强质感）===
         this.drawMetalHighlight(graphics, width);
-    }
-    
-    /**
-     * 绘制多层阴影
-     */
-    private static drawShadowLayers(graphics: Graphics, size: number): void {
-        // 第一层主阴影
-        graphics.fillColor = new Color(0, 0, 0, 102); // rgba(0, 0, 0, 0.4)
-        graphics.rect(-size / 2 + 5, -size / 2 + 6, size - 10, size - 6);
-        graphics.fill();
-        
-        // 第二层次阴影
-        graphics.fillColor = new Color(0, 0, 0, 64); // rgba(0, 0, 0, 0.25)
-        graphics.rect(-size / 2 + 6, -size / 2 + 7, size - 12, size - 8);
-        graphics.fill();
-        
-        // 第三层柔和阴影
-        graphics.fillColor = new Color(0, 0, 0, 38); // rgba(0, 0, 0, 0.15)
-        graphics.rect(-size / 2 + 7, -size / 2 + 8, size - 14, size - 10);
-        graphics.fill();
     }
     
     /**

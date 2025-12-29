@@ -11,8 +11,9 @@ export class WeaponRocketRenderer {
      * @param graphics Graphics 组件
      * @param width 宽度
      * @param height 高度
+     * @param skipShadow 已废弃参数，保留以兼容旧代码
      */
-    static render(graphics: Graphics, width: number, height: number): void {
+    static render(graphics: Graphics, width: number, height: number, skipShadow: boolean = false): void {
         if (!graphics) return;
 
         graphics.clear();
@@ -22,10 +23,7 @@ export class WeaponRocketRenderer {
         const towerWidth = width * 0.34;
         const towerHeight = width * 0.9;
         
-        // === 1. 多层阴影 ===
-        this.drawShadowLayers(graphics, baseWidth, baseHeight, towerWidth, towerHeight, width);
-        
-        // === 2. 火箭底座（装甲板）===
+        // === 1. 火箭底座（装甲板）===
         this.drawRocketBase(graphics, baseWidth, baseHeight, width);
         
         // === 3. 稳定器（左右三角形支架）===

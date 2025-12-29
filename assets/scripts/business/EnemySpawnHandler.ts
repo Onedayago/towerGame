@@ -88,12 +88,12 @@ export class EnemySpawnHandler {
         const containerHeight = this.containerNode.getComponent(UITransform)!.height;
         const cellCountY = Math.floor(containerHeight / cellSize);
 
-        // 随机选择一行
-        const randomRow = Math.floor(Math.random() * cellCountY);
+        // 固定在第5行生成（从下往上数，第1行索引为0，第5行索引为4）
+        const fixedRow = 4;
 
         // 计算最左边格子的中心位置（敌人锚点在中心）
         const startX = cellSize / 2; // 第一个格子的中心X
-        const startY = randomRow * cellSize + cellSize / 2; // 随机行的中心Y
+        const startY = fixedRow * cellSize + cellSize / 2; // 第5行的中心Y
 
         // 创建敌人生成特效
         this.createSpawnEffect(startX, startY, selectedType);

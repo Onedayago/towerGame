@@ -23,7 +23,7 @@
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 336
+      "__id__": 304
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -54,7 +54,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 337
+      "__id__": 305
     },
     "_id": "81b97bf0-1df1-4bdf-9be5-d0fb9cc55109"
   },
@@ -123,30 +123,18 @@
       },
       {
         "__id__": 293
-      },
-      {
-        "__id__": 301
-      },
-      {
-        "__id__": 309
-      },
-      {
-        "__id__": 317
-      },
-      {
-        "__id__": 325
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 333
+        "__id__": 301
       },
       {
-        "__id__": 334
+        "__id__": 302
       },
       {
-        "__id__": 335
+        "__id__": 303
       }
     ],
     "_prefab": null,
@@ -1738,22 +1726,6 @@
     },
     "enemySpawnEffectPrefab": {
       "__uuid__": "90b4d9fc-d1c3-4799-94e4-25acdc6433f9",
-      "__expectedType__": "cc.Prefab"
-    },
-    "rockObstaclePrefab": {
-      "__uuid__": "0b2e7671-4fa6-458f-b25a-c87280d0332a",
-      "__expectedType__": "cc.Prefab"
-    },
-    "wallObstaclePrefab": {
-      "__uuid__": "5049fd91-0dab-4d30-8646-595191092526",
-      "__expectedType__": "cc.Prefab"
-    },
-    "treeObstaclePrefab": {
-      "__uuid__": "9fb23aa1-edf5-4d1f-b00e-3911c17280f9",
-      "__expectedType__": "cc.Prefab"
-    },
-    "boxObstaclePrefab": {
-      "__uuid__": "cd3d9d44-8444-46cc-8ca4-8a0581147112",
       "__expectedType__": "cc.Prefab"
     },
     "backgroundMusicClip": {
@@ -8252,450 +8224,6 @@
     }
   },
   {
-    "__type__": "cc.Node",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 2
-    },
-    "_prefab": {
-      "__id__": 302
-    },
-    "__editorExtras__": {}
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 301
-    },
-    "asset": {
-      "__uuid__": "0b2e7671-4fa6-458f-b25a-c87280d0332a",
-      "__expectedType__": "cc.Prefab"
-    },
-    "fileId": "a03roByN1MiKJaeV0uwIXQ",
-    "instance": {
-      "__id__": 303
-    },
-    "targetOverrides": null,
-    "nestedPrefabInstanceRoots": null
-  },
-  {
-    "__type__": "cc.PrefabInstance",
-    "fileId": "fdLPAwZYFEk7apda3JXgbB",
-    "prefabRootNode": null,
-    "mountedChildren": [],
-    "mountedComponents": [],
-    "propertyOverrides": [
-      {
-        "__id__": 304
-      },
-      {
-        "__id__": 306
-      },
-      {
-        "__id__": 307
-      },
-      {
-        "__id__": 308
-      }
-    ],
-    "removedComponents": []
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 305
-    },
-    "propertyPath": [
-      "_name"
-    ],
-    "value": "RockObstacle"
-  },
-  {
-    "__type__": "cc.TargetInfo",
-    "localID": [
-      "a03roByN1MiKJaeV0uwIXQ"
-    ]
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 305
-    },
-    "propertyPath": [
-      "_lpos"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 786.799,
-      "y": -925.02,
-      "z": 0
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 305
-    },
-    "propertyPath": [
-      "_lrot"
-    ],
-    "value": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 305
-    },
-    "propertyPath": [
-      "_euler"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    }
-  },
-  {
-    "__type__": "cc.Node",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 2
-    },
-    "_prefab": {
-      "__id__": 310
-    },
-    "__editorExtras__": {}
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 309
-    },
-    "asset": {
-      "__uuid__": "9fb23aa1-edf5-4d1f-b00e-3911c17280f9",
-      "__expectedType__": "cc.Prefab"
-    },
-    "fileId": "f57htE7WxM8qQ9oFrtURAA",
-    "instance": {
-      "__id__": 311
-    },
-    "targetOverrides": null,
-    "nestedPrefabInstanceRoots": null
-  },
-  {
-    "__type__": "cc.PrefabInstance",
-    "fileId": "bbzTsvdfFKVpGXnqYQENf1",
-    "prefabRootNode": null,
-    "mountedChildren": [],
-    "mountedComponents": [],
-    "propertyOverrides": [
-      {
-        "__id__": 312
-      },
-      {
-        "__id__": 314
-      },
-      {
-        "__id__": 315
-      },
-      {
-        "__id__": 316
-      }
-    ],
-    "removedComponents": []
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 313
-    },
-    "propertyPath": [
-      "_name"
-    ],
-    "value": "TreeObstacle"
-  },
-  {
-    "__type__": "cc.TargetInfo",
-    "localID": [
-      "f57htE7WxM8qQ9oFrtURAA"
-    ]
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 313
-    },
-    "propertyPath": [
-      "_lpos"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 414.664,
-      "y": -903.755,
-      "z": 0
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 313
-    },
-    "propertyPath": [
-      "_lrot"
-    ],
-    "value": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 313
-    },
-    "propertyPath": [
-      "_euler"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    }
-  },
-  {
-    "__type__": "cc.Node",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 2
-    },
-    "_prefab": {
-      "__id__": 318
-    },
-    "__editorExtras__": {}
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 317
-    },
-    "asset": {
-      "__uuid__": "5049fd91-0dab-4d30-8646-595191092526",
-      "__expectedType__": "cc.Prefab"
-    },
-    "fileId": "45o3UAYhFFfYZQa2zC4/XT",
-    "instance": {
-      "__id__": 319
-    },
-    "targetOverrides": null,
-    "nestedPrefabInstanceRoots": null
-  },
-  {
-    "__type__": "cc.PrefabInstance",
-    "fileId": "9667ThmBpFKof7nkcSekc4",
-    "prefabRootNode": null,
-    "mountedChildren": [],
-    "mountedComponents": [],
-    "propertyOverrides": [
-      {
-        "__id__": 320
-      },
-      {
-        "__id__": 322
-      },
-      {
-        "__id__": 323
-      },
-      {
-        "__id__": 324
-      }
-    ],
-    "removedComponents": []
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 321
-    },
-    "propertyPath": [
-      "_name"
-    ],
-    "value": "WallObstacle"
-  },
-  {
-    "__type__": "cc.TargetInfo",
-    "localID": [
-      "45o3UAYhFFfYZQa2zC4/XT"
-    ]
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 321
-    },
-    "propertyPath": [
-      "_lpos"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 2551.779,
-      "y": -723.004,
-      "z": 0
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 321
-    },
-    "propertyPath": [
-      "_lrot"
-    ],
-    "value": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 321
-    },
-    "propertyPath": [
-      "_euler"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    }
-  },
-  {
-    "__type__": "cc.Node",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 2
-    },
-    "_prefab": {
-      "__id__": 326
-    },
-    "__editorExtras__": {}
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 325
-    },
-    "asset": {
-      "__uuid__": "cd3d9d44-8444-46cc-8ca4-8a0581147112",
-      "__expectedType__": "cc.Prefab"
-    },
-    "fileId": "ffZdktklpKcZa7c2ITVWzM",
-    "instance": {
-      "__id__": 327
-    },
-    "targetOverrides": null,
-    "nestedPrefabInstanceRoots": null
-  },
-  {
-    "__type__": "cc.PrefabInstance",
-    "fileId": "3dIZZG5/5GqriBoPewyQiQ",
-    "prefabRootNode": null,
-    "mountedChildren": [],
-    "mountedComponents": [],
-    "propertyOverrides": [
-      {
-        "__id__": 328
-      },
-      {
-        "__id__": 330
-      },
-      {
-        "__id__": 331
-      },
-      {
-        "__id__": 332
-      }
-    ],
-    "removedComponents": []
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 329
-    },
-    "propertyPath": [
-      "_name"
-    ],
-    "value": "BoxObstacle"
-  },
-  {
-    "__type__": "cc.TargetInfo",
-    "localID": [
-      "ffZdktklpKcZa7c2ITVWzM"
-    ]
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 329
-    },
-    "propertyPath": [
-      "_lpos"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 1711.819,
-      "y": -712.372,
-      "z": 0
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 329
-    },
-    "propertyPath": [
-      "_lrot"
-    ],
-    "value": {
-      "__type__": "cc.Quat",
-      "x": 0,
-      "y": 0,
-      "z": 0,
-      "w": 1
-    }
-  },
-  {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 329
-    },
-    "propertyPath": [
-      "_euler"
-    ],
-    "value": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    }
-  },
-  {
     "__type__": "cc.UITransform",
     "_name": "",
     "_objFlags": 0,
@@ -8821,46 +8349,34 @@
       },
       {
         "__id__": 293
-      },
-      {
-        "__id__": 301
-      },
-      {
-        "__id__": 309
-      },
-      {
-        "__id__": 317
-      },
-      {
-        "__id__": 325
       }
     ]
   },
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 338
+      "__id__": 306
     },
     "shadows": {
-      "__id__": 339
+      "__id__": 307
     },
     "_skybox": {
-      "__id__": 340
+      "__id__": 308
     },
     "fog": {
-      "__id__": 341
+      "__id__": 309
     },
     "octree": {
-      "__id__": 342
+      "__id__": 310
     },
     "skin": {
-      "__id__": 343
+      "__id__": 311
     },
     "lightProbeInfo": {
-      "__id__": 344
+      "__id__": 312
     },
     "postSettings": {
-      "__id__": 345
+      "__id__": 313
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false
